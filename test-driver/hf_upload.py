@@ -14,7 +14,7 @@ def upload_run(output_dir: Path, repo_path_prefix: str, env: dict[str, str]) -> 
     """Upload a run's output directory to HuggingFace, then replace local data/ with a marker.
 
     Args:
-        output_dir: Local output path (contains run-meta.json, eval-schema.json, data/).
+        output_dir: Local output path (contains run-meta.json, data/).
         repo_path_prefix: Path inside the HF repo, e.g. "model/case-model-ts".
         env: Dict with HF_TOKEN and HF_REPO_ID.
     """

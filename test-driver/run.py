@@ -593,6 +593,7 @@ def main():
             delete_email(pm_key, email)
         if personal_info_tmp and personal_info_tmp.exists():
             shutil.rmtree(personal_info_tmp, ignore_errors=True)
+        (output_dir / "eval-schema.json").unlink(missing_ok=True)
 
     if intercepted:
         print(f"\nINTERCEPTED — results in {output_dir}")
