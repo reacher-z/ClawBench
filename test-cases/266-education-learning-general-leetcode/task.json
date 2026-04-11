@@ -17,7 +17,7 @@
   },
   "instruction": "On LeetCode, open the \"Two Sum\" problem, write a correct Python solution in the code editor, and click the Submit button.",
   "eval_schema": {
-    "url_pattern": "leetcode\\.com/problems/two-sum/submit",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

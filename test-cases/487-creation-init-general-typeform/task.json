@@ -17,8 +17,8 @@
   },
   "instruction": "Create a Typeform user research survey with 10 questions",
   "eval_schema": {
-    "url_pattern": "admin\\.typeform\\.com/bff/bob-the-builder/forms/",
-    "method": "PUT"
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
+    "method": "POST"
   },
   "time_limit": 30,
   "extra_info": [

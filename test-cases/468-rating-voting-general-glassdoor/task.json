@@ -17,7 +17,7 @@
   },
   "instruction": "Write an interview review on Glassdoor",
   "eval_schema": {
-    "url_pattern": "glassdoor\\.com/(graph|api|a/interview)",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

@@ -17,11 +17,8 @@
   },
   "instruction": "On ClickUp, create a new workspace, then create a project named \"Benchmark Development\" with at least one custom field added to the project.",
   "eval_schema": {
-    "url_pattern": "clickup\\.com/hierarchy/v1/project",
-    "method": "POST",
-    "body": {
-      "name": "Benchmark Development"
-    }
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
+    "method": "POST"
   },
   "time_limit": 30,
   "extra_info": []
