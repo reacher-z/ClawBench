@@ -21,6 +21,8 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 **153** everyday tasks &nbsp;&middot;&nbsp; **144** live websites &nbsp;&middot;&nbsp; **15** life categories
 
+<a href="README.zh-CN.md"><img src="static/icons/language.svg" width="16" height="16"> 中文</a>
+
 </div>
 
 <br/>

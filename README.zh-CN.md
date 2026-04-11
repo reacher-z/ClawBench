@@ -21,6 +21,8 @@
 
 **153** 个日常任务 &nbsp;&middot;&nbsp; **144** 个真实网站 &nbsp;&middot;&nbsp; **15** 个生活类别
 
+<a href="README.md"><img src="static/icons/language.svg" width="16" height="16"> English</a>
+
 </div>
 
 <br/>
