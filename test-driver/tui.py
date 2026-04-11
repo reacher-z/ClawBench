@@ -38,6 +38,70 @@ def load_cases() -> list[str]:
     return cases
 
 
+# Values that mean "user hasn't filled this in yet" (from .env.example).
+PLACEHOLDER_VALUES = {"", "api_key_here", "your_domain_here", "your-domain-here"}
+
+
+def _yes(prompt: str, default: bool = True) -> bool:
+    """Prompt y/n with a default."""
+    suffix = " [Y/n]: " if default else " [y/N]: "
+    while True:
+        ans = input(prompt + suffix).strip().lower()
+        if not ans:
+            return default
+        if ans in ("y", "yes"):
+            return True
+        if ans in ("n", "no"):
+            return False
+        print("  Please answer y or n.")
+
+
+def _env_values(env_path: Path) -> dict[str, str]:
+    """Best-effort parse of a .env file into {key: unquoted value}."""
+    result: dict[str, str] = {}
+    if not env_path.exists():
+        return result
+    for line in env_path.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, _, val = stripped.partition("=")
+        result[key.strip()] = val.strip().strip('"').strip("'")
+    return result
+
+
+def _env_needs_purelymail(env_path: Path) -> bool:
+    """True if PURELY_MAIL_API_KEY or PURELY_MAIL_DOMAIN is missing or still a placeholder."""
+    vals = _env_values(env_path)
+    return (
+        vals.get("PURELY_MAIL_API_KEY", "") in PLACEHOLDER_VALUES
+        or vals.get("PURELY_MAIL_DOMAIN", "") in PLACEHOLDER_VALUES
+    )
+
+
+def _patch_env(env_path: Path, updates: dict[str, str]) -> None:
+    """Read, replace matching key=value lines in place, append missing ones, write back.
+    Preserves comments and unrelated lines verbatim."""
+    lines = env_path.read_text().splitlines() if env_path.exists() else []
+    seen: set[str] = set()
+    new_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            new_lines.append(line)
+            continue
+        key = stripped.split("=", 1)[0].strip()
+        if key in updates:
+            new_lines.append(f'{key}="{updates[key]}"')
+            seen.add(key)
+        else:
+            new_lines.append(line)
+    for key, value in updates.items():
+        if key not in seen:
+            new_lines.append(f'{key}="{value}"')
+    env_path.write_text("\n".join(new_lines) + "\n")
+
+
 def _recommend_concurrent() -> int:
     """Recommend max concurrent jobs based on CPU cores and RAM.
     Each container uses ~2 CPU cores and ~2 GB RAM."""
@@ -308,18 +372,76 @@ def mode_configure() -> None:
             break
 
 
+def setup_wizard() -> None:
+    """First-run setup: ensure .env exists, prompt for PurelyMail credentials,
+    and bootstrap models/models.yaml. Idempotent — only prompts for what's missing."""
+    print("\n=== First-time setup ===\n")
+    print("ClawBench needs two things to run:")
+    print("  1. PurelyMail credentials (used to create a fresh disposable email per test case)")
+    print("  2. At least one model in models/models.yaml")
+    print()
+
+    env_path = PROJECT_ROOT / ".env"
+    env_example = PROJECT_ROOT / ".env.example"
+
+    # Step 1: ensure .env exists
+    if not env_path.exists():
+        if env_example.exists():
+            if _yes("No .env found. Copy .env.example -> .env now?", default=True):
+                env_path.write_text(env_example.read_text())
+                print(f"  Created {env_path.relative_to(PROJECT_ROOT)}\n")
+        else:
+            env_path.touch()
+            print(f"  Created empty {env_path.relative_to(PROJECT_ROOT)}\n")
+
+    # Step 2: PurelyMail credentials
+    if env_path.exists() and _env_needs_purelymail(env_path):
+        print("Enter your PurelyMail credentials.")
+        print("  (Get them from https://purelymail.com -> account settings -> API)\n")
+        api_key = ""
+        while not api_key:
+            api_key = input("PURELY_MAIL_API_KEY: ").strip()
+        domain = ""
+        while not domain:
+            domain = input("PURELY_MAIL_DOMAIN : ").strip()
+        _patch_env(env_path, {
+            "PURELY_MAIL_API_KEY": api_key,
+            "PURELY_MAIL_DOMAIN": domain,
+        })
+        print(f"\n  Saved credentials to {env_path.relative_to(PROJECT_ROOT)}\n")
+
+    # Step 3: at least one model
+    if not load_models_data():
+        print("No models configured yet.")
+        if _yes("Add your first model now?", default=True):
+            mode_configure()
+
+    print("\n  Setup complete. Launching the main menu...\n")
+
+
 def main() -> None:
     os.chdir(PROJECT_ROOT)
+
+    # First-run setup wizard — only fires if anything required is missing.
+    env_path = PROJECT_ROOT / ".env"
+    if (
+        not env_path.exists()
+        or _env_needs_purelymail(env_path)
+        or not load_models_data()
+    ):
+        setup_wizard()
 
     models = load_models()
     cases = load_cases()
 
     print("\n=== ClawBench ===\n")
-    print(f"  Models: {len(models)}   Cases: {len(cases)}\n")
-    print("  1. Single run (one model × one case)")
-    print("  2. Batch run (models × cases)")
-    print("  3. Human mode (no agent, noVNC)")
-    print("  4. Configure models")
+    print("  Runs on your host. Spawns Docker/Podman containers automatically.\n")
+    print(f"  Models: {len(models)}   Cases: {len(cases)}")
+    print(f"  models.yaml: {MODELS_YAML.relative_to(PROJECT_ROOT)}\n")
+    print("  1. Single run        (one model x one case -> 1 container)")
+    print("  2. Batch run         (many models x cases -> N containers in parallel)")
+    print("  3. Human mode        (you drive the browser via noVNC :6080)")
+    print("  4. Configure models  (edit models/models.yaml interactively)")
 
     while True:
         mode = input("\nSelect mode [1-4]: ").strip()
@@ -332,7 +454,8 @@ def main() -> None:
         return
 
     if not models:
-        print("ERROR: no models configured. Run option 4 first, or copy models.example.yaml to models.yaml")
+        print("\nERROR: still no models configured. Run option 4 to add one,")
+        print("       or copy models/models.example.yaml to models/models.yaml and edit it.")
         sys.exit(1)
 
     if mode == "1":
