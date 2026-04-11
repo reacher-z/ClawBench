@@ -1,7 +1,6 @@
 models/models.yaml
 test-output-*/
 test-output/
-**/.env
 **/__pycache__/
 **/.venv/
 venv/
