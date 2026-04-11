@@ -49,7 +49,7 @@ authors:
   - family-names: Allen
     given-names: Kelsey R.
 preferred-citation:
-  type: conference-paper
+  type: article
   title: "ClawBench: Can AI Agents Complete Everyday Online Tasks?"
   authors:
     - family-names: Zhang
@@ -94,5 +94,10 @@ preferred-citation:
       given-names: Wenhu
     - family-names: Allen
       given-names: Kelsey R.
-  collection-title: "Conference on Language Modeling (COLM)"
+  journal: "arXiv preprint arXiv:2604.08523"
   year: 2026
+  url: "https://arxiv.org/abs/2604.08523"
+  identifiers:
+    - type: other
+      value: "arXiv:2604.08523"
+      description: arXiv preprint identifier
