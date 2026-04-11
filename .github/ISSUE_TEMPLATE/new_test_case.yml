@@ -1,0 +1,61 @@
+name: New Test Case Proposal
+description: Propose a new test case for ClawBench
+labels: ["new-test-case"]
+body:
+  - type: input
+    id: platform
+    attributes:
+      label: Platform / Website
+      description: e.g. grubhub.com
+    validations:
+      required: true
+  - type: textarea
+    id: task-description
+    attributes:
+      label: Task description
+      description: What should the agent do on this platform?
+    validations:
+      required: true
+  - type: dropdown
+    id: metaclass
+    attributes:
+      label: Category
+      options:
+        - daily-life
+        - shopping-commerce
+        - entertainment-hobbies
+        - office-secretary-tasks
+        - job-search-hr
+        - personal-management
+        - dev-tech
+        - automation-workflows
+        - rating-voting
+        - education-learning
+        - academia-research
+        - travel
+        - pet-animal-care
+        - finance-investment
+        - creation-init
+        - beauty-personal-care
+        - home-services-maintenance
+        - government-civic
+        - nonprofit-charity
+        - automotive-vehicle-services
+        - deletion-revocation
+    validations:
+      required: true
+  - type: dropdown
+    id: paywall
+    attributes:
+      label: Is the task behind a payment wall?
+      options:
+        - "Yes (agent has no valid credit card)"
+        - "No (free action, needs interception)"
+    validations:
+      required: true
+  - type: textarea
+    id: eval-schema
+    attributes:
+      label: Proposed eval_schema (if known)
+      description: URL pattern and HTTP method for the interceptor
+      render: json
