@@ -1,16 +1,51 @@
-# Copy to models/models.yaml and fill in your API keys.
-# Each top-level key is the model name (passed as MODEL_NAME to the container).
+# ============================================================================
+# ClawBench model configuration
+# ============================================================================
+# Copy this file to models/models.yaml (gitignored) and fill in your API keys.
+# Each top-level key is the model name, passed as MODEL_NAME to the container.
+#
+# Schema:  models/model.schema.json
+# Guide:   docs/installation.md  (where to get API keys for each provider)
+# ============================================================================
 
+# --- OpenRouter (unified access to many providers, free tier available) -----
+# Get a key: https://openrouter.ai/keys
 qwen3.5-397b-a17b:
   api_key: "sk-or-v1-..."
   base_url: https://openrouter.ai/api/v1
   api_type: openai-completions
-  thinking_level: medium             # optional
+  thinking_level: medium             # off | minimal | low | medium | high | xhigh | adaptive
 
-# For multiple API keys (round-robin), use api_keys instead of api_key:
-# some-model:
-#   api_keys:
-#     - "key1"
-#     - "key2"
+# --- Anthropic (Claude) -----------------------------------------------------
+# Get a key: https://console.anthropic.com/settings/keys
+# claude-sonnet-4-6:
+#   api_key: "sk-ant-..."
+#   base_url: https://api.anthropic.com
+#   api_type: anthropic-messages
+#   thinking_level: high
+
+# --- OpenAI (GPT) -----------------------------------------------------------
+# Get a key: https://platform.openai.com/api-keys
+# gpt-5.4-pro-2026-03-05:
+#   api_key: "sk-..."
 #   base_url: https://api.openai.com/v1
+#   api_type: openai-responses
+#   thinking_level: medium
+
+# --- Google (Gemini) --------------------------------------------------------
+# Get a key: https://aistudio.google.com/apikey
+# gemini-3-flash-preview:
+#   api_key: "AIza..."
+#   base_url: https://generativelanguage.googleapis.com/v1beta
+#   api_type: google-generative-ai
+
+# --- Multi-key round-robin --------------------------------------------------
+# Use `api_keys` instead of `api_key` to rotate across multiple keys.
+# Takes precedence over `api_key` if both are set.
+# some-rate-limited-model:
+#   api_keys:
+#     - "key-1"
+#     - "key-2"
+#     - "key-3"
+#   base_url: https://api.example.com/v1
 #   api_type: openai-completions
