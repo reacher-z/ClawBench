@@ -10,20 +10,38 @@ Each test case runs in an isolated container (Docker or Podman) with a Chrome br
 
 ## Table of Contents
 
-- [Dependencies](#dependencies)
-- [Quick Start](#quick-start)
-- [Architecture](#architecture)
-- [Data Output](#data-output)
-- [Building the Container](#building-the-container)
-- [API Endpoints](#api-endpoints)
-- [OpenClaw Agent Integration](#openclaw-agent-integration)
-- [Synthetic User Profile](#synthetic-user-profile)
-- [Tool Restrictions](#tool-restrictions)
-- [Request Interceptor](#request-interceptor)
-- [Test Driver](#test-driver)
-- [Human Mode](#human-mode)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+- [ClawBench](#clawbench)
+  - [Table of Contents](#table-of-contents)
+  - [Dependencies](#dependencies)
+  - [Quick Start](#quick-start)
+  - [Architecture](#architecture)
+  - [Data Output](#data-output)
+    - [Action Format (JSONL)](#action-format-jsonl)
+    - [Agent Messages Format (JSONL)](#agent-messages-format-jsonl)
+    - [HTTP Requests Format (JSONL)](#http-requests-format-jsonl)
+  - [Building the Container](#building-the-container)
+    - [Container engine](#container-engine)
+    - [Build](#build)
+    - [Ports](#ports)
+  - [API Endpoints](#api-endpoints)
+  - [OpenClaw Agent Integration](#openclaw-agent-integration)
+    - [Environment Variables](#environment-variables)
+    - [Container Lifecycle with OpenClaw](#container-lifecycle-with-openclaw)
+    - [OpenClaw Configuration](#openclaw-configuration)
+    - [OpenClaw Browser Patch](#openclaw-browser-patch)
+  - [Synthetic User Profile](#synthetic-user-profile)
+  - [Tool Restrictions](#tool-restrictions)
+  - [Request Interceptor](#request-interceptor)
+    - [How It Works](#how-it-works)
+    - [Schema Format](#schema-format)
+    - [When to Block](#when-to-block)
+    - [Interception Output](#interception-output)
+  - [Test Driver](#test-driver)
+  - [Human Mode](#human-mode)
+    - [Usage](#usage)
+    - [How it ends](#how-it-ends)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
 
 ## Dependencies
 
@@ -36,11 +54,7 @@ Python dependencies (`fpdf2`, `huggingface_hub`, `pyyaml`) are managed by `uv` a
 ## Quick Start
 
 ```bash
-# 1. Set up PurelyMail credentials:
-cp .env.example .env
-# Edit .env and fill in PURELY_MAIL_API_KEY and PURELY_MAIL_DOMAIN
-
-# 2. Launch the interactive menu:
+# Launch the interactive menu:
 ./run.sh
 ```
 
