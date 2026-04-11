@@ -4,6 +4,8 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
 
+**English** | [中文](README.zh-CN.md)
+
 ClawBench is a benchmarking framework for evaluating web agents in real browser environments. It records user/agent interactions, HTTP requests, action screenshots, and full MP4 video recordings of each session.
 
 Each test case runs in an isolated container (Docker or Podman) with a Chrome browser, a custom recording extension, and an AI agent. The framework captures everything the agent does and uses a request interceptor to detect task completion.
