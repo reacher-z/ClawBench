@@ -17,7 +17,11 @@ The interactive menu lets you configure models, select test cases, and choose a 
 For direct CLI usage:
 
 ```bash
+# openclaw harness (default)
 uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b
+
+# opencode harness — same model entry, different harness
+uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b --harness opencode
 ```
 
 ## Configuration
@@ -94,9 +98,9 @@ uv run --project test-driver test-driver/tui.py
 ```
 
 Options:
-1. **Single run** — pick one model and one test case
-2. **Batch run** — pick models and cases, set concurrency
-3. **Human mode** — pick a test case, launch noVNC
+1. **Single run** — pick harness, model, and test case
+2. **Batch run** — pick harness, models, and cases, set concurrency
+3. **Human mode** — pick a test case, launch noVNC (no harness picker; uses `clawbench-base` image)
 4. **Configure models** — add models to `models/models.yaml` interactively
 
 Test cases can be selected by their numeric ID prefix (e.g. `886` for `886-entertainment-hobbies-experience-topgolf`).
@@ -105,16 +109,16 @@ Test cases can be selected by their numeric ID prefix (e.g. `886` for `886-enter
 
 1. **Load config** — reads `.env` for PurelyMail credentials, loads model config from `models/models.yaml`
 2. **Load test case** — reads `task.json` from the specified test case directory
-3. **Build container image** — runs `docker build` (or `podman build`) to build the `clawbench` image; skipped with `--no-build`
+3. **Build container images** — runs `docker build` (or `podman build`) to build `clawbench-base` and, for agent mode, the selected harness layer `clawbench-<harness>`. Human mode only needs `clawbench-base`. Skipped with `--no-build`.
 4. **Create disposable email** — calls PurelyMail API to create `cb<uuid>@<domain>` with a generated password
 5. **Prepare personal info** — copies `shared/alex_green_personal_info.json`, injects the generated email into the contact field, writes `email_credentials.json`, generates `alex_green_resume.pdf` from `resume_template.json` (also with the generated email), and copies any `extra_info` files from the test case. All files are placed in a temporary directory mounted into the container at `/my-info/`
 6. **Write eval schema** — writes the eval schema from `task.json` to `eval-schema.json` in the output directory, then mounts it read-only into the container
 7. **Build instruction** — assembles the agent prompt from the task instruction, browser-only enforcement, an explicit listing of the core `/my-info/` files (personal info, email credentials, resume), and any extra info files
-8. **Start container** — launches the `clawbench` container image with the instruction, eval schema, personal info mount, and model config
+8. **Start container** — launches `clawbench-<harness>` (agent mode) or `clawbench-base` (human mode) with the instruction, eval schema, personal info mount, and model config
 9. **Wait** — blocks until the container exits (the container enforces its own time limit via `TIME_LIMIT_S`)
 10. **Collect results** — copies `/data` (actions, HTTP requests, screenshots, recording, interception) from the container
-11. **Ensure interception** — if the interceptor didn't produce `interception.json`, generates one with the stop reason from the container (`time_limit_exceeded`, `agent_idle`, or `agent_exited`)
-12. **Write metadata** — saves `run-meta.json` with model, timestamp, duration, and interception status
+11. **Ensure interception** — if the interceptor didn't produce `interception.json`, generates one with the stop reason from the container (`time_limit_exceeded`, `agent_idle`, `agent_exited`, `gateway_failed` [openclaw], `opencode_failed` [opencode], etc.)
+12. **Write metadata** — saves `run-meta.json` with harness, model, thinking/temperature/max_tokens, timestamp, duration, and interception status
 13. **Upload** (optional) — if `HF_TOKEN` and `HF_REPO_ID` are configured, uploads the output directory to HuggingFace and replaces the local `data/` with an `uploaded.json` marker
 14. **Cleanup** — removes the container, deletes the disposable email, and removes the temporary personal info directory (guaranteed via `try/finally`)
 
@@ -130,11 +134,13 @@ test-cases/
   886-entertainment-hobbies-experience-topgolf/
 ```
 
-This enables range-based selection with `--case-range` in the batch runner (e.g., `--case-range 1-50` selects all cases with IDs 1 through 50).
+This enables range-based selection with `--case-range` in the batch driver (e.g., `--case-range 1-50` selects all cases with IDs 1 through 50).
 
-## Batch Runner
+## Batch Driver
 
-`batch.py` runs the model x test-case cross-product concurrently. It builds the container image once upfront, then invokes `run.py` as a subprocess for each job (with `--no-build` to skip redundant rebuilds), with an asyncio semaphore controlling max parallelism.
+`batch.py` runs the model x test-case cross-product concurrently for a single chosen harness. It builds `clawbench-base` and `clawbench-<harness>` once upfront, then invokes `run.py` as a subprocess for each job (with `--no-build` to skip redundant rebuilds and `--harness <harness>` to carry the harness through), with an asyncio semaphore controlling max parallelism.
+
+Each batch invocation uses one harness. To benchmark the same model set under both harnesses, run `batch.py` twice with different `--harness` flags — outputs go to distinct `<harness>-<model>/` subtrees and never collide.
 
 ### Usage
 
@@ -156,6 +162,7 @@ uv run --project test-driver test-driver/batch.py --all-models --all-cases --dry
 
 | Flag | Description | Default |
 |------|-------------|---------|
+| `--harness HARNESS` | Agent harness (`openclaw` or `opencode`) | `openclaw` |
 | `--models PATTERN...` | Model name patterns (matched against keys in `models/models.yaml`) | (required, or `--all-models`) |
 | `--all-models` | Use all models in `models/models.yaml` | false |
 | `--cases PATTERN...` | Glob patterns for case dirs | (required, or `--all-cases` or `--case-range`) |
@@ -171,15 +178,15 @@ uv run --project test-driver test-driver/batch.py --all-models --all-cases --dry
 
 ### Output
 
-Each batch creates a timestamped subdirectory under the output dir:
+Each batch creates a timestamped subdirectory under the output dir. Model directories are prefixed by the harness used for the batch:
 
 ```
 test-output/batch-20260324-143207/
   batch-logs/
-    001-daily-life-food-uber-eats-gpt-5.4-pro-2026-03-05.log
+    001-daily-life-food-uber-eats-openclaw-gpt-5.4-pro-2026-03-05.log
   batch-summary.json
-  gpt-5.4-pro-2026-03-05/
-    001-daily-life-food-uber-eats-gpt-5.4-pro-2026-03-05-20260324-143210/
+  openclaw-gpt-5.4-pro-2026-03-05/
+    001-daily-life-food-uber-eats-openclaw-gpt-5.4-pro-2026-03-05-20260324-143210/
 ```
 
 - `batch-logs/<case>-<model>.log` — captured stdout/stderr from each subprocess
@@ -248,16 +255,16 @@ Each entry in `extra_info` has:
 
 ## Output
 
-Results are saved to `test-output/<model>/<case>-<model>-<YYYYMMDD-HHMMSS>/` at the project root:
+Results are saved to `test-output/<harness>-<model>/<case>-<harness>-<model>-<YYYYMMDD-HHMMSS>/` at the project root. The harness is prefixed into the model path segment so the same model benchmarked under both harnesses lands in distinct trees:
 
 ```
-test-output/qwen3.5-397b-a17b/886-entertainment-hobbies-experience-topgolf-qwen3.5-397b-a17b-20260406-215109/
+test-output/openclaw-qwen3.5-397b-a17b/886-entertainment-hobbies-experience-topgolf-openclaw-qwen3.5-397b-a17b-20260406-215109/
   eval-schema.json          # Schema used for this run
-  run-meta.json             # Run metadata (model, duration, intercepted)
+  run-meta.json             # Run metadata (harness, model, duration, intercepted)
   data/
     actions.jsonl           # Browser action log
     requests.jsonl          # HTTP request log (all browser requests)
-    agent-messages.jsonl    # Agent conversation transcript
+    agent-messages.jsonl    # Agent conversation transcript (unified JSONL schema across harnesses)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result
@@ -293,6 +300,7 @@ When the agent doesn't trigger the interceptor (generated by the driver):
 ```json
 {
   "test_case": "886-entertainment-hobbies-experience-topgolf",
+  "harness": "openclaw",
   "model": "qwen3.5-397b-a17b",
   "thinking_level": "medium",
   "temperature": null,
@@ -304,6 +312,8 @@ When the agent doesn't trigger the interceptor (generated by the driver):
   "intercepted": true
 }
 ```
+
+The `harness` field is set to `"openclaw"` or `"opencode"` for agent runs, and `null` for human mode.
 
 ## Personal Info
 

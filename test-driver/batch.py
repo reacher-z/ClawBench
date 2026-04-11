@@ -151,7 +151,7 @@ def ts() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Async runner
+# Async executor
 # ---------------------------------------------------------------------------
 
 shutdown_event: asyncio.Event | None = None
@@ -188,6 +188,7 @@ async def run_job(
     log_dir: Path,
     all_jobs: list[Job],
     batch_start: float,
+    harness: str,
     no_upload: bool = False,
 ) -> None:
     assert shutdown_event is not None
@@ -209,7 +210,7 @@ async def run_job(
             print(f"[{ts()}] [START] {job.case_name} x {job.model}")
             print_progress(all_jobs, batch_start)
 
-            safe_model = re.sub(r'[/:]+', '--', job.model)
+            safe_model = re.sub(r'[/:]+', '--', f"{harness}-{job.model}")
             log_path = log_dir / f"{job.case_name}-{safe_model}.log"
             start = time.monotonic()
 
@@ -219,6 +220,7 @@ async def run_job(
                     "uv", "run", "--project", "test-driver",
                     "test-driver/run.py",
                     str(job.case_dir), job.model,
+                    "--harness", harness,
                     "--output-dir", str(base_output),
                     "--no-build",
                 ]
@@ -468,12 +470,15 @@ async def async_main(args: argparse.Namespace) -> int:
     if args.dry_run:
         return 0
 
-    # Build image once
+    # Build images once (base + harness-specific)
     engine = detect_engine()
     # Ensure child run.py processes use the same engine
     os.environ["CONTAINER_ENGINE"] = engine
-    print(f"\nBuilding Docker image (engine={engine})...")
-    subprocess.run([engine, "build", "-t", "clawbench", str(PROJECT_ROOT)], check=True)
+    print(f"\nBuilding Docker images (engine={engine}, harness={args.harness})...")
+    subprocess.run([engine, "build", "-t", "clawbench-base",
+                    "-f", "Dockerfile.base", str(PROJECT_ROOT)], check=True)
+    subprocess.run([engine, "build", "-t", f"clawbench-{args.harness}",
+                    "-f", f"Dockerfile.{args.harness}", str(PROJECT_ROOT)], check=True)
 
     batch_ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     base_output = Path(args.output_dir).resolve() / f"batch-{batch_ts}"
@@ -524,7 +529,7 @@ async def async_main(args: argparse.Namespace) -> int:
     all_tasks = [
         asyncio.create_task(
             run_job(j, sem, throttle, base_output, log_dir, jobs, batch_start,
-                    no_upload=args.no_upload)
+                    harness=args.harness, no_upload=args.no_upload)
         )
         for j in jobs
     ]
@@ -566,6 +571,8 @@ async def async_main(args: argparse.Namespace) -> int:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Run ClawBench model x case cross-product")
+    p.add_argument("--harness", choices=["openclaw", "opencode"], default="openclaw",
+                   help="Agent harness used for every job in this batch (default: openclaw)")
     p.add_argument("--models", nargs="+", default=None, help="Model name patterns (matched against keys in models/models.yaml)")
     p.add_argument("--all-models", action="store_true", help="Use all models in models/models.yaml")
     p.add_argument("--cases", nargs="+", default=None, help="Glob patterns for case dirs")

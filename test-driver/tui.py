@@ -13,6 +13,7 @@ CASES_DIR = PROJECT_ROOT / "test-cases"
 
 API_TYPES = ["openai-completions", "openai-responses", "anthropic-messages", "google-generative-ai"]
 THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh", "adaptive"]
+HARNESSES = ["openclaw", "opencode"]
 
 
 def load_models_data() -> dict:
@@ -152,6 +153,9 @@ def run_cmd(cmd: list[str]) -> None:
 
 
 def mode_single(models: list[str], cases: list[str]) -> None:
+    print("\n--- Select harness ---\n")
+    harness = pick_one(HARNESSES, "Harness")
+
     print("\n--- Select model ---\n")
     model = pick_one(models, "Model")
 
@@ -161,10 +165,14 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     run_cmd([
         "uv", "run", "--project", "test-driver",
         "test-driver/run.py", f"test-cases/{case}", model,
+        "--harness", harness,
     ])
 
 
 def mode_batch(models: list[str], cases: list[str]) -> None:
+    print("\n--- Select harness ---\n")
+    harness = pick_one(HARNESSES, "Harness")
+
     print("\n--- Select models ---\n")
     selected_models = pick_many(models, "Models")
 
@@ -203,6 +211,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     cmd = [
         "uv", "run", "--project", "test-driver",
         "test-driver/batch.py",
+        "--harness", harness,
         "--models", *selected_models,
         *case_args,
         "--max-concurrent", concurrent,

@@ -22,7 +22,7 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-IMAGE = "clawbench"
+HARNESSES = ("openclaw", "opencode")
 
 
 def _detect_engine() -> str:
@@ -267,8 +267,16 @@ def build_instruction(task: dict) -> str:
 
 # -- Docker --
 
-def docker_build() -> None:
-    run([ENGINE, "build", "-t", IMAGE, str(PROJECT_ROOT)])
+def docker_build(harness: str | None = None) -> None:
+    # Always build the shared base image. Then, if a harness is requested,
+    # layer the harness-specific image on top. For human mode (harness=None),
+    # clawbench-base is enough — it has the full infrastructure + entrypoint.sh
+    # but no agent binary.
+    run([ENGINE, "build", "-t", "clawbench-base",
+         "-f", "Dockerfile.base", str(PROJECT_ROOT)])
+    if harness is not None:
+        run([ENGINE, "build", "-t", f"clawbench-{harness}",
+             "-f", f"Dockerfile.{harness}", str(PROJECT_ROOT)])
 
 
 def _network_flags() -> list[str]:
@@ -281,6 +289,10 @@ def _network_flags() -> list[str]:
 def docker_run_human(name: str, instruction: str, schema_path: Path,
                      personal_info_dir: Path,
                      time_limit_s: int = 1800) -> None:
+    # Human mode has no agent — use clawbench-base which carries the full
+    # infrastructure (Xvfb, Chrome, extension, server, noVNC) + entrypoint.sh
+    # but no agent binary. entrypoint.sh's HUMAN_MODE=1 branch exits before
+    # the harness-selection path, so no agent install is required.
     cmd = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
@@ -290,13 +302,13 @@ def docker_run_human(name: str, instruction: str, schema_path: Path,
         "-p", "6080:6080",
         "-v", f"{schema_path.resolve()}:/eval-schema.json:ro",
         "-v", f"{personal_info_dir.resolve()}:/my-info:ro",
-        IMAGE,
+        "clawbench-base",
     ]
     run(cmd)
 
 
 def docker_run(name: str, instruction: str, schema_path: Path,
-               personal_info_dir: Path, model_cfg: dict,
+               personal_info_dir: Path, model_cfg: dict, harness: str,
                time_limit_s: int = 1800) -> None:
     env_flags = [
         ENGINE, "run", "-d", "--name", name,
@@ -320,7 +332,7 @@ def docker_run(name: str, instruction: str, schema_path: Path,
         env_flags += ["-e", f"TEMPERATURE={model_cfg['temperature']}"]
     if model_cfg.get("max_tokens") is not None:
         env_flags += ["-e", f"MAX_TOKENS={model_cfg['max_tokens']}"]
-    run([*env_flags, IMAGE])
+    run([*env_flags, f"clawbench-{harness}"])
 
 
 def docker_wait(name: str) -> None:
@@ -363,6 +375,8 @@ def ensure_interception(output_dir: Path):
         "vnc_disconnected": "Session stopped: human disconnected from VNC without triggering the interceptor.",
         "chrome_cdp_timeout": "Session stopped: Chrome CDP was not ready after 30s (browser failed to start).",
         "gateway_failed": "Session stopped: OpenClaw gateway died on startup.",
+        "opencode_failed": "Session stopped: opencode process died on startup.",
+        "harness_not_installed": "Session stopped: the requested harness binary was not present in the container image. Use clawbench-openclaw or clawbench-opencode for agent runs, not clawbench-base.",
     }
     description = descriptions.get(reason, f"Session stopped: {reason}.")
     schema_file = output_dir / "eval-schema.json"
@@ -423,6 +437,10 @@ def main():
                         help="Model name (key in models/models.yaml, required for agent mode)")
     parser.add_argument("--human", action="store_true",
                         help="Human mode: expose Chrome via noVNC instead of running an agent")
+    parser.add_argument("--harness", choices=list(HARNESSES), default="openclaw",
+                        help="Agent harness: openclaw (default) or opencode. "
+                             "Selects the container image (clawbench-<harness>) and is "
+                             "prefixed into the output path to avoid collisions.")
     parser.add_argument("--output-dir", dest="output_dir", type=Path, default=None,
                         help="Directory to write output data to (default: <project>/test-output)")
     parser.add_argument("--no-build", dest="no_build", action="store_true",
@@ -467,7 +485,10 @@ def main():
         safe_model = "human"
     else:
         model_cfg = load_model_config(args.model)
-        safe_model = re.sub(r'[/:]+', '--', args.model)
+        # Prefix harness into safe_model so the same model under different
+        # harnesses lands in distinct output subtrees (no collisions on
+        # output_dir, container name, or HF upload path).
+        safe_model = re.sub(r'[/:]+', '--', f"{args.harness}-{args.model}")
 
     container = f"clawbench-{case_name}-{safe_model}-{int(time.time())}"
 
@@ -481,7 +502,9 @@ def main():
 
     if not args.no_build:
         step("Building container image")
-        docker_build()
+        # Human mode only needs clawbench-base (no agent binary required).
+        # Agent mode needs base + the requested harness layer.
+        docker_build(None if args.human else args.harness)
 
     email = None
     personal_info_tmp: Path | None = None
@@ -525,10 +548,10 @@ def main():
 
             step(f"Waiting for human (max {task['time_limit']}min)")
         else:
-            step("Starting container")
+            step(f"Starting container (harness={args.harness})")
             assert model_cfg is not None
             docker_run(container, instruction, schema_path,
-                       personal_info_tmp, model_cfg,
+                       personal_info_tmp, model_cfg, args.harness,
                        time_limit_s=time_limit_s)
 
             step(f"Waiting for container (max {task['time_limit']}min)")
@@ -553,6 +576,7 @@ def main():
                 "test_case": case_name,
                 **(task.get("metadata") or {}),
                 "instruction": task["instruction"],
+                "harness": None,
                 "model": "human",
                 "thinking_level": None,
                 "temperature": None,
@@ -569,6 +593,7 @@ def main():
                 "test_case": case_name,
                 **(task.get("metadata") or {}),
                 "instruction": task["instruction"],
+                "harness": args.harness,
                 "model": model_cfg["model"],
                 "thinking_level": model_cfg.get("thinking_level"),
                 "temperature": model_cfg.get("temperature"),

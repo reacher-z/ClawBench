@@ -251,21 +251,47 @@ if [ "$HUMAN_MODE" = "1" ]; then
   exit 0
 fi
 
-# If no INSTRUCTION provided, skip OpenClaw and keep container alive for external use
+# HARNESS is baked into the image via ENV in Dockerfile.{openclaw,opencode}.
+# clawbench-base has no HARNESS set — agent-mode runs on the base image will
+# hit the "harness_not_installed" guard below.
+HARNESS="${HARNESS:-openclaw}"
+echo "Harness: $HARNESS"
+
+# If no INSTRUCTION provided, skip the agent and keep container alive for external use
 if [ -z "$INSTRUCTION" ]; then
-  echo "No INSTRUCTION set, running in manual mode (no OpenClaw agent)."
+  echo "No INSTRUCTION set, running in manual mode (no agent)."
   wait -n
   exit 0
 fi
 
-# Generate a shared gateway token so gateway and agent can authenticate
-OPENCLAW_GATEWAY_TOKEN="$(head -c 32 /dev/urandom | od -A n -t x1 | tr -d ' \n')"
-export OPENCLAW_GATEWAY_TOKEN
+# Agent mode requires an actual harness binary in the image. The base image
+# has neither — users should layer clawbench-openclaw or clawbench-opencode
+# on top for agent runs.
+case "$HARNESS" in
+  openclaw)
+    if ! command -v openclaw >/dev/null 2>&1; then
+      echo "ERROR: HARNESS=openclaw but the 'openclaw' binary is not installed in this image." >&2
+      echo "       Use the clawbench-openclaw image (or build it first) for agent runs." >&2
+      echo "harness_not_installed" > /data/.stop-reason
+      exit 1
+    fi
+    ;;
+  opencode)
+    if ! command -v opencode >/dev/null 2>&1; then
+      echo "ERROR: HARNESS=opencode but the 'opencode' binary is not installed in this image." >&2
+      echo "       Use the clawbench-opencode image (or build it first) for agent runs." >&2
+      echo "harness_not_installed" > /data/.stop-reason
+      exit 1
+    fi
+    ;;
+  *)
+    echo "ERROR: unknown HARNESS='$HARNESS' (expected 'openclaw' or 'opencode')" >&2
+    echo "harness_not_installed" > /data/.stop-reason
+    exit 1
+    ;;
+esac
 
-# Generate OpenClaw config from env vars
-/setup-openclaw.sh
-
-# Copy /my-info/ into the OpenClaw workspace so the agent can access it via ./my-info/
+# Copy /my-info/ into the workspace so the agent can access it via ./my-info/
 WORKSPACE=/root/workspace
 mkdir -p "$WORKSPACE"
 if [ -d /my-info ]; then
@@ -273,7 +299,7 @@ if [ -d /my-info ]; then
   echo "Copied /my-info to $WORKSPACE/my-info"
 fi
 
-# Wait for Chrome CDP to be ready
+# Wait for Chrome CDP to be ready (harness-agnostic)
 echo "Waiting for Chrome CDP..."
 for i in $(seq 1 30); do
   if curl -sf http://127.0.0.1:9222/json/version > /dev/null 2>&1; then
@@ -288,34 +314,70 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-# Start OpenClaw gateway (log to /data for post-mortem debugging)
-openclaw gateway run > /data/gateway.log 2>&1 &
-GATEWAY_PID=$!
-sleep 3
+GATEWAY_PID=""
+if [ "$HARNESS" = "opencode" ]; then
+  # --- opencode harness ---
+  /setup-opencode.sh
 
-# Check gateway is alive
-if ! kill -0 $GATEWAY_PID 2>/dev/null; then
-  echo "ERROR: OpenClaw gateway died on startup. Log:"
-  cat /data/gateway.log
-  echo "gateway_failed" > /data/.stop-reason
-  exit 1
-fi
-echo "OpenClaw gateway running (pid=$GATEWAY_PID)"
+  cd "$WORKSPACE"
+  echo "Starting opencode agent from $WORKSPACE..."
+  # --format json writes a JSON event stream to stdout. This stream is useful
+  # for live progress monitoring but is LOSSY for reasoning/thinking content —
+  # reasoning parts only appear in the on-disk session, not the live stream.
+  # We capture the stream here to extract the sessionID for the post-run
+  # `opencode export` step (see cleanup block below), which produces the
+  # full transcript (including reasoning) as /data/agent-messages.jsonl.
+  opencode run --format json --model "clawbench/$MODEL_NAME" -- "$INSTRUCTION" \
+    > /data/opencode-stream.jsonl 2> /data/agent.log &
+  AGENT_PID=$!
+  sleep 3
 
-# Run the agent from workspace directory (where my-info/ lives)
-echo "Starting OpenClaw agent from $WORKSPACE..."
-TIMEOUT_MS=$(( ${TIME_LIMIT_S:-1800} * 1000 ))
-AGENT_CMD=(openclaw agent --session-id clawbench --message "$INSTRUCTION" --thinking "${THINKING_LEVEL:-medium}" --timeout "$TIMEOUT_MS" --local)
-echo "Agent command: ${AGENT_CMD[*]}"
-if [ -n "$TEMPERATURE" ]; then
-  AGENT_CMD+=(--temperature "$TEMPERATURE")
+  if ! kill -0 $AGENT_PID 2>/dev/null; then
+    echo "ERROR: opencode process died on startup. Log:"
+    cat /data/agent.log
+    echo "opencode_failed" > /data/.stop-reason
+    exit 1
+  fi
+  echo "opencode agent running (pid=$AGENT_PID)"
+else
+  # --- openclaw harness (default) ---
+
+  # Generate a shared gateway token so gateway and agent can authenticate
+  OPENCLAW_GATEWAY_TOKEN="$(head -c 32 /dev/urandom | od -A n -t x1 | tr -d ' \n')"
+  export OPENCLAW_GATEWAY_TOKEN
+
+  # Generate OpenClaw config from env vars
+  /setup-openclaw.sh
+
+  # Start OpenClaw gateway (log to /data for post-mortem debugging)
+  openclaw gateway run > /data/gateway.log 2>&1 &
+  GATEWAY_PID=$!
+  sleep 3
+
+  # Check gateway is alive
+  if ! kill -0 $GATEWAY_PID 2>/dev/null; then
+    echo "ERROR: OpenClaw gateway died on startup. Log:"
+    cat /data/gateway.log
+    echo "gateway_failed" > /data/.stop-reason
+    exit 1
+  fi
+  echo "OpenClaw gateway running (pid=$GATEWAY_PID)"
+
+  # Run the agent from workspace directory (where my-info/ lives)
+  echo "Starting OpenClaw agent from $WORKSPACE..."
+  TIMEOUT_MS=$(( ${TIME_LIMIT_S:-1800} * 1000 ))
+  AGENT_CMD=(openclaw agent --session-id clawbench --message "$INSTRUCTION" --thinking "${THINKING_LEVEL:-medium}" --timeout "$TIMEOUT_MS" --local)
+  echo "Agent command: ${AGENT_CMD[*]}"
+  if [ -n "$TEMPERATURE" ]; then
+    AGENT_CMD+=(--temperature "$TEMPERATURE")
+  fi
+  if [ -n "$MAX_TOKENS" ]; then
+    AGENT_CMD+=(--max-tokens "$MAX_TOKENS")
+  fi
+  cd "$WORKSPACE"
+  "${AGENT_CMD[@]}" > /data/agent.log 2>&1 &
+  AGENT_PID=$!
 fi
-if [ -n "$MAX_TOKENS" ]; then
-  AGENT_CMD+=(--max-tokens "$MAX_TOKENS")
-fi
-cd "$WORKSPACE"
-"${AGENT_CMD[@]}" > /data/agent.log 2>&1 &
-AGENT_PID=$!
 
 # Watchdog: wait for agent activity, then detect idle (no new actions for 300s)
 IDLE_THRESHOLD=300
@@ -363,14 +425,239 @@ fi
 
 echo "$STOP_REASON" > /data/.stop-reason
 
-# Kill all openclaw processes
+# Kill agent and (for openclaw) gateway processes
 kill $AGENT_PID 2>/dev/null || true
-kill $GATEWAY_PID 2>/dev/null || true
-pkill -f "openclaw" 2>/dev/null || true
+if [ -n "$GATEWAY_PID" ]; then
+  kill $GATEWAY_PID 2>/dev/null || true
+fi
+if [ "$HARNESS" = "opencode" ]; then
+  pkill -f "opencode" 2>/dev/null || true
+  pkill -f "chrome-devtools-mcp" 2>/dev/null || true
+else
+  pkill -f "openclaw" 2>/dev/null || true
+fi
 sleep 2
 
-# Copy OpenClaw session transcript to /data
-cp /root/.openclaw/agents/main/sessions/clawbench.jsonl /data/agent-messages.jsonl 2>/dev/null || true
+# Write the agent transcript to /data/agent-messages.jsonl (harness-specific).
+if [ "$HARNESS" = "openclaw" ]; then
+  # openclaw writes its own JSONL session file; copy it out.
+  cp /root/.openclaw/agents/main/sessions/clawbench.jsonl /data/agent-messages.jsonl 2>/dev/null || true
+else
+  # opencode: the live --format json stream is LOSSY (no reasoning parts), so
+  # export the on-disk session via `opencode export <sessionID>` which yields
+  # the full transcript including reasoning/thinking content. Convert the
+  # hierarchical export to JSONL (one line per session-info / message) so the
+  # file extension contract holds.
+  SESSION_ID=$(python3 -c '
+import json
+try:
+    for line in open("/data/opencode-stream.jsonl"):
+        line = line.strip()
+        if not line:
+            continue
+        sid = json.loads(line).get("sessionID")
+        if sid:
+            print(sid)
+            break
+except Exception:
+    pass
+' 2>/dev/null)
+  if [ -n "$SESSION_ID" ]; then
+    echo "Exporting opencode session $SESSION_ID..."
+    opencode export "$SESSION_ID" > /data/opencode-export.json 2>> /data/agent.log || true
+    # Translate the opencode export into the same JSONL schema openclaw uses.
+    # This way downstream consumers see a unified shape (session → model_change →
+    # thinking_level_change → custom → messages with role ∈ {user, assistant,
+    # toolResult}) regardless of which harness produced the transcript.
+    python3 -c '
+import json, os, secrets
+from datetime import datetime, timezone
+
+def iso(ms):
+    return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+def new_id():
+    return secrets.token_hex(4)
+
+def to_text(v):
+    if v is None: return ""
+    if isinstance(v, str): return v
+    try:
+        return json.dumps(v)
+    except Exception:
+        return str(v)
+
+try:
+    with open("/data/opencode-export.json") as f:
+        doc = json.load(f)
+except Exception as e:
+    print(f"opencode export parse failed: {e}")
+    raise SystemExit(0)
+
+info = doc.get("info", {})
+session_created_ms = info.get("time", {}).get("created") or 0
+directory = info.get("directory", "/root/workspace")
+
+# Find model id by scanning for the first assistant message
+model_id = os.environ.get("MODEL_NAME", "unknown")
+for m in doc.get("messages", []):
+    if m.get("info", {}).get("role") == "assistant":
+        mid = m.get("info", {}).get("modelID")
+        if mid:
+            model_id = mid
+        break
+
+api_type = os.environ.get("API_TYPE", "openai-completions")
+thinking = os.environ.get("THINKING_LEVEL") or "medium"
+
+with open("/data/agent-messages.jsonl", "w") as out:
+    # --- session header (no id chain — openclaw emits it like this) ---
+    out.write(json.dumps({
+        "type": "session",
+        "version": 3,
+        "id": "clawbench",
+        "timestamp": iso(session_created_ms),
+        "cwd": directory,
+    }) + "\n")
+
+    # --- DAG: model_change (parentId=null) → thinking_level_change → custom → messages ---
+    last_id = None
+    ts_ms = session_created_ms + 1
+
+    mc_id = new_id()
+    out.write(json.dumps({
+        "type": "model_change",
+        "id": mc_id,
+        "parentId": last_id,
+        "timestamp": iso(ts_ms),
+        "provider": "api",
+        "modelId": model_id,
+    }) + "\n")
+    last_id = mc_id
+    ts_ms += 1
+
+    tl_id = new_id()
+    out.write(json.dumps({
+        "type": "thinking_level_change",
+        "id": tl_id,
+        "parentId": last_id,
+        "timestamp": iso(ts_ms),
+        "thinkingLevel": thinking,
+    }) + "\n")
+    last_id = tl_id
+    ts_ms += 1
+
+    cs_id = new_id()
+    out.write(json.dumps({
+        "type": "custom",
+        "customType": "model-snapshot",
+        "data": {
+            "timestamp": ts_ms,
+            "provider": "api",
+            "modelApi": api_type,
+            "modelId": model_id,
+        },
+        "id": cs_id,
+        "parentId": last_id,
+        "timestamp": iso(ts_ms),
+    }) + "\n")
+    last_id = cs_id
+
+    # --- message events ---
+    for msg in doc.get("messages", []):
+        minfo = msg.get("info", {})
+        role = minfo.get("role")
+        parts = msg.get("parts", [])
+        msg_ts_ms = (minfo.get("time") or {}).get("created") or ts_ms
+
+        if role == "user":
+            texts = [p.get("text", "") for p in parts if p.get("type") == "text"]
+            content = [{"type": "text", "text": t} for t in texts]
+            if not content:
+                continue
+            ev_id = new_id()
+            out.write(json.dumps({
+                "type": "message",
+                "id": ev_id,
+                "parentId": last_id,
+                "timestamp": iso(msg_ts_ms),
+                "message": {"role": "user", "content": content},
+            }) + "\n")
+            last_id = ev_id
+
+        elif role == "assistant":
+            content = []
+            tool_parts = []
+            for p in parts:
+                pt = p.get("type")
+                if pt == "reasoning":
+                    content.append({
+                        "type": "thinking",
+                        "thinking": p.get("text", ""),
+                        "thinkingSignature": "reasoning",
+                    })
+                elif pt == "text":
+                    content.append({
+                        "type": "text",
+                        "text": p.get("text", ""),
+                    })
+                elif pt == "tool":
+                    state = p.get("state", {}) or {}
+                    content.append({
+                        "type": "toolCall",
+                        "id": p.get("callID", ""),
+                        "name": p.get("tool", ""),
+                        "arguments": state.get("input", {}) or {},
+                    })
+                    tool_parts.append(p)
+                # step-start / step-finish: dropped (openclaw has no analog)
+
+            if content:
+                ev_id = new_id()
+                out.write(json.dumps({
+                    "type": "message",
+                    "id": ev_id,
+                    "parentId": last_id,
+                    "timestamp": iso(msg_ts_ms),
+                    "message": {"role": "assistant", "content": content},
+                }) + "\n")
+                last_id = ev_id
+
+            # One toolResult message per toolCall, in order.
+            for p in tool_parts:
+                state = p.get("state", {}) or {}
+                is_error = state.get("status") == "error"
+                raw_output = state.get("error") if is_error else state.get("output")
+                output_text = to_text(raw_output)
+                tool_end_ms = (state.get("time") or {}).get("end") or msg_ts_ms
+                ev_id = new_id()
+                out.write(json.dumps({
+                    "type": "message",
+                    "id": ev_id,
+                    "parentId": last_id,
+                    "timestamp": iso(tool_end_ms),
+                    "message": {
+                        "role": "toolResult",
+                        "toolCallId": p.get("callID", ""),
+                        "toolName": p.get("tool", ""),
+                        "content": [{"type": "text", "text": output_text}],
+                        "isError": is_error,
+                        "timestamp": tool_end_ms,
+                    },
+                }) + "\n")
+                last_id = ev_id
+        # other roles (none expected from opencode) are skipped
+' 2>> /data/agent.log || true
+    rm -f /data/opencode-export.json
+  fi
+  # Fallback: if the export failed or produced nothing, fall back to the raw
+  # live stream so the run isn't left with an empty transcript.
+  if [ ! -s /data/agent-messages.jsonl ]; then
+    echo "opencode export empty or missing; falling back to live stream." >> /data/agent.log
+    cp /data/opencode-stream.jsonl /data/agent-messages.jsonl 2>/dev/null || true
+  fi
+  rm -f /data/opencode-stream.jsonl
+fi
 
 # Finalize bookkeeping (eval promotion, etc.) — recording keeps running
 curl -sf -X POST http://localhost:7878/api/stop || true

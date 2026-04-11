@@ -1,0 +1,15 @@
+FROM clawbench-base
+
+# Pin opencode and chrome-devtools-mcp versions for reproducibility.
+# opencode has no native browser tool — chrome-devtools-mcp is wired in as a
+# local stdio MCP server by setup-opencode.sh, pointing at the in-container
+# Chrome CDP on 127.0.0.1:9222.
+ARG OPENCODE_VERSION=1.4.3
+ARG CHROME_DEVTOOLS_MCP_VERSION=0.21.0
+RUN npm install -g opencode-ai@${OPENCODE_VERSION} chrome-devtools-mcp@${CHROME_DEVTOOLS_MCP_VERSION}
+
+COPY setup-opencode.sh /setup-opencode.sh
+RUN chmod +x /setup-opencode.sh
+
+# entrypoint.sh is inherited from clawbench-base.
+ENV HARNESS=opencode
