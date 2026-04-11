@@ -235,6 +235,24 @@ See [test-driver/README.md](test-driver/README.md) for full CLI documentation, b
 
 <br/>
 
+# <img src="static/icons/chart-bar.svg" width="28" height="28"> Evaluation
+
+Evaluation is a **post-session** step -- first run agents to collect trajectories, then evaluate them against human reference runs.
+
+```
+ 1. Run agents (test-driver)       2. Evaluate (eval/)
+ ─────────────────────────         ────────────────────────────────
+ ./run.sh  or  batch.py     ──►    Claude Code subagents compare
+ produces test-output/             agent vs human trajectories
+   with 5-layer recordings         under eval/agentic_eval.md rubric
+```
+
+The evaluator compares each agent trajectory against a human reference trajectory across all five recording layers (video, screenshots, HTTP traffic, browser actions, agent messages), then outputs PASS/FAIL with evidence-backed justification.
+
+See [eval/README.md](eval/README.md) for the full evaluation guide and Claude Code prompt template.
+
+<br/>
+
 # <img src="static/icons/circle-question.svg" width="28" height="28"> FAQ
 
 <details>

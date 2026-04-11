@@ -235,6 +235,24 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 
 <br/>
 
+# <img src="static/icons/chart-bar.svg" width="28" height="28"> 测评
+
+测评是**运行之后**的步骤 -- 先运行智能体收集轨迹,再将轨迹与人类参考运行进行对比评估。
+
+```
+ 1. 运行智能体 (test-driver)        2. 测评 (eval/)
+ ────────────────────────           ────────────────────────────────
+ ./run.sh 或 batch.py        ──►    Claude Code 子代理对比
+ 生成 test-output/                  智能体 vs 人类轨迹
+   含五层录制数据                    按 eval/agentic_eval.md rubric 判定
+```
+
+测评器将智能体轨迹与人类参考轨迹在五层录制数据（视频、截图、HTTP 流量、浏览器动作、智能体消息）上进行逐步对比,输出 PASS/FAIL 及带证据的判定理由。
+
+完整测评指南和 Claude Code prompt 模板详见 [eval/README.md](eval/README.md)。
+
+<br/>
+
 # <img src="static/icons/circle-question.svg" width="28" height="28"> 常见问题
 
 <details>
