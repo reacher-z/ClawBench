@@ -23,36 +23,36 @@ A benchmark of **153 everyday online tasks** spanning **144 live websites** and 
 
 Success rate (%) of 6 frontier AI agents on ClawBench. Even the strongest model completes only 33.3% of tasks.
 
-| Rank | Model | Overall | Daily | Finance | Work | Dev | Academic | Travel | Social | Pets |
-|------|-------|---------|-------|---------|------|-----|----------|--------|--------|------|
-| 1 | Claude Sonnet 4.6 | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
-| 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
-| 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
-| 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
-| 5 | GPT-5.4 | 6.5 | 9.6 | 0.0 | 0.0 | 11.1 | 7.1 | 7.7 | 0.0 | 9.1 |
-| 6 | Gemini 3.1 Flash Lite | 3.3 | 1.9 | 0.0 | 0.0 | 5.6 | 14.3 | 0.0 | 0.0 | 9.1 |
+| Rank | Model                 | Overall  | Daily    | Finance  | Work     | Dev      | Academic | Travel   | Social   | Pets     |
+| ---- | --------------------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
+| 1    | Claude Sonnet 4.6     | **33.3** | 44.2     | **50.0** | 19.0     | 11.1     | **50.0** | 23.1     | **38.9** | **18.2** |
+| 2    | GLM-5                 | 24.2     | **30.8** | 16.7     | **38.1** | 16.7     | 28.6     | 0.0      | 16.7     | **18.2** |
+| 3    | Gemini 3 Flash        | 19.0     | 15.4     | 33.3     | 23.8     | **22.2** | 28.6     | **30.8** | 11.1     | 0.0      |
+| 4    | Claude Haiku 4.5      | 18.3     | 15.4     | 22.2     | 19.0     | **27.8** | 21.4     | 7.7      | 16.7     | **18.2** |
+| 5    | GPT-5.4               | 6.5      | 9.6      | 0.0      | 0.0      | 11.1     | 7.1      | 7.7      | 0.0      | 9.1      |
+| 6    | Gemini 3.1 Flash Lite | 3.3      | 1.9      | 0.0      | 0.0      | 5.6      | 14.3     | 0.0      | 0.0      | 9.1      |
 
 <details>
 <summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
 
-| Category | Tasks | Example Platforms |
-|----------|-------|-------------------|
-| Daily Life | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
-| Entertainment & Hobbies | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
-| Creation & Initialization | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
-| Rating & Voting | 10 | Trustpilot, G2, Goodreads, RateMyProfessors |
-| Travel | 9 | Booking.com, Expedia, Airbnb, TripAdvisor |
-| Education & Learning | 9 | Coursera, Udemy, Khan Academy, Duolingo |
-| Office & Secretary | 9 | Google Calendar, Slack, Notion, Trello |
-| Beauty & Personal Care | 9 | Sephora, Ulta, Glossier |
-| Job Search & HR | 8 | LinkedIn, Greenhouse, Lever, Workday |
-| Pet & Animal Care | 8 | Chewy, Petco, Rover |
-| Personal Management | 6 | Mint, YNAB, Todoist |
-| Shopping & Commerce | 6 | Amazon, eBay, Etsy, Target |
-| Nonprofit & Charity | 6 | GoFundMe, DonorsChoose |
-| Academia & Research | 5 | Google Scholar, Semantic Scholar, OpenReview |
-| Finance & Investment | 4 | Robinhood, Fidelity, Coinbase |
-| Others | 15 | Automation, Dev & Tech, Government, Home Services, Automotive |
+| Category                  | Tasks | Example Platforms                                             |
+| ------------------------- | ----- | ------------------------------------------------------------- |
+| Daily Life                | 21    | Uber Eats, DoorDash, Instacart, Zillow, Craigslist            |
+| Entertainment & Hobbies   | 15    | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll              |
+| Creation & Initialization | 13    | Squarespace, Wix, Webflow, Ghost, Substack                    |
+| Rating & Voting           | 10    | Trustpilot, G2, Goodreads, RateMyProfessors                   |
+| Travel                    | 9     | Booking.com, Expedia, Airbnb, TripAdvisor                     |
+| Education & Learning      | 9     | Coursera, Udemy, Khan Academy, Duolingo                       |
+| Office & Secretary        | 9     | Google Calendar, Slack, Notion, Trello                        |
+| Beauty & Personal Care    | 9     | Sephora, Ulta, Glossier                                       |
+| Job Search & HR           | 8     | LinkedIn, Greenhouse, Lever, Workday                          |
+| Pet & Animal Care         | 8     | Chewy, Petco, Rover                                           |
+| Personal Management       | 6     | Mint, YNAB, Todoist                                           |
+| Shopping & Commerce       | 6     | Amazon, eBay, Etsy, Target                                    |
+| Nonprofit & Charity       | 6     | GoFundMe, DonorsChoose                                        |
+| Academia & Research       | 5     | Google Scholar, Semantic Scholar, OpenReview                  |
+| Finance & Investment      | 4     | Robinhood, Fidelity, Coinbase                                 |
+| Others                    | 15    | Automation, Dev & Tech, Government, Home Services, Automotive |
 
 </details>
 
@@ -91,11 +91,7 @@ Python dependencies (`fpdf2`, `huggingface_hub`, `pyyaml`) are managed by `uv` a
 ## Quick Start
 
 ```bash
-# 1. Set up PurelyMail credentials:
-cp .env.example .env
-# Edit .env and fill in PURELY_MAIL_API_KEY and PURELY_MAIL_DOMAIN
-
-# 2. Launch the interactive menu:
+# Launch the interactive menu:
 ./run.sh
 ```
 
@@ -166,11 +162,11 @@ Captured event types: `pageLoad`, `click`, `keydown`, `keyup`, `input`, `scroll`
 - **`type: "session"`** — session metadata (version, id, timestamp)
 - **`type: "message"`** — conversation turn, with `message.role` and `message.content[]`:
 
-| `message.role` | Content types                     | Description                        |
-| -------------- | --------------------------------- | ---------------------------------- |
-| `user`         | `text`                            | The instruction prompt              |
-| `assistant`    | `text`, `thinking`, `toolCall`    | Model response, reasoning, actions |
-| `toolResult`   | `text`                            | Tool execution results              |
+| `message.role` | Content types                  | Description                        |
+| -------------- | ------------------------------ | ---------------------------------- |
+| `user`         | `text`                         | The instruction prompt             |
+| `assistant`    | `text`, `thinking`, `toolCall` | Model response, reasoning, actions |
+| `toolResult`   | `text`                         | Tool execution results             |
 
 ### HTTP Requests Format (JSONL)
 
@@ -180,14 +176,14 @@ Captured event types: `pageLoad`, `click`, `keydown`, `keyup`, `input`, `scroll`
 {"timestamp": 1710000001.234, "url": "https://example.com/api?q=test", "method": "POST", "headers": {"Content-Type": "application/json"}, "body": {"action": "send"}, "query_params": {"q": "test"}, "resource_type": "XHR"}
 ```
 
-| Field           | Description                                                        |
-| --------------- | ------------------------------------------------------------------ |
-| `timestamp`     | Unix epoch (float)                                                 |
-| `url`           | Full request URL                                                   |
-| `method`        | HTTP method (GET, POST, etc.)                                      |
-| `headers`       | Request headers (object)                                           |
-| `body`          | Parsed request body (JSON object, form dict, raw string, or null)  |
-| `query_params`  | Parsed URL query parameters (object)                               |
+| Field           | Description                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| `timestamp`     | Unix epoch (float)                                                         |
+| `url`           | Full request URL                                                           |
+| `method`        | HTTP method (GET, POST, etc.)                                              |
+| `headers`       | Request headers (object)                                                   |
+| `body`          | Parsed request body (JSON object, form dict, raw string, or null)          |
+| `query_params`  | Parsed URL query parameters (object)                                       |
 | `resource_type` | Resource type: Document, Script, Stylesheet, XHR, Fetch, Image, Font, etc. |
 
 Requests to `localhost:7878` (extension server) and `chrome-extension://` URLs are filtered out.
@@ -223,13 +219,13 @@ podman build -t clawbench .
 
 ## API Endpoints
 
-| Method | Path              | Description                                  |
-| ------ | ----------------- | -------------------------------------------- |
-| GET    | `/api/status`     | Health check                                 |
-| POST   | `/api/action`     | Record a browser action (JSON body)          |
-| POST   | `/api/screenshot` | Store a screenshot (base64 PNG in JSON)      |
-| POST   | `/api/stop`       | Signal session stop, finalize bookkeeping    |
-| POST   | `/api/stop-recording` | Stop ffmpeg recording, finalize MP4      |
+| Method | Path                  | Description                               |
+| ------ | --------------------- | ----------------------------------------- |
+| GET    | `/api/status`         | Health check                              |
+| POST   | `/api/action`         | Record a browser action (JSON body)       |
+| POST   | `/api/screenshot`     | Store a screenshot (base64 PNG in JSON)   |
+| POST   | `/api/stop`           | Signal session stop, finalize bookkeeping |
+| POST   | `/api/stop-recording` | Stop ffmpeg recording, finalize MP4       |
 
 
 ## OpenClaw Agent Integration
@@ -238,17 +234,17 @@ The container uses [OpenClaw](https://github.com/openclaw/openclaw) as the agent
 
 ### Environment Variables
 
-| Variable                          | Example                                                | Description                                          |
-| --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
-| `MODEL_NAME`                      | `claude-sonnet-4-6`, `gemini-3-flash-preview`          | Model identifier                                     |
-| `BASE_URL`                        | `https://api.openai.com/v1`                            | API base URL                                         |
-| `API_TYPE`                        | `openai-completions`                                   | API type (`openai-completions`, `anthropic-messages`, etc.) |
-| `API_KEY`                         | `sk-ant-...`, `AIza...`                                | API key                                              |
-| `INSTRUCTION`                     | `"Go to example.com and…"`                             | Task prompt for the agent                            |
-| `TIME_LIMIT_S`                    | `300`                                                  | Watchdog timeout in seconds (default: 600)           |
-| `THINKING_LEVEL`                  | `high`, `low`, `off`                                   | Reasoning depth (default: `medium`)                  |
-| `TEMPERATURE`                     | `0.5`                                                  | Sampling temperature (optional)                      |
-| `MAX_TOKENS`                      | `4096`                                                 | Max output tokens (optional)                         |
+| Variable         | Example                                       | Description                                                 |
+| ---------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `MODEL_NAME`     | `claude-sonnet-4-6`, `gemini-3-flash-preview` | Model identifier                                            |
+| `BASE_URL`       | `https://api.openai.com/v1`                   | API base URL                                                |
+| `API_TYPE`       | `openai-completions`                          | API type (`openai-completions`, `anthropic-messages`, etc.) |
+| `API_KEY`        | `sk-ant-...`, `AIza...`                       | API key                                                     |
+| `INSTRUCTION`    | `"Go to example.com and…"`                    | Task prompt for the agent                                   |
+| `TIME_LIMIT_S`   | `300`                                         | Watchdog timeout in seconds (default: 600)                  |
+| `THINKING_LEVEL` | `high`, `low`, `off`                          | Reasoning depth (default: `medium`)                         |
+| `TEMPERATURE`    | `0.5`                                         | Sampling temperature (optional)                             |
+| `MAX_TOKENS`     | `4096`                                        | Max output tokens (optional)                                |
 
 ### Container Lifecycle with OpenClaw
 
