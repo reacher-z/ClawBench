@@ -21,6 +21,8 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 **153** everyday tasks &nbsp;&middot;&nbsp; **144** live websites &nbsp;&middot;&nbsp; **15** life categories
 
+<a href="README.zh-CN.md"><img src="static/icons/language.svg" width="16" height="16"> 中文</a>
+
 </div>
 
 <br/>
@@ -29,23 +31,19 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 <tr>
 <td align="center" width="25%">
 <img src="static/icons/globe.svg" width="36" height="36"><br/>
-<b>Live Websites</b><br/>
-<sub>144 real production sites --<br/>not sandboxed clones</sub>
+<b>Live Websites</b>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/cube.svg" width="36" height="36"><br/>
-<b>Isolated Containers</b><br/>
-<sub>Each run in its own Docker<br/>container with Chromium</sub>
+<b>Isolated Containers</b>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
-<b>Request Interceptor</b><br/>
-<sub>Blocks the final irreversible action<br/>to prevent real-world side effects</sub>
+<b>Request Interceptor</b>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/layer-group.svg" width="36" height="36"><br/>
-<b>Five-Layer Recording</b><br/>
-<sub>MP4, screenshots, HTTP traffic,<br/>DOM actions, agent messages</sub>
+<b>Five-Layer Recording</b>
 </td>
 </tr>
 </table>
