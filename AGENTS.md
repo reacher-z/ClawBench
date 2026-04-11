@@ -35,7 +35,8 @@ ClawBench/
   chrome-extension/               # Recording extension (content.js, background.js)
   shared/
     alex_green_personal_info.json # Synthetic user profile template
-  prompts/
+  eval/
+    README.md                     # Evaluation guide + Claude Code prompt template
     agentic_eval.md               # Evaluator rubric for judging agent success
 ```
 
@@ -113,4 +114,5 @@ test-output/<model>/<case>-<model>-<timestamp>/
 - [test-driver/README.md](test-driver/README.md) -- test driver, batch runner, output format, personal info
 - [extension-server/README.md](extension-server/README.md) -- FastAPI server, endpoints, screen recording
 - [CONTRIBUTING.md](CONTRIBUTING.md) -- how to add new test cases
-- [prompts/agentic_eval.md](prompts/agentic_eval.md) -- evaluator rubric for PASS/FAIL judgment
+- [eval/README.md](eval/README.md) -- evaluation guide and Claude Code prompt template
+- [eval/agentic_eval.md](eval/agentic_eval.md) -- evaluator rubric for PASS/FAIL judgment
