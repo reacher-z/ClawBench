@@ -370,6 +370,37 @@ If you use ClawBench in your research, please cite:
 </tr>
 </table>
 
+## Advisors
+
+<table>
+<tr>
+<td align="center">
+<a href="https://github.com/k-r-allen">
+<img src="https://github.com/k-r-allen.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Kelsey R. Allen</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/wenhuchen">
+<img src="https://github.com/wenhuchen.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Wenhu Chen</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/jdf-prog">
+<img src="https://github.com/jdf-prog.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Dongfu Jiang</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/chenllliang">
+<img src="https://github.com/chenllliang.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Liang Chen</b></sub>
+</a>
+</td>
+</tr>
+</table>
+
 ## License & Acknowledgments
 
 Apache 2.0 -- see [LICENSE](LICENSE).
