@@ -7,6 +7,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
 ### AI 智能体能完成日常在线任务吗?
 
@@ -109,27 +110,6 @@ TUI 会引导你完成模型选择、测试用例选取和运行模式 (单次 /
 <br/>
 
 # <img src="static/icons/play.svg" width="28" height="28"> 演示
-
-<!-- TODO: 替换为实际的演示 GIF/录屏 -->
-
-<table>
-<tr>
-<td width="50%" align="center">
-
-**在 Uber Eats 上点餐**
-
-https://github.com/user-attachments/assets/placeholder-uber-eats
-
-</td>
-<td width="50%" align="center">
-
-**提交求职申请**
-
-https://github.com/user-attachments/assets/placeholder-greenhouse
-
-</td>
-</tr>
-</table>
 
 > 每次 ClawBench 运行都会产生完整的 MP4 录屏。访问[项目主页](https://claw-bench.com)查看全部 153 个任务的录屏。
 
