@@ -14,24 +14,43 @@ Each test case runs in an isolated container (Docker or Podman) with a Chrome br
 
 ## Table of Contents
 
-- [Quick Start](#quick-start)
-- [How it works](#how-it-works-30-second-tour)
-- [What's a "model name"?](#whats-a-model-name)
-- [End-to-end example](#end-to-end-example)
-- [Manual setup](#manual-setup)
-- [Dependencies](#dependencies)
-- [Architecture](#architecture)
-- [Data Output](#data-output)
-- [Building the Container](#building-the-container)
-- [API Endpoints](#api-endpoints)
-- [OpenClaw Agent Integration](#openclaw-agent-integration)
-- [Synthetic User Profile](#synthetic-user-profile)
-- [Tool Restrictions](#tool-restrictions)
-- [Request Interceptor](#request-interceptor)
-- [Test Driver](#test-driver)
-- [Human Mode](#human-mode)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+- [ClawBench](#clawbench)
+  - [Table of Contents](#table-of-contents)
+  - [Quick Start](#quick-start)
+  - [How it works (30-second tour)](#how-it-works-30-second-tour)
+  - [What's a "model name"?](#whats-a-model-name)
+  - [End-to-end example](#end-to-end-example)
+  - [Manual setup](#manual-setup)
+  - [Dependencies](#dependencies)
+  - [Quick Start](#quick-start-1)
+  - [Architecture](#architecture)
+  - [Data Output](#data-output)
+    - [Action Format (JSONL)](#action-format-jsonl)
+    - [Agent Messages Format (JSONL)](#agent-messages-format-jsonl)
+    - [HTTP Requests Format (JSONL)](#http-requests-format-jsonl)
+  - [Building the Container](#building-the-container)
+    - [Container engine](#container-engine)
+    - [Build](#build)
+    - [Ports](#ports)
+  - [API Endpoints](#api-endpoints)
+  - [OpenClaw Agent Integration](#openclaw-agent-integration)
+    - [Environment Variables](#environment-variables)
+    - [Container Lifecycle with OpenClaw](#container-lifecycle-with-openclaw)
+    - [OpenClaw Configuration](#openclaw-configuration)
+    - [OpenClaw Browser Patch](#openclaw-browser-patch)
+  - [Synthetic User Profile](#synthetic-user-profile)
+  - [Tool Restrictions](#tool-restrictions)
+  - [Request Interceptor](#request-interceptor)
+    - [How It Works](#how-it-works)
+    - [Schema Format](#schema-format)
+    - [When to Block](#when-to-block)
+    - [Interception Output](#interception-output)
+  - [Test Driver](#test-driver)
+  - [Human Mode](#human-mode)
+    - [Usage](#usage)
+    - [How it ends](#how-it-ends)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
 
 ## Quick Start
 
@@ -47,13 +66,13 @@ Prefer to configure things by hand? See [Manual setup](#manual-setup).
 
 ## How it works (30-second tour)
 
-| Layer | What it does | Runs where |
-|---|---|---|
-| `./run.sh` | Bash one-liner that execs the TUI | **your host** |
-| `test-driver/tui.py` | Interactive menu (plain Python prompts) | **your host** |
-| `test-driver/run.py` | Builds the image, spawns **one** container per case | **your host** |
-| `test-driver/batch.py` | Spawns **N containers in parallel** (`asyncio.Semaphore`, configurable) | **your host** |
-| Container (Chromium + extension + agent) | Runs the actual test case | **inside Docker/Podman** |
+| Layer                                    | What it does                                                            | Runs where               |
+| ---------------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+| `./run.sh`                               | Bash one-liner that execs the TUI                                       | **your host**            |
+| `test-driver/tui.py`                     | Interactive menu (plain Python prompts)                                 | **your host**            |
+| `test-driver/run.py`                     | Builds the image, spawns **one** container per case                     | **your host**            |
+| `test-driver/batch.py`                   | Spawns **N containers in parallel** (`asyncio.Semaphore`, configurable) | **your host**            |
+| Container (Chromium + extension + agent) | Runs the actual test case                                               | **inside Docker/Podman** |
 
 So:
 
@@ -142,6 +161,15 @@ cp models/models.example.yaml models/models.yaml
 
 Python dependencies (`fpdf2`, `huggingface_hub`, `pyyaml`) are managed by `uv` and installed automatically on first run.
 
+## Quick Start
+
+```bash
+# Launch the interactive menu:
+./run.sh
+```
+
+The menu will guide you through configuring models, selecting test cases, and running benchmarks.
+
 ## Architecture
 
 ```
@@ -207,11 +235,11 @@ Captured event types: `pageLoad`, `click`, `keydown`, `keyup`, `input`, `scroll`
 - **`type: "session"`** — session metadata (version, id, timestamp)
 - **`type: "message"`** — conversation turn, with `message.role` and `message.content[]`:
 
-| `message.role` | Content types                     | Description                        |
-| -------------- | --------------------------------- | ---------------------------------- |
-| `user`         | `text`                            | The instruction prompt              |
-| `assistant`    | `text`, `thinking`, `toolCall`    | Model response, reasoning, actions |
-| `toolResult`   | `text`                            | Tool execution results              |
+| `message.role` | Content types                  | Description                        |
+| -------------- | ------------------------------ | ---------------------------------- |
+| `user`         | `text`                         | The instruction prompt             |
+| `assistant`    | `text`, `thinking`, `toolCall` | Model response, reasoning, actions |
+| `toolResult`   | `text`                         | Tool execution results             |
 
 ### HTTP Requests Format (JSONL)
 
@@ -221,14 +249,14 @@ Captured event types: `pageLoad`, `click`, `keydown`, `keyup`, `input`, `scroll`
 {"timestamp": 1710000001.234, "url": "https://example.com/api?q=test", "method": "POST", "headers": {"Content-Type": "application/json"}, "body": {"action": "send"}, "query_params": {"q": "test"}, "resource_type": "XHR"}
 ```
 
-| Field           | Description                                                        |
-| --------------- | ------------------------------------------------------------------ |
-| `timestamp`     | Unix epoch (float)                                                 |
-| `url`           | Full request URL                                                   |
-| `method`        | HTTP method (GET, POST, etc.)                                      |
-| `headers`       | Request headers (object)                                           |
-| `body`          | Parsed request body (JSON object, form dict, raw string, or null)  |
-| `query_params`  | Parsed URL query parameters (object)                               |
+| Field           | Description                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| `timestamp`     | Unix epoch (float)                                                         |
+| `url`           | Full request URL                                                           |
+| `method`        | HTTP method (GET, POST, etc.)                                              |
+| `headers`       | Request headers (object)                                                   |
+| `body`          | Parsed request body (JSON object, form dict, raw string, or null)          |
+| `query_params`  | Parsed URL query parameters (object)                                       |
 | `resource_type` | Resource type: Document, Script, Stylesheet, XHR, Fetch, Image, Font, etc. |
 
 Requests to `localhost:7878` (extension server) and `chrome-extension://` URLs are filtered out.
@@ -264,13 +292,13 @@ podman build -t clawbench .
 
 ## API Endpoints
 
-| Method | Path              | Description                                  |
-| ------ | ----------------- | -------------------------------------------- |
-| GET    | `/api/status`     | Health check                                 |
-| POST   | `/api/action`     | Record a browser action (JSON body)          |
-| POST   | `/api/screenshot` | Store a screenshot (base64 PNG in JSON)      |
-| POST   | `/api/stop`       | Signal session stop, finalize bookkeeping    |
-| POST   | `/api/stop-recording` | Stop ffmpeg recording, finalize MP4      |
+| Method | Path                  | Description                               |
+| ------ | --------------------- | ----------------------------------------- |
+| GET    | `/api/status`         | Health check                              |
+| POST   | `/api/action`         | Record a browser action (JSON body)       |
+| POST   | `/api/screenshot`     | Store a screenshot (base64 PNG in JSON)   |
+| POST   | `/api/stop`           | Signal session stop, finalize bookkeeping |
+| POST   | `/api/stop-recording` | Stop ffmpeg recording, finalize MP4       |
 
 
 ## OpenClaw Agent Integration
@@ -279,17 +307,17 @@ The container uses [OpenClaw](https://github.com/openclaw/openclaw) as the agent
 
 ### Environment Variables
 
-| Variable                          | Example                                                | Description                                          |
-| --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
-| `MODEL_NAME`                      | `claude-sonnet-4-6`, `gemini-3-flash-preview`          | Model identifier                                     |
-| `BASE_URL`                        | `https://api.openai.com/v1`                            | API base URL                                         |
-| `API_TYPE`                        | `openai-completions`                                   | API type (`openai-completions`, `anthropic-messages`, etc.) |
-| `API_KEY`                         | `sk-ant-...`, `AIza...`                                | API key                                              |
-| `INSTRUCTION`                     | `"Go to example.com and…"`                             | Task prompt for the agent                            |
-| `TIME_LIMIT_S`                    | `300`                                                  | Watchdog timeout in seconds (default: 600)           |
-| `THINKING_LEVEL`                  | `high`, `low`, `off`                                   | Reasoning depth (default: `medium`)                  |
-| `TEMPERATURE`                     | `0.5`                                                  | Sampling temperature (optional)                      |
-| `MAX_TOKENS`                      | `4096`                                                 | Max output tokens (optional)                         |
+| Variable         | Example                                       | Description                                                 |
+| ---------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `MODEL_NAME`     | `claude-sonnet-4-6`, `gemini-3-flash-preview` | Model identifier                                            |
+| `BASE_URL`       | `https://api.openai.com/v1`                   | API base URL                                                |
+| `API_TYPE`       | `openai-completions`                          | API type (`openai-completions`, `anthropic-messages`, etc.) |
+| `API_KEY`        | `sk-ant-...`, `AIza...`                       | API key                                                     |
+| `INSTRUCTION`    | `"Go to example.com and…"`                    | Task prompt for the agent                                   |
+| `TIME_LIMIT_S`   | `300`                                         | Watchdog timeout in seconds (default: 600)                  |
+| `THINKING_LEVEL` | `high`, `low`, `off`                          | Reasoning depth (default: `medium`)                         |
+| `TEMPERATURE`    | `0.5`                                         | Sampling temperature (optional)                             |
+| `MAX_TOKENS`     | `4096`                                        | Max output tokens (optional)                                |
 
 ### Container Lifecycle with OpenClaw
 
