@@ -15,12 +15,32 @@
 
 </div>
 
----
+<br/>
 
-- Tasks run on **live production websites**, not sandboxed clones
-- Each run is **fully isolated** in a Docker container with a real Chromium browser
-- A **request interceptor** blocks the final irreversible action (checkout, form submit, email send) to prevent real-world side effects
-- **Five-layer recording**: session replay (MP4), action screenshots, HTTP traffic, browser actions, agent messages
+<table>
+<tr>
+<td align="center" width="25%">
+<img src="static/icons/globe.svg" width="36" height="36"><br/>
+<b>Live Websites</b><br/>
+<sub>144 real production sites, not sandboxed clones</sub>
+</td>
+<td align="center" width="25%">
+<img src="static/icons/cube.svg" width="36" height="36"><br/>
+<b>Isolated Containers</b><br/>
+<sub>Each run in its own Docker container with Chromium</sub>
+</td>
+<td align="center" width="25%">
+<img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
+<b>Request Interceptor</b><br/>
+<sub>Blocks the final irreversible action to prevent side effects</sub>
+</td>
+<td align="center" width="25%">
+<img src="static/icons/layer-group.svg" width="36" height="36"><br/>
+<b>Five-Layer Recording</b><br/>
+<sub>MP4 replay, screenshots, HTTP traffic, actions, agent messages</sub>
+</td>
+</tr>
+</table>
 
 <br/>
 
@@ -48,6 +68,47 @@ cp models/models.example.yaml models/models.yaml   # Edit: add your model API ke
 ```
 
 The TUI guides you through model selection, test case picking, and run mode (single / batch / human baseline).
+
+<br/>
+
+# <img src="static/icons/video.svg" width="28" height="28"> Tutorial
+
+<div align="center">
+
+<!-- TODO: Replace with actual video links -->
+
+[![Watch on YouTube](https://img.shields.io/badge/Watch_Tutorial-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
+&nbsp;&nbsp;
+[![Watch on Bilibili](https://img.shields.io/badge/Watch_Tutorial-Bilibili-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white)](https://bilibili.com)
+
+</div>
+
+<br/>
+
+# <img src="static/icons/play.svg" width="28" height="28"> Demos
+
+<!-- TODO: Replace with actual demo GIFs/recordings -->
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+**Ordering food on Uber Eats**
+
+https://github.com/user-attachments/assets/placeholder-uber-eats
+
+</td>
+<td width="50%" align="center">
+
+**Submitting a job application**
+
+https://github.com/user-attachments/assets/placeholder-greenhouse
+
+</td>
+</tr>
+</table>
+
+> Each ClawBench run produces a full MP4 session recording. See the [project page](https://claw-bench.com) for all 153 task recordings.
 
 <br/>
 
@@ -225,6 +286,31 @@ If you use ClawBench in your research, please cite:
   url       = {https://claw-bench.com}
 }
 ```
+
+## Core Contributors
+
+<table>
+<tr>
+<td align="center">
+<a href="https://github.com/reacher-z">
+<img src="https://github.com/reacher-z.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Yuxuan Zhang</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/Perry2004">
+<img src="https://github.com/Perry2004.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Perry Zhu</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/MEKSAAA">
+<img src="https://github.com/MEKSAAA.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Junwen Miao</b></sub>
+</a>
+</td>
+</tr>
+</table>
 
 ## License & Acknowledgments
 
