@@ -111,6 +111,27 @@ The TUI guides you through model selection, test case picking, and run mode (sin
 
 # <img src="static/icons/play.svg" width="28" height="28"> Demos
 
+<!-- TODO: Replace with actual demo GIFs/recordings -->
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+**Ordering food on Uber Eats**
+
+https://github.com/user-attachments/assets/placeholder-uber-eats
+
+</td>
+<td width="50%" align="center">
+
+**Submitting a job application**
+
+https://github.com/user-attachments/assets/placeholder-greenhouse
+
+</td>
+</tr>
+</table>
+
 > Each ClawBench run produces a full MP4 session recording. See the [project page](https://claw-bench.com) for all 153 task recordings.
 
 <br/>
