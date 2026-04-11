@@ -29,22 +29,22 @@
 <td align="center" width="25%">
 <img src="static/icons/globe.svg" width="36" height="36"><br/>
 <b>真实网站</b><br/>
-<sub>144 个真实生产环境网站 --<br/>非沙盒克隆</sub>
+<sub>144 个真实生产环境网站,非沙盒克隆</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/cube.svg" width="36" height="36"><br/>
 <b>隔离容器</b><br/>
-<sub>每次运行在独立的 Docker<br/>容器中,内含 Chromium</sub>
+<sub>每次运行在独立的 Docker 容器中,内含 Chromium</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
 <b>请求拦截器</b><br/>
-<sub>拦截最终不可逆操作<br/>防止真实副作用</sub>
+<sub>拦截最终不可逆操作,防止真实副作用</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/layer-group.svg" width="36" height="36"><br/>
 <b>五层录制</b><br/>
-<sub>MP4、截图、HTTP 流量、<br/>DOM 动作、智能体消息</sub>
+<sub>MP4、截图、HTTP 流量、DOM 动作、智能体消息</sub>
 </td>
 </tr>
 </table>

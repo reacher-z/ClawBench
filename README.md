@@ -29,22 +29,22 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 <td align="center" width="25%">
 <img src="static/icons/globe.svg" width="36" height="36"><br/>
 <b>Live Websites</b><br/>
-<sub>144 real production sites --<br/>not sandboxed clones</sub>
+<sub>144 real production sites, not sandboxed clones</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/cube.svg" width="36" height="36"><br/>
 <b>Isolated Containers</b><br/>
-<sub>Each run in its own Docker<br/>container with Chromium</sub>
+<sub>Each run in its own Docker container with Chromium</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
 <b>Request Interceptor</b><br/>
-<sub>Blocks the final irreversible action<br/>to prevent real-world side effects</sub>
+<sub>Blocks the final irreversible action to prevent side effects</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/layer-group.svg" width="36" height="36"><br/>
 <b>Five-Layer Recording</b><br/>
-<sub>MP4, screenshots, HTTP traffic,<br/>DOM actions, agent messages</sub>
+<sub>MP4, screenshots, HTTP traffic, DOM actions, agent messages</sub>
 </td>
 </tr>
 </table>
