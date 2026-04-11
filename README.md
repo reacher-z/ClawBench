@@ -7,6 +7,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
