@@ -1,29 +1,84 @@
 # ClawBench
 
+[![Paper](https://img.shields.io/badge/Paper-COLM_2026-red.svg)](https://claw-bench.com)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
 
-ClawBench is a benchmarking framework for evaluating web agents in real browser environments. It records user/agent interactions, HTTP requests, action screenshots, and full MP4 video recordings of each session.
+**ClawBench: Can AI Agents Complete Everyday Online Tasks?**
 
-Each test case runs in an isolated container (Docker or Podman) with a Chrome browser, a custom recording extension, and an AI agent. The framework captures everything the agent does and uses a request interceptor to detect task completion.
+A benchmark of **153 everyday online tasks** spanning **144 live websites** and **15 life categories** — from ordering food on Uber Eats to submitting job applications on Greenhouse. Unlike sandbox-based benchmarks, ClawBench evaluates agents on real production websites with full complexity: cookie consent popups, dynamic JavaScript rendering, CAPTCHAs, and multi-step interaction flows.
+
+- Tasks run on **live production websites**, not sandboxed clones
+- Each run is **fully isolated** in a Docker container with a real Chromium browser
+- A **request interceptor** blocks the final irreversible action (checkout, form submit, email send) to prevent real-world side effects
+- **Five-layer recording**: session replay (MP4), action screenshots, HTTP traffic, browser actions, agent messages
+
+## News
+
+- **2026-04** — Paper accepted at [COLM 2026](https://colmweb.org/)
+- **2026-04** — Initial open-source release (153 tasks, 144 platforms)
+
+## Results
+
+Success rate (%) of 6 frontier AI agents on ClawBench. Even the strongest model completes only 33.3% of tasks.
+
+| Rank | Model | Overall | Daily | Finance | Work | Dev | Academic | Travel | Social | Pets |
+|------|-------|---------|-------|---------|------|-----|----------|--------|--------|------|
+| 1 | Claude Sonnet 4.6 | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
+| 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
+| 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
+| 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
+| 5 | GPT-5.4 | 6.5 | 9.6 | 0.0 | 0.0 | 11.1 | 7.1 | 7.7 | 0.0 | 9.1 |
+| 6 | Gemini 3.1 Flash Lite | 3.3 | 1.9 | 0.0 | 0.0 | 5.6 | 14.3 | 0.0 | 0.0 | 9.1 |
+
+<details>
+<summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
+
+| Category | Tasks | Example Platforms |
+|----------|-------|-------------------|
+| Daily Life | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
+| Entertainment & Hobbies | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
+| Creation & Initialization | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
+| Rating & Voting | 10 | Trustpilot, G2, Goodreads, RateMyProfessors |
+| Travel | 9 | Booking.com, Expedia, Airbnb, TripAdvisor |
+| Education & Learning | 9 | Coursera, Udemy, Khan Academy, Duolingo |
+| Office & Secretary | 9 | Google Calendar, Slack, Notion, Trello |
+| Beauty & Personal Care | 9 | Sephora, Ulta, Glossier |
+| Job Search & HR | 8 | LinkedIn, Greenhouse, Lever, Workday |
+| Pet & Animal Care | 8 | Chewy, Petco, Rover |
+| Personal Management | 6 | Mint, YNAB, Todoist |
+| Shopping & Commerce | 6 | Amazon, eBay, Etsy, Target |
+| Nonprofit & Charity | 6 | GoFundMe, DonorsChoose |
+| Academia & Research | 5 | Google Scholar, Semantic Scholar, OpenReview |
+| Finance & Investment | 4 | Robinhood, Fidelity, Coinbase |
+| Others | 15 | Automation, Dev & Tech, Government, Home Services, Automotive |
+
+</details>
 
 ## Table of Contents
 
-- [Dependencies](#dependencies)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
 - [Data Output](#data-output)
 - [Building the Container](#building-the-container)
+- [Test Driver](#test-driver)
+- [Human Mode](#human-mode)
+- [Contributing](#contributing)
+- [Citation](#citation)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+<details>
+<summary><b>Implementation Details</b></summary>
+
 - [API Endpoints](#api-endpoints)
 - [OpenClaw Agent Integration](#openclaw-agent-integration)
 - [Synthetic User Profile](#synthetic-user-profile)
 - [Tool Restrictions](#tool-restrictions)
 - [Request Interceptor](#request-interceptor)
-- [Test Driver](#test-driver)
-- [Human Mode](#human-mode)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+
+</details>
 
 ## Dependencies
 
@@ -366,6 +421,24 @@ The session stops when any of these happen:
 - **Time limit** — the configured time limit expires
 
 After the session ends, results are collected in the same format as agent runs (actions, screenshots, recording, interception).
+
+## Contributing
+
+We welcome contributions — especially new test cases that expand ClawBench's coverage. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding test cases, setting up eval schemas, and submitting PRs.
+
+## Citation
+
+If you use ClawBench in your research, please cite:
+
+```bibtex
+@inproceedings{zhang2026clawbench,
+  title     = {ClawBench: Can AI Agents Complete Everyday Online Tasks?},
+  author    = {Yuxuan Zhang and Yubo Wang and Yipeng Zhu and Penghui Du and Junwen Miao and Xuan Lu and Wendong Xu and Yunzhuo Hao and Songcheng Cai and Xiaochen Wang and Huaisong Zhang and Xian Wu and Yi Lu and Minyi Lei and Kai Zou and Huifeng Yin and Ping Nie and Liang Chen and Dongfu Jiang and Wenhu Chen and Kelsey R. Allen},
+  booktitle = {Conference on Language Modeling (COLM)},
+  year      = {2026},
+  url       = {https://claw-bench.com}
+}
+```
 
 ## License
 

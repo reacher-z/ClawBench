@@ -1,0 +1,43 @@
+name: Validate test cases
+
+on:
+  pull_request:
+    paths:
+      - 'test-cases/**/task.json'
+      - 'test-cases/task.schema.json'
+  push:
+    branches: [main]
+    paths:
+      - 'test-cases/**/task.json'
+      - 'test-cases/task.schema.json'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install jsonschema
+      - name: Validate all task.json files
+        run: |
+          python3 -c "
+          import json, glob, sys
+          from jsonschema import validate, ValidationError
+
+          schema = json.load(open('test-cases/task.schema.json'))
+          tasks = sorted(glob.glob('test-cases/*/task.json'))
+          errors = 0
+
+          for f in tasks:
+              try:
+                  validate(json.load(open(f)), schema)
+              except (ValidationError, json.JSONDecodeError) as e:
+                  msg = e.message if hasattr(e, 'message') else str(e)
+                  print(f'FAIL: {f}: {msg}')
+                  errors += 1
+
+          print(f'Validated {len(tasks)} task files, {errors} error(s)')
+          sys.exit(1 if errors else 0)
+          "
