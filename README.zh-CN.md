@@ -3,15 +3,22 @@
 # ClawBench
 
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
+[![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
 
-**AI 智能体能完成日常在线任务吗?**
+### AI 智能体能完成日常在线任务吗?
 
-153 个日常任务 &middot; 144 个真实网站 &middot; 15 个生活类别
+我们让 6 个前沿 AI 智能体去做人们每天都在做的事 --<br/>
+点外卖、订酒店、投简历、写评价、管理项目。<br/>
+**最强的模型也只完成了 33.3% 的任务。**
 
-[English](README.md) | **中文**
+[论文](https://arxiv.org/abs/2604.08523) &nbsp;&bull;&nbsp; [项目主页](https://claw-bench.com) &nbsp;&bull;&nbsp; [排行榜](#-实验结果)
+
+---
+
+**153** 个日常任务 &nbsp;&middot;&nbsp; **144** 个真实网站 &nbsp;&middot;&nbsp; **15** 个生活类别
 
 </div>
 
@@ -22,25 +29,41 @@
 <td align="center" width="25%">
 <img src="static/icons/globe.svg" width="36" height="36"><br/>
 <b>真实网站</b><br/>
-<sub>144 个真实生产环境网站,非沙盒克隆</sub>
+<sub>144 个真实生产环境网站 --<br/>非沙盒克隆</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/cube.svg" width="36" height="36"><br/>
 <b>隔离容器</b><br/>
-<sub>每次运行在独立的 Docker 容器中,内含 Chromium</sub>
+<sub>每次运行在独立的 Docker<br/>容器中,内含 Chromium</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
 <b>请求拦截器</b><br/>
-<sub>拦截最终不可逆操作,防止真实副作用</sub>
+<sub>拦截最终不可逆操作<br/>防止真实副作用</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/layer-group.svg" width="36" height="36"><br/>
 <b>五层录制</b><br/>
-<sub>MP4 回放、截图、HTTP 流量、动作、智能体消息</sub>
+<sub>MP4、截图、HTTP 流量、<br/>DOM 动作、智能体消息</sub>
 </td>
 </tr>
 </table>
+
+<br/>
+
+## 工作流程
+
+```
+   你选择一个任务             ClawBench 启动一个          智能体驱动浏览器:          拦截器捕获最终操作
+   来自 153 个真实             隔离的 Docker 容器          导航、填表、点击            并记录所有数据
+   日常场景                    + Chromium                                           
+                                                                                    
+   ┌──────────────┐           ┌──────────────┐           ┌──────────────┐           ┌──────────────┐
+   │ "在 Rover 上 │    ──►    │    容器      │    ──►    │   AI 智能体  │    ──►    │   已拦截     │
+   │  预订宠物     │           │  + Chromium  │           │  浏览真实    │           │   五层数据   │
+   │  寄养"       │           │  + 智能体    │           │   网站       │           │   已录制     │
+   └──────────────┘           └──────────────┘           └──────────────┘           └──────────────┘
+```
 
 <br/>
 
@@ -114,11 +137,15 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 
 # <img src="static/icons/chart-bar.svg" width="28" height="28"> 实验结果
 
-6 个前沿 AI 智能体在 ClawBench 上的成功率 (%)。即使是最强的模型也只完成了 33.3% 的任务。
+<div align="center">
+
+**6 个前沿 AI 智能体在 ClawBench 上的成功率 (%)**
+
+</div>
 
 | 排名 | 模型 | 总体 | 日常 | 金融 | 工作 | 开发 | 学术 | 旅行 | 社交 | 宠物 |
-|------|-------|---------|-------|---------|------|-----|----------|--------|--------|------|
-| 1 | Claude Sonnet 4.6 | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
+|:----:|-------|:------:|:-----:|:-----:|:----:|:---:|:----:|:----:|:----:|:----:|
+| 1 | **Claude Sonnet 4.6** | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
 | 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
 | 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
 | 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
@@ -129,7 +156,7 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 <summary><b>任务类别 (15 个类别, 153 个任务)</b></summary>
 
 | 类别 | 数量 | 示例平台 |
-|----------|-------|-------------------|
+|----------|:-----:|-------------------|
 | 日常生活 | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
 | 娱乐与爱好 | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
 | 创建与初始化 | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
