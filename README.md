@@ -3,15 +3,22 @@
 # ClawBench
 
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
+[![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
 
-**Can AI Agents Complete Everyday Online Tasks?**
+### Can AI Agents Complete Everyday Online Tasks?
 
-153 everyday tasks &middot; 144 live websites &middot; 15 life categories
+We asked 6 frontier AI agents to do what people do every day --<br/>
+order food, book travel, apply for jobs, write reviews, manage projects.<br/>
+**The best model completed only 33.3% of tasks.**
 
-**English** | [中文](README.zh-CN.md)
+[Paper](https://arxiv.org/abs/2604.08523) &nbsp;&bull;&nbsp; [Project Page](https://claw-bench.com) &nbsp;&bull;&nbsp; [Leaderboard](#-results)
+
+---
+
+**153** everyday tasks &nbsp;&middot;&nbsp; **144** live websites &nbsp;&middot;&nbsp; **15** life categories
 
 </div>
 
@@ -22,25 +29,41 @@
 <td align="center" width="25%">
 <img src="static/icons/globe.svg" width="36" height="36"><br/>
 <b>Live Websites</b><br/>
-<sub>144 real production sites, not sandboxed clones</sub>
+<sub>144 real production sites --<br/>not sandboxed clones</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/cube.svg" width="36" height="36"><br/>
 <b>Isolated Containers</b><br/>
-<sub>Each run in its own Docker container with Chromium</sub>
+<sub>Each run in its own Docker<br/>container with Chromium</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
 <b>Request Interceptor</b><br/>
-<sub>Blocks the final irreversible action to prevent side effects</sub>
+<sub>Blocks the final irreversible action<br/>to prevent real-world side effects</sub>
 </td>
 <td align="center" width="25%">
 <img src="static/icons/layer-group.svg" width="36" height="36"><br/>
 <b>Five-Layer Recording</b><br/>
-<sub>MP4 replay, screenshots, HTTP traffic, actions, agent messages</sub>
+<sub>MP4, screenshots, HTTP traffic,<br/>DOM actions, agent messages</sub>
 </td>
 </tr>
 </table>
+
+<br/>
+
+## How It Works
+
+```
+   You pick a task            ClawBench spins up           Agent drives the         Interceptor catches
+   from 153 real-world        an isolated Docker           browser: navigates,      the final action &
+   everyday scenarios         container + Chromium         fills forms, clicks      records everything
+                                                                                    
+   ┌──────────────┐           ┌──────────────┐           ┌──────────────┐           ┌──────────────┐
+   │  "Book a pet │    ──►    │   Container  │    ──►    │   AI Agent   │    ──►    │  Intercepted │
+   │   sitter on  │           │  + Chromium  │           │  browses the │           │   5 layers   │
+   │   Rover"     │           │  + Agent     │           │   live site  │           │   recorded   │
+   └──────────────┘           └──────────────┘           └──────────────┘           └──────────────┘
+```
 
 <br/>
 
@@ -114,11 +137,15 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 
 # <img src="static/icons/chart-bar.svg" width="28" height="28"> Results
 
-Success rate (%) of 6 frontier AI agents on ClawBench. Even the strongest model completes only 33.3% of tasks.
+<div align="center">
+
+**Success rate (%) of 6 frontier AI agents on ClawBench**
+
+</div>
 
 | Rank | Model | Overall | Daily | Finance | Work | Dev | Academic | Travel | Social | Pets |
-|------|-------|---------|-------|---------|------|-----|----------|--------|--------|------|
-| 1 | Claude Sonnet 4.6 | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
+|:----:|-------|:-------:|:-----:|:-------:|:----:|:---:|:--------:|:------:|:------:|:----:|
+| 1 | **Claude Sonnet 4.6** | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
 | 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
 | 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
 | 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
@@ -129,7 +156,7 @@ Success rate (%) of 6 frontier AI agents on ClawBench. Even the strongest model 
 <summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
 
 | Category | Tasks | Example Platforms |
-|----------|-------|-------------------|
+|----------|:-----:|-------------------|
 | Daily Life | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
 | Entertainment & Hobbies | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
 | Creation & Initialization | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
