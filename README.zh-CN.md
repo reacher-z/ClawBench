@@ -2,7 +2,7 @@
 
 # ClawBench
 
-[![Paper](https://img.shields.io/badge/Paper-COLM_2026-red.svg)](https://claw-bench.com)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
@@ -278,12 +278,14 @@ OpenClaw 智能体只能使用浏览器工具和一组受限的只读 shell 命�
 如果你在研究中使用了 ClawBench,请引用:
 
 ```bibtex
-@inproceedings{zhang2026clawbench,
-  title     = {ClawBench: Can AI Agents Complete Everyday Online Tasks?},
-  author    = {Yuxuan Zhang and Yubo Wang and Yipeng Zhu and Penghui Du and Junwen Miao and Xuan Lu and Wendong Xu and Yunzhuo Hao and Songcheng Cai and Xiaochen Wang and Huaisong Zhang and Xian Wu and Yi Lu and Minyi Lei and Kai Zou and Huifeng Yin and Ping Nie and Liang Chen and Dongfu Jiang and Wenhu Chen and Kelsey R. Allen},
-  booktitle = {Conference on Language Modeling (COLM)},
-  year      = {2026},
-  url       = {https://claw-bench.com}
+@misc{zhang2026clawbench,
+  title         = {ClawBench: Can AI Agents Complete Everyday Online Tasks?},
+  author        = {Yuxuan Zhang and Yubo Wang and Yipeng Zhu and Penghui Du and Junwen Miao and Xuan Lu and Wendong Xu and Yunzhuo Hao and Songcheng Cai and Xiaochen Wang and Huaisong Zhang and Xian Wu and Yi Lu and Minyi Lei and Kai Zou and Huifeng Yin and Ping Nie and Liang Chen and Dongfu Jiang and Wenhu Chen and Kelsey R. Allen},
+  year          = {2026},
+  eprint        = {2604.08523},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2604.08523}
 }
 ```
 
@@ -298,9 +300,21 @@ OpenClaw 智能体只能使用浏览器工具和一组受限的只读 shell 命�
 </a>
 </td>
 <td align="center">
+<a href="https://github.com/Wyyyb">
+<img src="https://github.com/Wyyyb.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Yubo Wang</b></sub>
+</a>
+</td>
+<td align="center">
 <a href="https://github.com/Perry2004">
 <img src="https://github.com/Perry2004.png" width="80" height="80" style="border-radius:50%"><br/>
 <sub><b>Perry Zhu</b></sub>
+</a>
+</td>
+<td align="center">
+<a href="https://github.com/eternaldolphin">
+<img src="https://github.com/eternaldolphin.png" width="80" height="80" style="border-radius:50%"><br/>
+<sub><b>Penghui Du</b></sub>
 </a>
 </td>
 <td align="center">
