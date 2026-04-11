@@ -5,14 +5,13 @@ The test driver orchestrates single test-case runs against the ClawBench framewo
 ## Quick Start
 
 ```bash
-# 1. Configure .env with PurelyMail credentials (see Configuration below)
-# 2. Launch the interactive menu:
+# Launch the interactive menu — the first-run wizard handles .env and models for you:
 ./run.sh
 # Or equivalently:
 uv run --project test-driver test-driver/tui.py
 ```
 
-The interactive menu lets you configure models, select test cases, and choose a run mode interactively.
+On first launch, the TUI walks you through creating `.env` (PurelyMail credentials) and adding your first model. After that, the main menu lets you pick a run mode and select test cases interactively. See the top-level [README](../README.md#quick-start) for the full quickstart.
 
 For direct CLI usage:
 
@@ -93,10 +92,12 @@ Validated by `models/model.schema.json`:
 uv run --project test-driver test-driver/tui.py
 ```
 
+On first launch (no `.env` or no models configured), the TUI runs a setup wizard that copies `.env.example`, prompts for `PURELY_MAIL_API_KEY` / `PURELY_MAIL_DOMAIN`, and walks you into the model-config flow before showing the main menu.
+
 Options:
-1. **Single run** — pick one model and one test case
-2. **Batch run** — pick models and cases, set concurrency
-3. **Human mode** — pick a test case, launch noVNC
+1. **Single run** — pick one model and one test case (1 container)
+2. **Batch run** — pick models and cases, set concurrency (N containers in parallel)
+3. **Human mode** — pick a test case, launch noVNC (1 container, you drive the browser)
 4. **Configure models** — add models to `models/models.yaml` interactively
 
 Test cases can be selected by their numeric ID prefix (e.g. `886` for `886-entertainment-hobbies-experience-topgolf`).

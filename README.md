@@ -6,14 +6,20 @@
 
 **English** | [中文](README.zh-CN.md)
 
+> **TL;DR:** ClawBench runs **on your host machine**. Just `./run.sh` and follow the first-run setup wizard — it builds the Docker/Podman image and spawns one container per test case for you. You do **not** run anything inside a container yourself.
+
 ClawBench is a benchmarking framework for evaluating web agents in real browser environments. It records user/agent interactions, HTTP requests, action screenshots, and full MP4 video recordings of each session.
 
 Each test case runs in an isolated container (Docker or Podman) with a Chrome browser, a custom recording extension, and an AI agent. The framework captures everything the agent does and uses a request interceptor to detect task completion.
 
 ## Table of Contents
 
-- [Dependencies](#dependencies)
 - [Quick Start](#quick-start)
+- [How it works](#how-it-works-30-second-tour)
+- [What's a "model name"?](#whats-a-model-name)
+- [End-to-end example](#end-to-end-example)
+- [Manual setup](#manual-setup)
+- [Dependencies](#dependencies)
 - [Architecture](#architecture)
 - [Data Output](#data-output)
 - [Building the Container](#building-the-container)
@@ -27,6 +33,107 @@ Each test case runs in an isolated container (Docker or Podman) with a Chrome br
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
+## Quick Start
+
+```bash
+git clone https://github.com/reacher-z/ClawBench.git
+cd ClawBench
+./run.sh   # the first-run wizard handles everything else
+```
+
+The wizard creates `.env` from the template, prompts you for your PurelyMail API key + domain (used to generate a fresh disposable email per test case), and walks you through adding your first model. After that the main menu appears — pick **"1. Single run"**, choose your model, choose any test case. ClawBench builds the container image (first run only) and spawns the container; results land in `test-output/`.
+
+Prefer to configure things by hand? See [Manual setup](#manual-setup).
+
+## How it works (30-second tour)
+
+| Layer | What it does | Runs where |
+|---|---|---|
+| `./run.sh` | Bash one-liner that execs the TUI | **your host** |
+| `test-driver/tui.py` | Interactive menu (plain Python prompts) | **your host** |
+| `test-driver/run.py` | Builds the image, spawns **one** container per case | **your host** |
+| `test-driver/batch.py` | Spawns **N containers in parallel** (`asyncio.Semaphore`, configurable) | **your host** |
+| Container (Chromium + extension + agent) | Runs the actual test case | **inside Docker/Podman** |
+
+So:
+
+- **Single run** = 1 container.
+- **Batch run** = many containers running in parallel. Default concurrency is derived from your CPU/RAM; configurable in the TUI or via `--max-concurrent`.
+- The container engine is auto-detected (Docker or Podman). Set `CONTAINER_ENGINE=docker` or `CONTAINER_ENGINE=podman` to override.
+
+## What's a "model name"?
+
+`MODEL_NAME` is **just a YAML key you choose** in `models/models.yaml`. It doesn't have to match a real model version string — it's a label that resolves to a full provider config (`base_url`, `api_type`, `api_key`, `thinking_level`):
+
+```yaml
+# models/models.yaml
+my-claude:                            # ← this is the MODEL_NAME the TUI shows
+  api_key: "sk-ant-..."
+  base_url: https://api.anthropic.com
+  api_type: anthropic-messages
+  thinking_level: medium
+
+gpt5-via-openrouter:                  # ← another MODEL_NAME
+  api_key: "sk-or-v1-..."
+  base_url: https://openrouter.ai/api/v1
+  api_type: openai-completions
+```
+
+`api_type` is one of `openai-completions`, `openai-responses`, `anthropic-messages`, or `google-generative-ai`. Add as many entries as you like — the TUI lists all of them in the model picker. From the CLI:
+
+```bash
+uv run --project test-driver test-driver/run.py \
+  test-cases/886-entertainment-hobbies-experience-topgolf my-claude
+```
+
+## End-to-end example
+
+Once the wizard is done, run `./run.sh` again, choose **"1. Single run"**, pick your model, then enter `886` at the case prompt (numeric IDs work because the test-case directories are ID-prefixed). ClawBench will:
+
+1. Build the `clawbench` Docker/Podman image (first run only)
+2. Create a disposable email like `cba1b2c3d4e5f6@<your-domain>` via PurelyMail
+3. Spawn a container, mount the eval schema and synthetic user profile, and start the agent
+4. Wait for the request interceptor to fire (or for the time limit)
+5. Copy `/data` out of the container and write results to:
+
+```
+test-output/my-claude/886-entertainment-hobbies-experience-topgolf-my-claude-<TIMESTAMP>/
+  data/
+    actions.jsonl          # Every browser action
+    requests.jsonl         # Every HTTP request
+    agent-messages.jsonl   # Full agent transcript (thinking + tool calls)
+    screenshots/           # PNG per action
+    recording.mp4          # Full session video
+    interception.json      # Request that triggered the stop, or stop reason
+  run-meta.json            # Model, duration, intercepted=true/false
+  eval-schema.json         # Schema used for this run
+```
+
+For batch evaluation across all models × cases 1-50, pick **"2. Batch run"** in the TUI, or run directly:
+
+```bash
+uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50 --max-concurrent 3
+```
+
+## Manual setup
+
+If you'd rather skip the wizard and configure everything by hand:
+
+```bash
+# 1. PurelyMail credentials
+cp .env.example .env
+# edit .env → fill in PURELY_MAIL_API_KEY and PURELY_MAIL_DOMAIN
+
+# 2. At least one model
+cp models/models.example.yaml models/models.yaml
+# edit models/models.yaml → fill in api_key
+
+# 3. Launch
+./run.sh
+```
+
+`./run.sh` will detect that `.env` and `models/models.yaml` already exist and skip the wizard, going straight to the main menu.
+
 ## Dependencies
 
 - [Python](https://www.python.org/) 3.11+
@@ -34,19 +141,6 @@ Each test case runs in an isolated container (Docker or Podman) with a Chrome br
 - [Docker](https://www.docker.com/) or [Podman](https://podman.io/) (container runtime)
 
 Python dependencies (`fpdf2`, `huggingface_hub`, `pyyaml`) are managed by `uv` and installed automatically on first run.
-
-## Quick Start
-
-```bash
-# 1. Set up PurelyMail credentials:
-cp .env.example .env
-# Edit .env and fill in PURELY_MAIL_API_KEY and PURELY_MAIL_DOMAIN
-
-# 2. Launch the interactive menu:
-./run.sh
-```
-
-The menu will guide you through configuring models, selecting test cases, and running benchmarks.
 
 ## Architecture
 
