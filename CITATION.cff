@@ -1,0 +1,98 @@
+cff-version: 1.2.0
+message: "If you use ClawBench, please cite it as below."
+title: "ClawBench: Can AI Agents Complete Everyday Online Tasks?"
+type: software
+license: Apache-2.0
+url: "https://claw-bench.com"
+repository-code: "https://github.com/reacher-z/ClawBench"
+authors:
+  - family-names: Zhang
+    given-names: Yuxuan
+  - family-names: Wang
+    given-names: Yubo
+  - family-names: Zhu
+    given-names: Yipeng
+  - family-names: Du
+    given-names: Penghui
+  - family-names: Miao
+    given-names: Junwen
+  - family-names: Lu
+    given-names: Xuan
+  - family-names: Xu
+    given-names: Wendong
+  - family-names: Hao
+    given-names: Yunzhuo
+  - family-names: Cai
+    given-names: Songcheng
+  - family-names: Wang
+    given-names: Xiaochen
+  - family-names: Zhang
+    given-names: Huaisong
+  - family-names: Wu
+    given-names: Xian
+  - family-names: Lu
+    given-names: Yi
+  - family-names: Lei
+    given-names: Minyi
+  - family-names: Zou
+    given-names: Kai
+  - family-names: Yin
+    given-names: Huifeng
+  - family-names: Nie
+    given-names: Ping
+  - family-names: Chen
+    given-names: Liang
+  - family-names: Jiang
+    given-names: Dongfu
+  - family-names: Chen
+    given-names: Wenhu
+  - family-names: Allen
+    given-names: Kelsey R.
+preferred-citation:
+  type: conference-paper
+  title: "ClawBench: Can AI Agents Complete Everyday Online Tasks?"
+  authors:
+    - family-names: Zhang
+      given-names: Yuxuan
+    - family-names: Wang
+      given-names: Yubo
+    - family-names: Zhu
+      given-names: Yipeng
+    - family-names: Du
+      given-names: Penghui
+    - family-names: Miao
+      given-names: Junwen
+    - family-names: Lu
+      given-names: Xuan
+    - family-names: Xu
+      given-names: Wendong
+    - family-names: Hao
+      given-names: Yunzhuo
+    - family-names: Cai
+      given-names: Songcheng
+    - family-names: Wang
+      given-names: Xiaochen
+    - family-names: Zhang
+      given-names: Huaisong
+    - family-names: Wu
+      given-names: Xian
+    - family-names: Lu
+      given-names: Yi
+    - family-names: Lei
+      given-names: Minyi
+    - family-names: Zou
+      given-names: Kai
+    - family-names: Yin
+      given-names: Huifeng
+    - family-names: Nie
+      given-names: Ping
+    - family-names: Chen
+      given-names: Liang
+    - family-names: Jiang
+      given-names: Dongfu
+    - family-names: Chen
+      given-names: Wenhu
+    - family-names: Allen
+      given-names: Kelsey R.
+  collection-title: "Conference on Language Modeling (COLM)"
+  year: 2026

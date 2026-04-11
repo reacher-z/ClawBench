@@ -1,0 +1,44 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: test-case
+    attributes:
+      label: Test case (if applicable)
+      description: e.g. 001-daily-life-food-uber-eats
+  - type: dropdown
+    id: container-engine
+    attributes:
+      label: Container engine
+      options:
+        - Docker
+        - Podman
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: e.g. Ubuntu 22.04, macOS 15.3
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: e.g. 3.12.4
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error output
+      description: Paste the relevant error or log output
+      render: shell
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to trigger the issue
