@@ -24,26 +24,15 @@
 
 <br/>
 
-<table>
-<tr>
-<td align="center" width="25%">
-<img src="static/icons/globe.svg" width="36" height="36"><br/>
-<b>真实网站</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/cube.svg" width="36" height="36"><br/>
-<b>隔离容器</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
-<b>请求拦截器</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/layer-group.svg" width="36" height="36"><br/>
-<b>五层录制</b>
-</td>
-</tr>
-</table>
+<p align="center">
+<img src="static/icons/globe.svg" width="24" height="24">&nbsp;<b>真实网站</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/cube.svg" width="24" height="24">&nbsp;<b>隔离容器</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/shield-halved.svg" width="24" height="24">&nbsp;<b>请求拦截器</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/layer-group.svg" width="24" height="24">&nbsp;<b>五层录制</b>
+</p>
 
 <br/>
 
@@ -135,11 +124,17 @@ cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型
 
 **2. 跑你的第一个任务** (三选一):
 
-**(a) 交互式 TUI** —— 最简单,帮你挑模型 + 测试用例:
+<table><tr><td>
+
+**推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
+
 ```bash
 ./run.sh
 ```
-（`./run.sh` 需要真实的交互式终端；如果是管道 / CI / 非 TTY 环境，直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。）
+
+需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
+
+</td></tr></table>
 
 **(b) 指定模型跑单个任务:**
 ```bash
