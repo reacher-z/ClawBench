@@ -84,12 +84,26 @@ cp .env.example .env          # Edit: add PURELY_MAIL_API_KEY + PURELY_MAIL_DOMA
 cp models/models.example.yaml models/models.yaml   # Edit: add your model API keys
 ```
 
-**2. Launch the interactive TUI:**
+**2. Run your first task** (pick one):
+
+**(a) Interactive TUI** — easiest, picks model + test case for you:
 ```bash
 ./run.sh
 ```
 
-The TUI guides you through model selection, test case picking, and run mode (single / batch / human baseline).
+**(b) Run one specific task against a specific model:**
+```bash
+uv run --project test-driver test-driver/run.py \
+  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+```
+Results land in `test-output/<model>/<timestamp>-001-.../` with the full five-layer recording.
+
+**(c) Drive the browser yourself via noVNC** — produces a human reference run:
+```bash
+uv run --project test-driver test-driver/run.py \
+  test-cases/001-daily-life-food-uber-eats --human
+```
+Open the noVNC URL the script prints, complete the task by hand, then close the tab.
 
 <br/>
 
@@ -141,6 +155,48 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 </table>
 
 > Each ClawBench run produces a full MP4 session recording. See the [project page](https://claw-bench.com) for all 153 task recordings.
+
+<br/>
+
+# <img src="static/icons/circle-question.svg" width="28" height="28"> Example Walkthrough
+
+Curious what one task actually looks like, start to finish? Here's task **001** end to end.
+
+**The task** — from [`test-cases/001-daily-life-food-uber-eats/task.json`](test-cases/001-daily-life-food-uber-eats/task.json):
+
+```json
+{
+  "instruction": "On Uber Eats, order delivery: one Pad Thai, deliver to home address, note \"no peanuts\"",
+  "time_limit": 30,
+  "eval_schema": {
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
+    "method": "POST"
+  }
+}
+```
+
+The agent gets this `instruction` verbatim, plus read-only access to `/my-info/alex_green_personal_info.json` (the dummy user's name, home address, phone, date of birth) and a disposable email account for any sign-in prompt. It has **30 minutes** to reach a `POST` request — any longer and the container is killed.
+
+**What the agent does** (the happy path):
+
+1. Navigates to `ubereats.com`
+2. Reads the dummy user's home address from `/my-info/alex_green_personal_info.json` and enters it in the delivery-address box
+3. Searches for **"Pad Thai"** in the food search
+4. Picks a restaurant that has Pad Thai available for delivery to that address
+5. Opens the item detail page, finds the customization or special-instructions field, enters **"no peanuts"**
+6. Adds one to cart, opens the cart, and handles any sign-in prompt using the disposable email credentials
+7. Reaches checkout, taps **Place Order**
+
+**What the interceptor catches** — that final *Place Order* tap fires a `POST` request. ClawBench's request interceptor sits in front of the browser and **captures the outbound request before it reaches Uber Eats's servers**, so the dummy user is never actually charged. At the exact moment of interception, all five recording layers (MP4 video, PNG screenshots, HTTP traffic, browser actions, agent messages) are frozen into `/data/`.
+
+**How the judge decides PASS / FAIL** — task 001's `url_pattern` is the intentional sentinel `__PLACEHOLDER_WILL_NOT_MATCH__`, which means **no request path can mechanically match**. The verdict comes from the agentic judge in [`eval/agentic_eval.md`](eval/agentic_eval.md), which replays the five-layer recording against a human reference run and checks four things:
+
+- Did the agent actually reach the final checkout step?
+- Is the cart exactly **one** Pad Thai (not two, not a combo)?
+- Is the delivery address the user's home address from `alex_green_personal_info.json`?
+- Does the order carry the **"no peanuts"** note in the instructions field?
+
+All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidence from the recording pinned to the failing criterion. This per-task rubric is what makes ClawBench judge-sensitive rather than URL-regex-sensitive — see [`eval/README.md`](eval/README.md) for the full rubric format and [`eval/agentic_eval.md`](eval/agentic_eval.md) for the judge prompt.
 
 <br/>
 
@@ -230,10 +286,10 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 ./run.sh
 
 # Single run:
-uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b
+uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 
 # Human mode (you control the browser via noVNC):
-uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf --human
+uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats --human
 
 # Batch (all models x cases 1-50, 3 concurrent):
 uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50 --max-concurrent 3
