@@ -7,6 +7,7 @@ import re
 import secrets
 import shutil
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -17,12 +18,16 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 import yaml
+from rich.console import Console
+from rich.panel import Panel
+from rich.status import Status
 
 from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 IMAGE = "clawbench"
+console = Console()
 
 
 def _detect_engine() -> str:
@@ -85,9 +90,18 @@ def load_model_config(model: str) -> dict:
         print(f"Available models: {', '.join(sorted(all_models))}")
         sys.exit(1)
 
-    # Validate model name characters
-    if any(c in model for c in "/ \\:*?\"<>|"):
-        print(f"ERROR: model name '{model}' contains illegal characters (/ \\ : * ? \" < > | or spaces)")
+    # Validate model name characters. Note: '/' and ':' are valid in
+    # vendor-prefixed ids like 'anthropic/claude-sonnet-4-6' or
+    # 'arcee-ai/trinity-large-preview:free' — they get sanitized to
+    # '--' before being used as path components (see `safe_model`
+    # below). We only reject characters that could cause real trouble
+    # in shell/filesystem paths even after that sanitization.
+    bad = [c for c in " \\*?\"<>|" if c in model]
+    if bad:
+        print(
+            f"ERROR: model name '{model}' contains illegal character(s): "
+            f"{' '.join(repr(c) for c in bad)}"
+        )
         sys.exit(1)
 
     config = dict(all_models[model])
@@ -267,8 +281,197 @@ def build_instruction(task: dict) -> str:
 
 # -- Docker --
 
+def _image_exists() -> bool:
+    return subprocess.run(
+        [ENGINE, "image", "inspect", IMAGE],
+        capture_output=True,
+    ).returncode == 0
+
+
+def _pick_free_port(preferred: int = 6080) -> int:
+    """Return ``preferred`` if available on 127.0.0.1, else an OS-assigned
+    ephemeral port. Avoids the hard-coded ``-p 6080:6080`` collision when
+    something else on the host already owns that port.
+    """
+    for candidate in (preferred, 0):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(("127.0.0.1", candidate))
+                return s.getsockname()[1]
+        except OSError:
+            continue
+    raise RuntimeError("Could not find a free TCP port for noVNC")
+
+
+_STEP_RE = re.compile(r"^(?:STEP|Step)\s+(\d+)(?:/(\d+))?", re.IGNORECASE)
+_BK_STEP_RE = re.compile(r"^#(\d+)\s+\[")
+
+
+def _run_build(cmd: list[str]) -> tuple[int, str, list[str]]:
+    """Execute a build command with a live spinner.
+
+    Returns ``(exit_code, last_line, all_output_lines)``.
+    """
+    console.print(f"[dim]$ {' '.join(cmd)}[/]")
+
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    assert proc.stdout is not None
+
+    last_line = ""
+    last_step = ""
+    output_lines: list[str] = []
+    status_msg = "[cyan]Starting build…[/]"
+    with Status(status_msg, console=console, spinner="dots") as status:
+        for raw in proc.stdout:
+            line = raw.rstrip()
+            if not line:
+                continue
+            last_line = line
+            output_lines.append(line)
+
+            m = _STEP_RE.match(line)
+            if m:
+                cur = m.group(1)
+                tot = m.group(2) or "?"
+                rest = line.split(":", 1)[-1].strip()[:72]
+                last_step = f"step {cur}/{tot}"
+                status.update(
+                    f"[cyan]Building image — {last_step}[/] [dim]{rest}[/]"
+                )
+                continue
+
+            m = _BK_STEP_RE.match(line)
+            if m:
+                snippet = line[:100]
+                status.update(f"[cyan]Building image[/] [dim]{snippet}[/]")
+                continue
+
+            lowered = line.lower()
+            if "error" in lowered and "--no-" not in lowered:
+                console.print(f"  [yellow]{line[:120]}[/]")
+            status.update(
+                f"[cyan]Building image[/] "
+                f"[dim]{(last_step + ' · ') if last_step else ''}{line[:72]}[/]"
+            )
+
+    rc = proc.wait()
+    return rc, last_line, output_lines
+
+
+def _looks_like_stale_cache(output_lines: list[str]) -> bool:
+    """Return True if the build failure looks like it was caused by
+    stale layer-cache (e.g. old lockfiles, wrong Python version)."""
+    blob = "\n".join(output_lines).lower()
+    patterns = [
+        "no interpreter found for python",
+        "no matching distribution found",
+        "package not found",
+        "could not find a version that satisfies",
+    ]
+    return any(p in blob for p in patterns)
+
+
 def docker_build() -> None:
-    run([ENGINE, "build", "-t", IMAGE, str(PROJECT_ROOT)])
+    """Build (or rebuild) the clawbench image with a live progress spinner.
+
+    The first build pulls ~2GB (python base, chromium, ffmpeg, noVNC, Node,
+    openclaw) and takes several minutes; subsequent rebuilds are near-instant
+    when the layer cache is warm. We show a banner only for the cold path.
+
+    If the build fails with a pattern that suggests stale layer-cache
+    (e.g. a lockfile mismatch), we automatically retry once with
+    ``--no-cache`` so the user doesn't have to debug it manually.
+    """
+    first_build = not _image_exists()
+
+    if first_build:
+        console.print()
+        console.print(Panel(
+            "[bold]First-time container build.[/]\n"
+            "This downloads ~2 GB (chromium, ffmpeg, noVNC, Node, openclaw)\n"
+            "and typically takes [bold]5–10 minutes[/] on a decent connection.\n"
+            "[dim]Subsequent runs reuse the layer cache and finish in seconds.[/]",
+            title="[bold]Building clawbench image[/]",
+            border_style="cyan",
+        ))
+
+    cmd = [ENGINE, "build", "-t", IMAGE, str(PROJECT_ROOT)]
+    rc, last_line, output_lines = _run_build(cmd)
+
+    # If the build failed and the output looks like a stale-cache
+    # problem, retry once with --no-cache before giving up.
+    if rc != 0 and _looks_like_stale_cache(output_lines):
+        console.print()
+        console.print(
+            "[yellow]Build failed — looks like a stale layer cache "
+            "(e.g. updated lockfiles not picked up).[/]"
+        )
+        console.print(
+            "[yellow]Retrying with [bold]--no-cache[/] "
+            "(full rebuild, may take a few minutes)…[/]"
+        )
+        console.print()
+        cmd_nc = [ENGINE, "build", "--no-cache", "-t", IMAGE, str(PROJECT_ROOT)]
+        rc, last_line, output_lines = _run_build(cmd_nc)
+
+    if rc != 0:
+        console.print(f"[red bold]Build failed[/] (exit {rc})")
+        if last_line:
+            console.print(f"  Last output: [dim]{last_line}[/]")
+        sys.exit(rc)
+
+    console.print("[green]✓[/] Container image ready")
+
+
+def _fix_data_ownership(data_dir: Path) -> None:
+    """On Linux + rootful Docker, files written inside the container are
+    owned by root on the host. After ``docker cp``, the caller cannot
+    ``rm -rf test-output/`` without sudo. Detect this and chown the tree
+    back to the caller's UID/GID via a throwaway container (which has the
+    root privileges needed to chown anything on the bind-mounted dir).
+
+    No-op on macOS, on rootless podman, and when the tree is already
+    owned by the caller.
+    """
+    if sys.platform != "linux":
+        return
+    if ENGINE != "docker":
+        return
+    if not data_dir.exists():
+        return
+    try:
+        uid = os.getuid()
+    except AttributeError:
+        return
+    try:
+        needs_fix = any(
+            p.stat().st_uid != uid
+            for p in data_dir.rglob("*")
+            if not p.is_symlink()
+        )
+    except OSError:
+        needs_fix = True
+    if not needs_fix:
+        return
+
+    print(f"  Fixing ownership of {data_dir} (rootful Docker -> host UID)")
+    subprocess.run(
+        [
+            ENGINE, "run", "--rm",
+            "-v", f"{data_dir.resolve()}:/fix",
+            IMAGE,
+            "chown", "-R", f"{uid}:{os.getgid()}", "/fix",
+        ],
+        check=False,
+        capture_output=True,
+    )
 
 
 def _network_flags() -> list[str]:
@@ -278,16 +481,46 @@ def _network_flags() -> list[str]:
     return []
 
 
+def _proxy_env_flags() -> list[str]:
+    """Forward host proxy env vars into the container.
+
+    Inside the container 127.0.0.1 is its own loopback, not the host.
+    Rewrite localhost references to the host gateway so the proxy is reachable.
+    Both podman (host.containers.internal) and Docker Desktop
+    (host.docker.internal) resolve to the Mac host.
+    """
+    host_gw = "host.containers.internal" if ENGINE == "podman" else "host.docker.internal"
+    flags: list[str] = []
+    has_proxy = False
+    for var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy",
+                "ALL_PROXY", "all_proxy", "NO_PROXY", "no_proxy"):
+        val = os.environ.get(var, "")
+        if not val:
+            continue
+        if var not in ("NO_PROXY", "no_proxy"):
+            has_proxy = True
+        # Rewrite 127.0.0.1 / localhost to host gateway
+        val = val.replace("127.0.0.1", host_gw).replace("localhost", host_gw)
+        flags += ["-e", f"{var}={val}"]
+    # Ensure container-internal traffic bypasses the proxy
+    if has_proxy and not os.environ.get("NO_PROXY") and not os.environ.get("no_proxy"):
+        flags += ["-e", "NO_PROXY=localhost,127.0.0.1"]
+        flags += ["-e", "no_proxy=localhost,127.0.0.1"]
+    return flags
+
+
 def docker_run_human(name: str, instruction: str, schema_path: Path,
                      personal_info_dir: Path,
-                     time_limit_s: int = 1800) -> None:
+                     time_limit_s: int = 1800,
+                     host_port: int = 6080) -> None:
     cmd = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
+        *_proxy_env_flags(),
         "-e", "HUMAN_MODE=1",
         "-e", f"INSTRUCTION={instruction}",
         "-e", f"TIME_LIMIT_S={time_limit_s}",
-        "-p", "6080:6080",
+        "-p", f"{host_port}:6080",
         "-v", f"{schema_path.resolve()}:/eval-schema.json:ro",
         "-v", f"{personal_info_dir.resolve()}:/my-info:ro",
         IMAGE,
@@ -297,10 +530,12 @@ def docker_run_human(name: str, instruction: str, schema_path: Path,
 
 def docker_run(name: str, instruction: str, schema_path: Path,
                personal_info_dir: Path, model_cfg: dict,
-               time_limit_s: int = 1800) -> None:
+               time_limit_s: int = 1800,
+               host_port: int | None = None) -> None:
     env_flags = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
+        *_proxy_env_flags(),
         "-e", f"MODEL_NAME={model_cfg['model']}",
         "-e", f"BASE_URL={model_cfg['base_url']}",
         "-e", f"API_TYPE={model_cfg['api_type']}",
@@ -311,6 +546,9 @@ def docker_run(name: str, instruction: str, schema_path: Path,
         "-v", f"{schema_path.resolve()}:/eval-schema.json:ro",
         "-v", f"{personal_info_dir.resolve()}:/my-info:ro",
     ]
+    # Expose noVNC so the user can watch the agent in real-time.
+    if host_port is not None:
+        env_flags += ["-p", f"{host_port}:6080"]
     # host.docker.internal needs explicit mapping on Linux (not Docker Desktop)
     if "host.docker.internal" in model_cfg["base_url"]:
         env_flags += ["--add-host=host.docker.internal:host-gateway"]
@@ -324,9 +562,37 @@ def docker_run(name: str, instruction: str, schema_path: Path,
 
 
 def docker_wait(name: str) -> None:
-    """Block until the container exits."""
-    subprocess.run([ENGINE, "wait", name], capture_output=True)
-    print("Container exited")
+    """Block until the container exits, showing a live status line."""
+    start = time.time()
+    # Launch `docker wait` in background so we can poll status
+    proc = subprocess.Popen([ENGINE, "wait", name],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    last_actions = 0
+    with Status("[dim]starting...[/]", console=console) as status:
+        while proc.poll() is None:
+            elapsed = int(time.time() - start)
+            mins, secs = divmod(elapsed, 60)
+            # Query actions count from container
+            r = subprocess.run(
+                [ENGINE, "exec", name, "wc", "-l", "/data/actions.jsonl"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if r.returncode == 0:
+                try:
+                    last_actions = int(r.stdout.strip().split()[0])
+                except (ValueError, IndexError):
+                    pass
+            status.update(
+                f"[dim]{mins:02d}:{secs:02d}  •  {last_actions} actions[/]"
+            )
+            # Poll every 5s
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+    elapsed = int(time.time() - start)
+    mins, secs = divmod(elapsed, 60)
+    console.print(f"  Container exited ({mins}m{secs:02d}s, {last_actions} actions)")
 
 
 def docker_copy(name: str, output_dir: Path) -> None:
@@ -506,8 +772,13 @@ def main():
 
         if args.human:
             step("Starting container (human mode)")
+            # Avoid the hard-coded 6080:6080 collision: try 6080 first and
+            # fall back to an OS-assigned ephemeral port if something else
+            # on the host is already listening there.
+            host_port = _pick_free_port(6080)
             docker_run_human(container, instruction, schema_path,
-                             personal_info_tmp, time_limit_s)
+                             personal_info_tmp, time_limit_s,
+                             host_port=host_port)
 
             # Graceful stop on Ctrl+C: give container time to flush recording
             def handle_sigint(sig, frame):
@@ -517,21 +788,32 @@ def main():
 
             signal.signal(signal.SIGINT, handle_sigint)
 
-            print(f"\n  noVNC: http://localhost:6080/vnc.html")
-            print(f"  Task:  {task['instruction'][:200]}")
-            print(f"  Email: {email}  Password: {email_pw}")
-            print(f"  Time limit: {task['time_limit']} minutes")
-            print(f"  Close the noVNC tab when done.\n")
+            vnc_url = f"http://localhost:{host_port}/vnc.html"
+            console.print(f"\n  noVNC: [link={vnc_url}]{vnc_url}[/link]")
+            if host_port != 6080:
+                console.print(f"  [dim](port 6080 was busy, auto-picked {host_port})[/dim]")
+            console.print(f"  Task:  {task['instruction'][:200]}")
+            console.print(f"  Email: {email}  Password: {email_pw}")
+            console.print(f"  Time limit: {task['time_limit']} minutes")
+            console.print(f"  Close the noVNC tab when done.\n")
 
             step(f"Waiting for human (max {task['time_limit']}min)")
         else:
             step("Starting container")
             assert model_cfg is not None
+            host_port = _pick_free_port(6080)
             docker_run(container, instruction, schema_path,
                        personal_info_tmp, model_cfg,
-                       time_limit_s=time_limit_s)
+                       time_limit_s=time_limit_s,
+                       host_port=host_port)
 
-            step(f"Waiting for container (max {task['time_limit']}min)")
+            vnc_url = f"http://localhost:{host_port}/vnc.html"
+            console.print(f"\n  noVNC: [link={vnc_url}]{vnc_url}[/link]")
+            if host_port != 6080:
+                console.print(f"  [dim](port 6080 was busy, auto-picked {host_port})[/dim]")
+            console.print(f"  Open the URL above to watch the agent in real-time.\n")
+
+            step(f"Agent running (max {task['time_limit']}min)")
 
         docker_wait(container)
 
@@ -540,6 +822,7 @@ def main():
 
         step("Copying results")
         docker_copy(container, output_dir)
+        _fix_data_ownership(output_dir / "data")
 
         ensure_interception(output_dir)
 

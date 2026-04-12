@@ -4,9 +4,6 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
 [![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
-[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
 ### AI 智能体能完成日常在线任务吗?
@@ -75,14 +72,66 @@
 
 # <img src="static/icons/person.svg" width="28" height="28"> 手动快速开始
 
-**前置条件:** [Python 3.11+](https://python.org), [uv](https://docs.astral.sh/uv/), [Docker](https://www.docker.com/) 或 [Podman](https://podman.io/)
+**前置条件:** [Python 3.11+](https://python.org)、[uv](https://docs.astral.sh/uv/)，以及一个容器引擎 —— [Docker](https://www.docker.com/) **或** [Podman](https://podman.io/)。ClawBench 会自动检测已安装的那个；也可以用 `export CONTAINER_ENGINE=docker` 或 `export CONTAINER_ENGINE=podman` 强制指定。
+
+<details>
+<summary><b>安装 Docker 或 Podman</b> (macOS / Linux / Windows)</summary>
+
+#### macOS
+
+```bash
+# 方案 A —— Docker Desktop（最简单，带 GUI）
+brew install --cask docker
+open -a Docker                 # 启动后等任务栏的鲸鱼图标转完
+
+# 方案 B —— Podman（rootless，无 daemon，仅 CLI）
+brew install podman
+podman machine init            # 一次性：下载 Linux VM 镜像
+podman machine start           # 每次 podman 命令前必须先启动
+```
+
+> **macOS 上 Podman 需要 VM。** 只 `brew install podman` 是不够的 —— Podman 在 macOS 上靠一个小 Linux VM 来跑容器，装完必须跑一次 `podman machine init && podman machine start`，否则 `podman info` 会直接报 `Cannot connect to Podman`。
+
+#### Linux (Ubuntu / Debian)
+
+```bash
+# 方案 A —— Podman（默认 rootless，推荐）
+sudo apt update && sudo apt install -y podman
+
+# 方案 B —— Docker
+sudo apt install -y docker.io
+sudo usermod -aG docker $USER  # 登出再登入让 shell 拾取新组
+```
+
+> **Rootful Docker 文件归属坑：** 用 `sudo` 方式跑的 Docker，容器里产生的文件 `docker cp` 出来之后属主是 `root`，普通用户 `rm` 不动。ClawBench 驱动在每次运行后会检测到这个情况，自动 chown `test-output/` 回当前用户。如果你也会用其他容器工具并排跑，可以考虑 rootless Podman（或 rootless Docker）从根上避免这个问题。
+
+#### Windows
+
+```powershell
+# 方案 A —— Docker Desktop（WSL2 后端）
+winget install Docker.DockerDesktop
+# 然后从开始菜单启动 Docker Desktop，等它就绪
+
+# 方案 B —— Podman
+winget install RedHat.Podman
+podman machine init
+podman machine start
+```
+
+> 下面那些 `uv run …` 命令请从 **PowerShell**、**WSL2** 或 **Git Bash** 里跑。和 macOS 一样，Windows Podman 第一次用之前也必须 `podman machine init && podman machine start`。
+
+</details>
 
 **1. 克隆并配置:**
 ```bash
 git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
-cp .env.example .env          # 编辑: 填入 PURELY_MAIL_API_KEY + PURELY_MAIL_DOMAIN
-cp models/models.example.yaml models/models.yaml   # 编辑: 填入你的模型 API 密钥
+cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型 API 密钥
+# `.env`（用于注册一次性邮箱的 PurelyMail 凭证）已经随仓库提交，开箱即用。
+# 只有想覆盖默认值或添加 HF_TOKEN 时才需要编辑。
 ```
+
+> [!NOTE]
+> **首次运行会构建容器镜像**（chromium + ffmpeg + noVNC + Node + openclaw，大约 **2 GB** 下载，网速正常大概 **5–10 分钟**）。构建时会实时显示进度 spinner + 当前 step，后续运行直接走 layer 缓存，秒级完成。
 
 **2. 跑你的第一个任务** (三选一):
 
@@ -90,12 +139,15 @@ cp models/models.example.yaml models/models.yaml   # 编辑: 填入你的模型 
 ```bash
 ./run.sh
 ```
+（`./run.sh` 需要真实的交互式终端；如果是管道 / CI / 非 TTY 环境，直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。）
 
 **(b) 指定模型跑单个任务:**
 ```bash
 uv run --project test-driver test-driver/run.py \
   test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
+容器启动后,脚本会打印一个 **noVNC URL**（如 `http://localhost:6080/vnc.html`）—— 在浏览器中打开即可实时观看 agent 操作。如果 6080 端口被占用,会自动选一个空闲端口。
+
 结果落在 `test-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
 
 **(c) 通过 noVNC 手动控制浏览器** —— 产出人工参考轨迹:
@@ -103,7 +155,7 @@ uv run --project test-driver test-driver/run.py \
 uv run --project test-driver test-driver/run.py \
   test-cases/001-daily-life-food-uber-eats --human
 ```
-打开脚本打印的 noVNC URL,在浏览器里亲手完成任务,完事后关掉标签页。
+打开脚本打印的 noVNC URL,在浏览器里亲手完成任务,完事后关掉标签页。端口被占时会自动换一个。
 
 <br/>
 
