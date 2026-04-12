@@ -54,8 +54,7 @@
 
 # <img src="static/icons/robot.svg" width="28" height="28"> LLM 快速开始
 
-1. 将你的编程智能体 (Claude Code, Cursor, Copilot 等) 指向 [`AGENTS.md`](AGENTS.md)
-2. 直接提问!
+将你的编程智能体 (Claude Code, Cursor, Copilot 等) 指向 [`AGENTS.md`](AGENTS.md)，直接提问即可。
 
 <br/>
 

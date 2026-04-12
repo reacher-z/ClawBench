@@ -54,8 +54,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 # <img src="static/icons/robot.svg" width="28" height="28"> LLM Quick Start
 
-1. Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AGENTS.md)
-2. Prompt away!
+Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AGENTS.md) and prompt away.
 
 <br/>
 
