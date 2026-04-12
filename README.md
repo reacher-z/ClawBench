@@ -2,11 +2,11 @@
 
 # ClawBench
 
-[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
-[![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
-[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
+[![Project Page](https://img.shields.io/badge/Project-Page-8A2BE2.svg?logo=githubpages&logoColor=white)](https://claw-bench.com)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-D22128.svg?logo=apache&logoColor=white)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-supported-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
 ### Can AI Agents Complete Everyday Online Tasks?
