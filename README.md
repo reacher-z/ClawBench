@@ -124,17 +124,12 @@ cp models/models.example.yaml models/models.yaml   # edit: add your model API ke
 
 **2. Run your first task** (pick one):
 
-<table><tr><td>
-
-**Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
-
-```bash
-./run.sh
-```
-
-Needs an interactive terminal. For pipes / CI / non-TTY, call `test-driver/run.py` or `test-driver/batch.py` directly.
-
-</td></tr></table>
+> [!TIP]
+> **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
+> ```bash
+> ./run.sh
+> ```
+> Needs an interactive terminal. For pipes / CI / non-TTY, call `test-driver/run.py` or `test-driver/batch.py` directly.
 
 **(b) Run one specific task against a specific model:**
 ```bash
