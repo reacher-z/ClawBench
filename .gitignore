@@ -12,3 +12,7 @@ build/
 .idea/
 .vscode/
 *.log
+
+# ClawBench-Lite upstream adapter build artifacts
+clawbench_lite_v1.plaintext.json
+ClawBench_Lite_V1.enc
