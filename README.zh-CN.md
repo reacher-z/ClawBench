@@ -93,6 +93,16 @@ TUI 会引导你完成模型选择、测试用例选取和运行模式 (单次 /
 
 <br/>
 
+# <img src="static/icons/chart-bar.svg" width="28" height="28"> ClawBench-Lite
+
+**第一次跑？先跑这个。** [`test-cases/lite.json`](test-cases/lite.json) 是完整 153 任务的 **20 个精选子集**，按站点知名度、真实日常相关度、难度和类别多样性挑选。它对齐了 [browser-use/benchmark](https://github.com/browser-use/benchmark) 的 20-tasks-per-source 规范，用完整 benchmark 一小部分的成本就能拿到可信的信号。
+
+分层: **flagship 9 / core 8 / wildcard 3** —— 覆盖日常生活 (OpenTable, DoorDash, Instacart, TaskRabbit)、娱乐爱好 (Eventbrite, Goodreads, Fandango)、创建初始化 (Asana, Mailchimp, Squarespace)、旅行 (Airbnb)、教育 (LeetCode)、开发技术 (GitHub)、学术研究 (Overleaf)、个人管理 (1Password) 等类别。所有 Lite 任务均由 [`eval/agentic_eval.md`](eval/agentic_eval.md) 判定，不依赖 `url_pattern` 形态。
+
+完整 manifest 格式见 [`test-cases/lite.schema.json`](test-cases/lite.schema.json)；4 轴选择 rubric 与完整 swap history 见 `lite.json` 的 `notes` 字段。
+
+<br/>
+
 # <img src="static/icons/video.svg" width="28" height="28"> 教程
 
 <div align="center">
