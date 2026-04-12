@@ -93,6 +93,16 @@ The TUI guides you through model selection, test case picking, and run mode (sin
 
 <br/>
 
+# <img src="static/icons/chart-bar.svg" width="28" height="28"> ClawBench-Lite
+
+**New here? Run this first.** [`test-cases/lite.json`](test-cases/lite.json) is a **20-task curated subset** of the full 153, selected for household-name sites, real-world relevance, difficulty, and category diversity. It matches the 20-tasks-per-source convention of [browser-use/benchmark](https://github.com/browser-use/benchmark) and gives you a credible signal at a fraction of the full-benchmark cost.
+
+Tier distribution: **flagship 9 / core 8 / wildcard 3** — spanning daily life (OpenTable, DoorDash, Instacart, TaskRabbit), entertainment (Eventbrite, Goodreads, Fandango), creation (Asana, Mailchimp, Squarespace), travel (Airbnb), education (LeetCode), dev-tech (GitHub), academia (Overleaf), personal management (1Password), and more. All Lite tasks are judged by [`eval/agentic_eval.md`](eval/agentic_eval.md) regardless of `url_pattern` shape.
+
+See [`test-cases/lite.schema.json`](test-cases/lite.schema.json) for the manifest shape and the `notes` field in `lite.json` for the 4-axis selection rubric + full swap history.
+
+<br/>
+
 # <img src="static/icons/video.svg" width="28" height="28"> Tutorial
 
 <div align="center">
