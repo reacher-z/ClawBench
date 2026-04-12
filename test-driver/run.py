@@ -1,6 +1,7 @@
 """ClawBench single test-case driver."""
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -456,7 +457,9 @@ def main():
     if not task_file.exists():
         print(f"ERROR: {task_file} not found")
         sys.exit(1)
-    task = json.loads(task_file.read_text())
+    task_bytes = task_file.read_bytes()
+    task = json.loads(task_bytes)
+    task_json_sha256 = hashlib.sha256(task_bytes).hexdigest()
 
     case_name = task_dir.name
     time_limit_s = task["time_limit"] * 60
@@ -552,6 +555,7 @@ def main():
             meta = {
                 "test_case": case_name,
                 **(task.get("metadata") or {}),
+                "task_json_sha256": task_json_sha256,
                 "instruction": task["instruction"],
                 "model": "human",
                 "thinking_level": None,
@@ -568,6 +572,7 @@ def main():
             meta = {
                 "test_case": case_name,
                 **(task.get("metadata") or {}),
+                "task_json_sha256": task_json_sha256,
                 "instruction": task["instruction"],
                 "model": model_cfg["model"],
                 "thinking_level": model_cfg.get("thinking_level"),
