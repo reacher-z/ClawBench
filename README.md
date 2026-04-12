@@ -3,6 +3,8 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![Paper](https://img.shields.io/badge/arXiv-paper-red)](https://arxiv.org/abs/2604.08523)
+
 
 ClawBench is a benchmarking framework for evaluating web agents in real browser environments. It records user/agent interactions, HTTP requests, action screenshots, and full MP4 video recordings of each session.
 
@@ -45,6 +47,18 @@ cp .env.example .env
 ```
 
 The menu will guide you through configuring models, selecting test cases, and running benchmarks.
+
+### What's under the hood?
+If you choose the `run_single`, the program will start the the `test-driver/run.py` to run on the docker sandbox:
+```
+uv run --project test-driver test-driver/run.py test-cases/[test-case] [model]
+```
+
+This will trigger the `run.py main()` function. 
+
+1. The sandbox will be built.
+2. This function will fetch the email and then save the personal login information to the sandbox.
+3. start run `docker_run` in the run.py. 
 
 ## Architecture
 
