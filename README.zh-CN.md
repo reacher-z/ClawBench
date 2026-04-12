@@ -84,12 +84,26 @@ cp .env.example .env          # 编辑: 填入 PURELY_MAIL_API_KEY + PURELY_MAIL
 cp models/models.example.yaml models/models.yaml   # 编辑: 填入你的模型 API 密钥
 ```
 
-**2. 启动交互式 TUI:**
+**2. 跑你的第一个任务** (三选一):
+
+**(a) 交互式 TUI** —— 最简单,帮你挑模型 + 测试用例:
 ```bash
 ./run.sh
 ```
 
-TUI 会引导你完成模型选择、测试用例选取和运行模式 (单次 / 批量 / 人工基线)。
+**(b) 指定模型跑单个任务:**
+```bash
+uv run --project test-driver test-driver/run.py \
+  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+```
+结果落在 `test-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
+
+**(c) 通过 noVNC 手动控制浏览器** —— 产出人工参考轨迹:
+```bash
+uv run --project test-driver test-driver/run.py \
+  test-cases/001-daily-life-food-uber-eats --human
+```
+打开脚本打印的 noVNC URL,在浏览器里亲手完成任务,完事后关掉标签页。
 
 <br/>
 
@@ -141,6 +155,48 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 </table>
 
 > 每次 ClawBench 运行都会产生完整的 MP4 录屏。访问[项目主页](https://claw-bench.com)查看全部 153 个任务的录屏。
+
+<br/>
+
+# <img src="static/icons/circle-question.svg" width="28" height="28"> 任务走读示例
+
+好奇一个任务从头到尾到底长什么样? 下面是 **001 号任务** 的完整走读。
+
+**任务定义** —— 来自 [`test-cases/001-daily-life-food-uber-eats/task.json`](test-cases/001-daily-life-food-uber-eats/task.json):
+
+```json
+{
+  "instruction": "On Uber Eats, order delivery: one Pad Thai, deliver to home address, note \"no peanuts\"",
+  "time_limit": 30,
+  "eval_schema": {
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
+    "method": "POST"
+  }
+}
+```
+
+智能体拿到的就是这段原文 `instruction`,另外有只读权限访问 `/my-info/alex_green_personal_info.json` (dummy user 的姓名、住址、电话、生日) 和一个一次性邮箱账号 (万一遇到强制登录)。它有 **30 分钟** 去触发一个 `POST` 请求,超时容器会被 kill。
+
+**智能体要做什么** (顺利路径下):
+
+1. 打开 `ubereats.com`
+2. 从 `/my-info/alex_green_personal_info.json` 读出 dummy user 的家庭住址,填入配送地址输入框
+3. 在菜品搜索框里搜 **"Pad Thai"**
+4. 挑一家能配送到这个地址且有 Pad Thai 的餐厅
+5. 进入菜品详情页,在定制或特殊说明字段里填 **"no peanuts"**
+6. 加一份到购物车,打开购物车,必要时用一次性邮箱凭据处理登录弹窗
+7. 进入 checkout,点 **Place Order**
+
+**拦截器抓到了什么** —— 最后的 *Place Order* 那一点会发起一个 `POST` 请求。ClawBench 的 request interceptor 架在浏览器和目标站之间,**会在请求到达 Uber Eats 服务器之前抓下来**,所以 dummy user 永远不会被真的扣款。拦截发生的那一瞬间,五层录制 (MP4 视频、PNG 截图、HTTP 流量、浏览器动作、智能体消息) 会被一起冻结到 `/data/`。
+
+**裁判怎么判 PASS / FAIL** —— 001 号任务的 `url_pattern` 是特意留的 sentinel `__PLACEHOLDER_WILL_NOT_MATCH__`,这意味着**没有任何请求路径能机械匹配**。判决完全由 [`eval/agentic_eval.md`](eval/agentic_eval.md) 里的 agentic judge 给出 —— 它把智能体的五层录制和人工参考轨迹对照,检查四件事:
+
+- 智能体有没有真正走到最后的 checkout?
+- 购物车里是不是**正好一份** Pad Thai (不是两份、也不是套餐)?
+- 配送地址是不是 `alex_green_personal_info.json` 里的家庭住址?
+- 订单的特殊说明字段里有没有 **"no peanuts"**?
+
+四条全满足才算 **PASS**,任何一条没达到就是 **FAIL**,而且失败证据会被绑定到对应的判据上。正是这种 per-task rubric 让 ClawBench 对裁判敏感而不是对 URL 正则敏感 —— 完整 rubric 格式见 [`eval/README.md`](eval/README.md),judge prompt 见 [`eval/agentic_eval.md`](eval/agentic_eval.md)。
 
 <br/>
 
@@ -230,10 +286,10 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 ./run.sh
 
 # 单次运行:
-uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b
+uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 
 # 人工模式 (通过 noVNC 控制浏览器):
-uv run --project test-driver test-driver/run.py test-cases/886-entertainment-hobbies-experience-topgolf --human
+uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats --human
 
 # 批量运行 (所有模型 x 用例 1-50, 3 个并发):
 uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50 --max-concurrent 3
