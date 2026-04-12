@@ -24,26 +24,15 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 <br/>
 
-<table>
-<tr>
-<td align="center" width="25%">
-<img src="static/icons/globe.svg" width="36" height="36"><br/>
-<b>Live Websites</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/cube.svg" width="36" height="36"><br/>
-<b>Isolated Containers</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
-<b>Request Interceptor</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/layer-group.svg" width="36" height="36"><br/>
-<b>Five-Layer Recording</b>
-</td>
-</tr>
-</table>
+<p align="center">
+<img src="static/icons/globe.svg" width="24" height="24">&nbsp;<b>Live Websites</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/cube.svg" width="24" height="24">&nbsp;<b>Isolated Containers</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/shield-halved.svg" width="24" height="24">&nbsp;<b>Request Interceptor</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/layer-group.svg" width="24" height="24">&nbsp;<b>Five-Layer Recording</b>
+</p>
 
 <br/>
 

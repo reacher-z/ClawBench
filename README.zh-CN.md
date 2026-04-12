@@ -24,26 +24,15 @@
 
 <br/>
 
-<table>
-<tr>
-<td align="center" width="25%">
-<img src="static/icons/globe.svg" width="36" height="36"><br/>
-<b>真实网站</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/cube.svg" width="36" height="36"><br/>
-<b>隔离容器</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/shield-halved.svg" width="36" height="36"><br/>
-<b>请求拦截器</b>
-</td>
-<td align="center" width="25%">
-<img src="static/icons/layer-group.svg" width="36" height="36"><br/>
-<b>五层录制</b>
-</td>
-</tr>
-</table>
+<p align="center">
+<img src="static/icons/globe.svg" width="24" height="24">&nbsp;<b>真实网站</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/cube.svg" width="24" height="24">&nbsp;<b>隔离容器</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/shield-halved.svg" width="24" height="24">&nbsp;<b>请求拦截器</b>
+&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+<img src="static/icons/layer-group.svg" width="24" height="24">&nbsp;<b>五层录制</b>
+</p>
 
 <br/>
 
