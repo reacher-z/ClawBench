@@ -124,12 +124,17 @@ cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型
 
 **2. 跑你的第一个任务** (三选一):
 
-> [!TIP]
-> **推荐 — 交互式 TUI**（引导式选择模型 + 测试用例）:
-> ```bash
-> ./run.sh
-> ```
-> 需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
+<table><tr><td>
+
+**推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
+
+```bash
+./run.sh
+```
+
+需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
+
+</td></tr></table>
 
 **(b) 指定模型跑单个任务:**
 ```bash
