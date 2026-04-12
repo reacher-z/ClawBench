@@ -6,6 +6,8 @@
 [![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
+**⚡ 一键启动**
+
 ### AI 智能体能完成日常在线任务吗?
 
 我们让 6 个前沿 AI 智能体去做人们每天都在做的事 --<br/>

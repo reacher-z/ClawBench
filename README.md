@@ -6,6 +6,8 @@
 [![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
+**⚡ Run in one line of code**
+
 ### Can AI Agents Complete Everyday Online Tasks?
 
 We asked 6 frontier AI agents to do what people do every day --<br/>
