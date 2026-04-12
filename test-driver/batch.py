@@ -324,6 +324,19 @@ def print_summary(jobs: list[Job], elapsed: float, max_concurrent: int) -> None:
     print(f"\nTotal: {len(jobs)} jobs | {' | '.join(parts)}")
     print(f"Total elapsed: {fmt_duration(elapsed)} (max_concurrent={max_concurrent})")
 
+    # For failed/error jobs, print single-run commands the user can
+    # copy-paste to debug with real-time noVNC.
+    bad = [j for j in jobs if j.status in ("failed", "error")]
+    if bad:
+        print(f"\nTo debug a failed case with live noVNC, re-run it as a single run:")
+        for j in bad[:10]:
+            print(
+                f"  uv run --project test-driver test-driver/run.py "
+                f"{j.case_dir} {j.model}"
+            )
+        if len(bad) > 10:
+            print(f"  ... and {len(bad) - 10} more")
+
 
 def print_run_stats(base_output: Path) -> None:
     """Print per-run statistics from output directories."""
@@ -468,12 +481,15 @@ async def async_main(args: argparse.Namespace) -> int:
     if args.dry_run:
         return 0
 
-    # Build image once
+    # Build image once — reuse run.py's spinner/progress helper so first-time
+    # builds show a clear "~2GB, 5–10min" banner and live step counter instead
+    # of a wall of apt/npm output.
     engine = detect_engine()
-    # Ensure child run.py processes use the same engine
+    # Ensure child run.py processes (and the imported helper below) use the
+    # same engine as we just detected.
     os.environ["CONTAINER_ENGINE"] = engine
-    print(f"\nBuilding Docker image (engine={engine})...")
-    subprocess.run([engine, "build", "-t", "clawbench", str(PROJECT_ROOT)], check=True)
+    import run as _run_mod  # lazy: import after CONTAINER_ENGINE is set
+    _run_mod.docker_build()
 
     batch_ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     base_output = Path(args.output_dir).resolve() / f"batch-{batch_ts}"

@@ -175,23 +175,28 @@ chromium \
 sleep 2
 socat TCP-LISTEN:9223,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:9222 &
 
-# Human mode: expose display via noVNC, wait for VNC disconnect or eval match
+# Always start noVNC so users can watch the browser in any mode.
+# In human mode x11vnc also fires disconnect hooks for the watchdog.
+echo "Starting noVNC..."
+VNC_GONE_HOOK=""
+VNC_ACCEPT_HOOK=""
 if [ "$HUMAN_MODE" = "1" ]; then
-  echo "Starting human mode with noVNC..."
+  VNC_GONE_HOOK="-gone touch /data/.vnc-disconnected"
+  VNC_ACCEPT_HOOK="-afteraccept rm -f /data/.vnc-disconnected"
+fi
+x11vnc -display :99 -nopw -shared -forever -rfbport 5900 -xkb \
+  $VNC_GONE_HOOK $VNC_ACCEPT_HOOK &
+sleep 1
 
-  # Start x11vnc with disconnect/reconnect hooks
-  x11vnc -display :99 -nopw -shared -forever -rfbport 5900 -xkb \
-    -gone "touch /data/.vnc-disconnected" \
-    -afteraccept "rm -f /data/.vnc-disconnected" &
-  sleep 1
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
+sleep 1
+echo "============================================"
+echo "noVNC ready: http://localhost:6080/vnc.html"
+echo "============================================"
 
-  # Start noVNC websocket proxy (browser-based VNC client on port 6080)
-  /opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 &
-  sleep 1
-
-  echo "============================================"
-  echo "noVNC ready: http://localhost:6080/vnc.html"
-  echo "============================================"
+# Human mode: wait for VNC disconnect or eval match
+if [ "$HUMAN_MODE" = "1" ]; then
+  echo "Human mode active."
   if [ -n "$INSTRUCTION" ]; then
     echo ""
     echo "TASK: $INSTRUCTION"

@@ -2,11 +2,8 @@
 
 # ClawBench
 
-[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
-[![Project Page](https://img.shields.io/badge/Project-Page-8A2BE2.svg?logo=githubpages&logoColor=white)](https://claw-bench.com)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-D22128.svg?logo=apache&logoColor=white)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](https://python.org)
-[![Docker](https://img.shields.io/badge/Docker-supported-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-b31b1b.svg)](https://arxiv.org/abs/2604.08523)
+[![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
 ### Can AI Agents Complete Everyday Online Tasks?
@@ -75,14 +72,66 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 # <img src="static/icons/person.svg" width="28" height="28"> Human Quick Start
 
-**Prerequisites:** [Python 3.11+](https://python.org), [uv](https://docs.astral.sh/uv/), [Docker](https://www.docker.com/) or [Podman](https://podman.io/)
+**Prerequisites:** [Python 3.11+](https://python.org), [uv](https://docs.astral.sh/uv/), and a container engine — [Docker](https://www.docker.com/) **or** [Podman](https://podman.io/). ClawBench auto-detects whichever is installed; force one with `export CONTAINER_ENGINE=docker` or `export CONTAINER_ENGINE=podman`.
+
+<details>
+<summary><b>Install Docker or Podman</b> (macOS / Linux / Windows)</summary>
+
+#### macOS
+
+```bash
+# Option A — Docker Desktop (easiest, includes GUI)
+brew install --cask docker
+open -a Docker                 # launch and wait for the whale icon to settle
+
+# Option B — Podman (rootless, no daemon, CLI only)
+brew install podman
+podman machine init            # one-time: downloads the Linux VM image
+podman machine start           # must be running before any podman command
+```
+
+> **macOS Podman needs a VM.** `brew install podman` alone is not enough — Podman on macOS runs containers inside a small Linux VM, so you must `podman machine init && podman machine start` once after install or `podman info` will fail with `Cannot connect to Podman`.
+
+#### Linux (Ubuntu / Debian)
+
+```bash
+# Option A — Podman (rootless by default, recommended)
+sudo apt update && sudo apt install -y podman
+
+# Option B — Docker
+sudo apt install -y docker.io
+sudo usermod -aG docker $USER  # log out / back in so your shell picks up the group
+```
+
+> **Rootful Docker ownership note:** with classic `sudo`-docker, files extracted from containers land owned by `root` on the host. ClawBench's driver detects this after each run and chowns `test-output/` back to your user automatically — but if you run other container tooling alongside, rootless Podman (or rootless Docker) avoids the issue entirely.
+
+#### Windows
+
+```powershell
+# Option A — Docker Desktop (WSL2 backend)
+winget install Docker.DockerDesktop
+# then launch Docker Desktop from the Start menu and wait for it to be ready
+
+# Option B — Podman
+winget install RedHat.Podman
+podman machine init
+podman machine start
+```
+
+> Run the `uv run …` commands below from **PowerShell**, **WSL2**, or **Git Bash**. Like macOS, Windows Podman requires `podman machine init && podman machine start` before its first use.
+
+</details>
 
 **1. Clone and configure:**
 ```bash
 git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
-cp .env.example .env          # Edit: add PURELY_MAIL_API_KEY + PURELY_MAIL_DOMAIN
-cp models/models.example.yaml models/models.yaml   # Edit: add your model API keys
+cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
+# `.env` (PurelyMail creds for disposable-email signups) is already committed
+# and works out of the box. Edit it only to override defaults or add HF_TOKEN.
 ```
+
+> [!NOTE]
+> **First run builds a container image** (chromium + ffmpeg + noVNC + Node + openclaw, roughly **2 GB** download, **5–10 min** on a decent connection). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
 
 **2. Run your first task** (pick one):
 
@@ -90,12 +139,15 @@ cp models/models.example.yaml models/models.yaml   # Edit: add your model API ke
 ```bash
 ./run.sh
 ```
+(`./run.sh` needs an interactive terminal; for pipes / CI / non-TTY environments, call `test-driver/run.py` or `test-driver/batch.py` directly.)
 
 **(b) Run one specific task against a specific model:**
 ```bash
 uv run --project test-driver test-driver/run.py \
   test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
+Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
+
 Results land in `test-output/<model>/<timestamp>-001-.../` with the full five-layer recording.
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
@@ -103,7 +155,7 @@ Results land in `test-output/<model>/<timestamp>-001-.../` with the full five-la
 uv run --project test-driver test-driver/run.py \
   test-cases/001-daily-life-food-uber-eats --human
 ```
-Open the noVNC URL the script prints, complete the task by hand, then close the tab.
+Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
 
 <br/>
 
