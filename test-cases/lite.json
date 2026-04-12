@@ -1,0 +1,226 @@
+{
+  "$schema": "./lite.schema.json",
+  "version": "0.1",
+  "created": "2026-04-12",
+  "rubric_max": 12,
+  "total_tasks": 20,
+  "notes": "ClawBench-Lite v0.1 — a 20-task curated subset of the 153-task ClawBench. Designed to match the 20-tasks-per-source convention of browser-use/benchmark (https://github.com/browser-use/benchmark) so the subset can eventually be upstreamed as a 6th source alongside WebBench, Mind2Web 2, GAIA, BrowseComp, and Custom. All Lite tasks are judged by eval/agentic_eval.md regardless of whether eval_schema.url_pattern is a concrete regex or __PLACEHOLDER_WILL_NOT_MATCH__ — tasks were selected on task quality / popularity / real-world relevance, not on url_pattern shape. Selection rubric: 4 axes × 3 points each (site popularity, task realism, difficulty, category ambassador), max 12. Binary gates: accessibility (no hard CAPTCHA / geo-lock / mandatory-phone-step-1 / payment wall before satisfiable) and soft novelty (not a clear duplicate of existing benchmark coverage at the same site). All 20 selections use distinct domains for site-level diversity. Swap history during validation: (1) shopping-commerce pool lacked household-name retailers so the slot was swapped to daily-life/housing/zillow 011; (2) zillow 011 was then dropped after recorded runs showed PerimeterX CAPTCHA walls on 4/4 models in batch-20260327 (borderline accessibility-gate violation), and the slot was reallocated to daily-life/food/instacart 007 — housing is therefore no longer a represented vertical in Lite v0.1.",
+  "skipped_categories": [
+    "nonprofit-charity",
+    "home-services-maintenance",
+    "finance-investment",
+    "automotive-vehicle-services",
+    "automation-workflows",
+    "government-civic",
+    "deletion-revocation",
+    "shopping-commerce",
+    "daily-life-housing"
+  ],
+  "tier_distribution": {
+    "flagship": 9,
+    "core": 8,
+    "wildcard": 3
+  },
+  "tasks": [
+    {
+      "task_id": 872,
+      "dir": "872-daily-life-food-opentable",
+      "tier": "flagship",
+      "metaclass": "daily-life",
+      "platform": "opentable",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "OpenTable is the household-name leader for restaurant reservations; dining-out booking is canonical daily-life behavior with multi-step restaurant filtering and seating selection, and the eval_schema has a concrete url_pattern."
+    },
+    {
+      "task_id": 2,
+      "dir": "002-daily-life-food-doordash",
+      "tier": "flagship",
+      "metaclass": "daily-life",
+      "platform": "doordash",
+      "url_pattern_concrete": false,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 1, "ambassador": 3, "total": 10 },
+      "rationale": "DoorDash is the canonical food-delivery flagship on weekly real-world use; simpler flow than OpenTable but an irreplaceable everyday-life ambassador."
+    },
+    {
+      "task_id": 47,
+      "dir": "047-daily-life-personal-care-taskrabbit",
+      "tier": "flagship",
+      "metaclass": "daily-life",
+      "platform": "taskrabbit",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 2, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 10 },
+      "rationale": "TaskRabbit is the vertical leader for gig-services marketplace; booking a helper is a multi-step realistic flow with date/time/service selection, plus concrete url_pattern and extra_info support."
+    },
+    {
+      "task_id": 372,
+      "dir": "372-entertainment-hobbies-general-eventbrite",
+      "tier": "flagship",
+      "metaclass": "entertainment-hobbies",
+      "platform": "eventbrite",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "Eventbrite is the household-name event platform; event creation is a canonical creator-side task with multi-field form, extra_info support, and concrete url_pattern — a rare combination of popularity and eval quality."
+    },
+    {
+      "task_id": 369,
+      "dir": "369-entertainment-hobbies-general-goodreads",
+      "tier": "flagship",
+      "metaclass": "entertainment-hobbies",
+      "platform": "goodreads",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 2, "difficulty": 2, "ambassador": 3, "total": 10 },
+      "rationale": "Goodreads is the household-name reading community; shelf/list creation is realistic hobby curation, with concrete url_pattern and extra_info — distinct vertical from Eventbrite and Fandango."
+    },
+    {
+      "task_id": 867,
+      "dir": "867-entertainment-hobbies-movies-fandango",
+      "tier": "flagship",
+      "metaclass": "entertainment-hobbies",
+      "platform": "fandango",
+      "url_pattern_concrete": false,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "Fandango is the household-name movie-ticket flagship; buying a ticket with theater, showtime, and seat selection is canonical cinema behavior and a distinct entertainment vertical from event creation and reading lists."
+    },
+    {
+      "task_id": 501,
+      "dir": "501-creation-init-general-asana",
+      "tier": "flagship",
+      "metaclass": "creation-init",
+      "platform": "asana",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 2, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 10 },
+      "rationale": "Asana is a B2B SaaS leader for project management; creating a portfolio with three sub-projects is a canonical multi-object creation task, with concrete url_pattern and extra_info."
+    },
+    {
+      "task_id": 486,
+      "dir": "486-creation-init-general-mailchimp",
+      "tier": "flagship",
+      "metaclass": "creation-init",
+      "platform": "mailchimp",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 2, "total": 10 },
+      "rationale": "Mailchimp is the household-name email-marketing leader; authoring a campaign exercises audience selection, content editing, and concrete url_pattern evaluation — a distinct creation vertical from project tooling and website builders."
+    },
+    {
+      "task_id": 712,
+      "dir": "712-creation-init-website-create-squarespace",
+      "tier": "flagship",
+      "metaclass": "creation-init",
+      "platform": "squarespace",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "Squarespace is the household-name website builder; creating a portfolio site is a canonical self-publishing task with meaningful UI depth and concrete url_pattern."
+    },
+    {
+      "task_id": 142,
+      "dir": "142-office-secretary-tasks-collab-trello",
+      "tier": "core",
+      "metaclass": "office-secretary-tasks",
+      "platform": "trello",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 2, "realism": 2, "difficulty": 2, "ambassador": 3, "total": 9 },
+      "rationale": "Trello is the vertical leader for Kanban collaboration; creating a board with lists and cards is canonical office-collaboration behavior with concrete url_pattern — strongest office-secretary task that is not email-client-specific."
+    },
+    {
+      "task_id": 469,
+      "dir": "469-rating-voting-general-tripadvisor",
+      "tier": "core",
+      "metaclass": "rating-voting",
+      "platform": "tripadvisor",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "TripAdvisor is the household-name global travel-review platform; writing a restaurant review is canonical rating behavior with concrete url_pattern — a natural ambassador for user-generated-content tasks."
+    },
+    {
+      "task_id": 266,
+      "dir": "266-education-learning-general-leetcode",
+      "tier": "core",
+      "metaclass": "education-learning",
+      "platform": "leetcode",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 3, "ambassador": 3, "total": 12 },
+      "rationale": "LeetCode is the canonical coding-education platform and one of the highest-difficulty ClawBench tasks — opening a problem, writing a solution, and submitting exercises 5+ steps of dynamic UI plus code editing. The only 12/12 task in the shortlist."
+    },
+    {
+      "task_id": 279,
+      "dir": "279-travel-general-airbnb",
+      "tier": "core",
+      "metaclass": "travel",
+      "platform": "airbnb",
+      "url_pattern_concrete": false,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 3, "ambassador": 3, "total": 12 },
+      "rationale": "Airbnb is the household-name home-rental platform; searching for an apartment by city/date/guests, selecting a listing, and driving to the Confirm-and-Pay page with all fields filled is one of the deepest multi-step flows in ClawBench. Chosen over Momondo (flight search) because Airbnb is a global household name and end-to-end booking is a distinctive ClawBench contribution vs existing benchmark coverage."
+    },
+    {
+      "task_id": 91,
+      "dir": "091-job-search-hr-job-apply-indeed",
+      "tier": "core",
+      "metaclass": "job-search-hr",
+      "platform": "indeed",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "Indeed is the global household-name job board; applying to a posting is canonical job-seeker behavior and the strongest job-search-hr ambassador, with concrete url_pattern."
+    },
+    {
+      "task_id": 783,
+      "dir": "783-beauty-personal-care-beauty-booking-ulta-beauty",
+      "tier": "core",
+      "metaclass": "beauty-personal-care",
+      "platform": "ulta-beauty",
+      "url_pattern_concrete": false,
+      "scores": { "popularity": 2, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 10 },
+      "rationale": "Ulta Beauty is the vertical leader for beauty retail and services; booking a salon appointment exercises location/stylist/time selection — a realistic multi-step everyday task that represents the beauty vertical without being purely e-commerce."
+    },
+    {
+      "task_id": 7,
+      "dir": "007-daily-life-food-instacart",
+      "tier": "core",
+      "metaclass": "daily-life",
+      "platform": "instacart",
+      "url_pattern_concrete": false,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 3, "ambassador": 3, "total": 12 },
+      "rationale": "Instacart is the household-name leader for grocery delivery in North America; purchasing all ingredients for a multi-day meal plan with recipes, auto-selected nearest store, and checkout is a 5+ step weekly real-world flow with meaningful UI depth plus extra_info (meal_plan.json) for cross-recipe ingredient matching. Occupies a distinct food vertical from DoorDash restaurant delivery. Placeholder url_pattern is acceptable under all-agentic eval. Swapped in after the planned Zillow 011 housing pick showed PerimeterX CAPTCHA walls across 4/4 models in the 03-27 recorded batch, borderline-violating the accessibility gate."
+    },
+    {
+      "task_id": 809,
+      "dir": "809-pet-animal-care-pet-adopt-petfinder",
+      "tier": "core",
+      "metaclass": "pet-animal-care",
+      "platform": "petfinder",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 2, "realism": 2, "difficulty": 2, "ambassador": 3, "total": 9 },
+      "rationale": "Petfinder is the vertical leader for pet adoption in the US; submitting an adoption inquiry is the canonical pet-animal-care task and uses a concrete GraphQL url_pattern."
+    },
+    {
+      "task_id": 179,
+      "dir": "179-dev-tech-github-ops-github",
+      "tier": "wildcard",
+      "metaclass": "dev-tech",
+      "platform": "github",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "GitHub is the household-name code-hosting flagship; creating a repository with README + LICENSE + .gitignore is the canonical dev onboarding flow. Wildcard slot: dev-tech has only 2 tasks but GitHub is a first-tier brand. Concrete url_pattern (POST github.com/repositories). No other source benchmark in browser-use/benchmark covers this, so it is a distinctive ClawBench contribution."
+    },
+    {
+      "task_id": 215,
+      "dir": "215-academia-research-paper-tables-overleaf",
+      "tier": "wildcard",
+      "metaclass": "academia-research",
+      "platform": "overleaf",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 2, "realism": 3, "difficulty": 3, "ambassador": 3, "total": 11 },
+      "rationale": "Overleaf is the vertical leader for collaborative LaTeX; creating a project, writing a booktabs table, and compiling exercises multi-step code-editing UI — one of the deepest tasks in the entire benchmark, with concrete url_pattern and extra_info."
+    },
+    {
+      "task_id": 403,
+      "dir": "403-personal-management-account-security-1password-web",
+      "tier": "wildcard",
+      "metaclass": "personal-management",
+      "platform": "1password-web",
+      "url_pattern_concrete": true,
+      "scores": { "popularity": 3, "realism": 3, "difficulty": 2, "ambassador": 3, "total": 11 },
+      "rationale": "1Password is the household-name password manager; adding five login entries exercises repetitive structured data entry — canonical personal-security behavior with concrete url_pattern and extra_info credentials."
+    }
+  ]
+}
