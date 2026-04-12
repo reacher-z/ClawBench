@@ -54,8 +54,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 # <img src="static/icons/robot.svg" width="28" height="28"> LLM Quick Start
 
-1. Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AGENTS.md)
-2. Prompt away!
+Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AGENTS.md) and prompt away.
 
 <br/>
 
@@ -124,17 +123,12 @@ cp models/models.example.yaml models/models.yaml   # edit: add your model API ke
 
 **2. Run your first task** (pick one):
 
-<table><tr><td>
-
-**Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
-
-```bash
-./run.sh
-```
-
-Needs an interactive terminal. For pipes / CI / non-TTY, call `test-driver/run.py` or `test-driver/batch.py` directly.
-
-</td></tr></table>
+> [!TIP]
+> **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
+> ```bash
+> ./run.sh
+> ```
+> Needs an interactive terminal. For pipes / CI / non-TTY, call `test-driver/run.py` or `test-driver/batch.py` directly.
 
 **(b) Run one specific task against a specific model:**
 ```bash

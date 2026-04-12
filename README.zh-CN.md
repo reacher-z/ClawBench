@@ -54,8 +54,7 @@
 
 # <img src="static/icons/robot.svg" width="28" height="28"> LLM 快速开始
 
-1. 将你的编程智能体 (Claude Code, Cursor, Copilot 等) 指向 [`AGENTS.md`](AGENTS.md)
-2. 直接提问!
+将你的编程智能体 (Claude Code, Cursor, Copilot 等) 指向 [`AGENTS.md`](AGENTS.md)，直接提问即可。
 
 <br/>
 
@@ -124,17 +123,12 @@ cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型
 
 **2. 跑你的第一个任务** (三选一):
 
-<table><tr><td>
-
-**推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
-
-```bash
-./run.sh
-```
-
-需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
-
-</td></tr></table>
+> [!TIP]
+> **推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
+> ```bash
+> ./run.sh
+> ```
+> 需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
 
 **(b) 指定模型跑单个任务:**
 ```bash
