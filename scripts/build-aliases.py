@@ -125,6 +125,7 @@ dependencies = [
 [project.scripts]
 claw-bench = "clawbench.cli:main"
 clawbench = "clawbench.cli:main"
+clawbench-eval = "clawbench.cli:main"
 
 [project.urls]
 Homepage = "https://claw-bench.com"
