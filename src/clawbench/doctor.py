@@ -128,25 +128,48 @@ def check_output_dir() -> CheckResult:
 
 
 def check_secrets() -> CheckResult:
-    """Soft check — PurelyMail key presence affects which cases are runnable
-    but ClawBench works without it for many cases. Report whichever source
-    has it, or say it's missing."""
-    sources: list[str] = []
+    """Soft check — PurelyMail key is required for email-dependent cases
+    but the wheel ships a working default, so a fresh install already has
+    one. Report which source the key will resolve from at runtime."""
+    # Mirror the precedence in ``run._load_runtime_env`` so doctor doesn't
+    # lie about reality.
+    from clawbench.run import DEFAULT_SECRETS
+
     if os.environ.get("PURELY_MAIL_API_KEY"):
-        sources.append("env")
-    if (Path.cwd() / ".env").exists():
-        sources.append("./.env")
-    if _paths.user_secrets_path().exists():
-        sources.append(str(_paths.user_secrets_path()))
-    if not sources:
+        source = "env"
+    elif _env_file_has_key(Path.cwd() / ".env", "PURELY_MAIL_API_KEY"):
+        source = "./.env"
+    elif _env_file_has_key(_paths.user_secrets_path(), "PURELY_MAIL_API_KEY"):
+        source = str(_paths.user_secrets_path())
+    elif DEFAULT_SECRETS.get("PURELY_MAIL_API_KEY"):
+        source = "wheel default"
+    else:
         return CheckResult(
             "PurelyMail API key",
             "warn",
             "not configured",
             "Email-requiring cases will fail. Set PURELY_MAIL_API_KEY or run "
-            "`claw-bench configure --secrets`.",
+            "`clawbench configure --secrets`.",
         )
-    return CheckResult("PurelyMail API key", "ok", "found in " + ", ".join(sources))
+    return CheckResult("PurelyMail API key", "ok", f"found in {source}")
+
+
+def _env_file_has_key(path: Path, key: str) -> bool:
+    """``True`` iff ``path`` is a readable ``KEY=VALUE`` file that
+    actually defines ``key`` (rather than just existing)."""
+    if not path.is_file():
+        return False
+    try:
+        for line in path.read_text().splitlines():
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            name = s.split("=", 1)[0].strip()
+            if name == key:
+                return True
+    except OSError:
+        pass
+    return False
 
 
 ALL_CHECKS = [
