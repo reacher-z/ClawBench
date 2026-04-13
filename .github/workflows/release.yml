@@ -39,19 +39,15 @@ jobs:
           uv sync --all-extras
           uv run pytest tests/ -v
 
-      - name: Build primary wheel (claw-bench)
-        run: uv build
-
-      - name: Build alias wheel (clawbench)
-        run: |
-          cd packaging/clawbench
-          uv build --wheel --sdist
-          # Move alias artifacts up into the root dist/ so a single
-          # pypi-publish step ships both distributions.
-          mv dist/* ../../dist/
-
-      - name: Publish both distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      # The original ``claw-bench`` / ``clawbench`` names were taken on
+      # PyPI before we could claim them, so we ship under a family of
+      # alias distributions instead. The script below materializes one
+      # distribution per alias name, builds a wheel, and uploads it.
+      # All aliases share the version from the root ``pyproject.toml``.
+      - name: Build and publish alias distributions
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv run python scripts/build-aliases.py --publish
 
   # ----------------------------------------------------------------------
   # GHCR container image (multi-arch)

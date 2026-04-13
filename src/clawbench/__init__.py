@@ -9,12 +9,22 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
-# We publish under two distribution names on PyPI — ``claw-bench`` (primary)
-# and ``clawbench`` (alias) — because PyPI's normalization collapses
-# case/punctuation but not hyphenation. Whichever name the user installed
-# under is the one whose metadata will be queryable.
+# We publish under several distribution names on PyPI (the original
+# ``claw-bench`` / ``clawbench`` names are currently held by an
+# unrelated project, so the user-facing name is one of the aliases
+# below). Whichever name the user installed under is the one whose
+# metadata will be queryable via ``importlib.metadata``.
 __version__ = "0.0.0+unknown"
-for _dist in ("claw-bench", "clawbench"):
+for _dist in (
+    "clawbench-eval",     # primary (README Quick Start)
+    "nail-clawbench",     # org-prefixed alias
+    "clawbench-harness",
+    "harness-bench",
+    "openclawbench",
+    "claw-harness",
+    "claw-bench",         # original primary (blocked; left for future)
+    "clawbench",          # original alias  (blocked; left for future)
+):
     try:
         __version__ = version(_dist)
         break
