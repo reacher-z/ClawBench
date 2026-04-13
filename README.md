@@ -6,7 +6,7 @@
 [![Project Page](https://img.shields.io/badge/Project-Page-blue.svg)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=social)](https://github.com/reacher-z/ClawBench)
 
-**⚡ Run in one line of code**
+<a href="#-human-quick-start"><img src="https://img.shields.io/badge/%E2%9A%A1%20Run%20in%20one%20line%20of%20code-4F46E5?style=for-the-badge&labelColor=4F46E5" alt="Run in one line of code"></a>
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
