@@ -3,8 +3,8 @@
 # ClawBench
 
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
-[![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000&label=%F0%9F%A4%97)](https://huggingface.co/papers/2604.08523)
-[![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000&label=%F0%9F%A4%97)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
+[![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/papers/2604.08523)
+[![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
 [![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench)
 
@@ -17,8 +17,6 @@
 We asked 6 frontier AI agents to do what people do every day --<br/>
 order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 **The best model completed only 33.3% of tasks.**
-
-[Paper](https://arxiv.org/abs/2604.08523) &nbsp;&bull;&nbsp; [Project Page](https://claw-bench.com) &nbsp;&bull;&nbsp; [Leaderboard](#-results)
 
 ---
 

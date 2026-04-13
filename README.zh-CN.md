@@ -3,8 +3,8 @@
 # ClawBench
 
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
-[![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000&label=%F0%9F%A4%97)](https://huggingface.co/papers/2604.08523)
-[![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000&label=%F0%9F%A4%97)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
+[![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/papers/2604.08523)
+[![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
 [![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench)
 
@@ -17,8 +17,6 @@
 我们让 6 个前沿 AI 智能体去做人们每天都在做的事 --<br/>
 点外卖、订酒店、投简历、写评价、管理项目。<br/>
 **最强的模型也只完成了 33.3% 的任务。**
-
-[论文](https://arxiv.org/abs/2604.08523) &nbsp;&bull;&nbsp; [项目主页](https://claw-bench.com) &nbsp;&bull;&nbsp; [排行榜](#-实验结果)
 
 ---
 
