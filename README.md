@@ -68,8 +68,16 @@ Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AG
 
 # <img src="static/icons/person.svg" width="28" height="28"> Human Quick Start
 
+Pick either path — both land you at the same interactive TUI.
+
 ```bash
+# Option A — PyPI install (recommended for most users)
 uv tool install clawbench-eval && clawbench
+```
+
+```bash
+# Option B — Clone the repo (for contributors / source hacking)
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 ```
 
 **Prerequisites:** [Python 3.11+](https://python.org), [uv](https://docs.astral.sh/uv/), and a container engine — [Docker](https://www.docker.com/) **or** [Podman](https://podman.io/). ClawBench auto-detects whichever is installed; force one with `export CONTAINER_ENGINE=docker` or `export CONTAINER_ENGINE=podman`.

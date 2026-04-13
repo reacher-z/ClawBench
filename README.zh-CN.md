@@ -68,8 +68,16 @@ uv tool install clawbench-eval && clawbench
 
 # <img src="static/icons/person.svg" width="28" height="28"> 手动快速开始
 
+两条路任选一条 —— 最终都会打开同一个交互式 TUI。
+
 ```bash
+# 方案 A —— 从 PyPI 安装（推荐大多数用户）
 uv tool install clawbench-eval && clawbench
+```
+
+```bash
+# 方案 B —— 克隆仓库（适合贡献者 / 改代码）
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 ```
 
 **前置条件:** [Python 3.11+](https://python.org)、[uv](https://docs.astral.sh/uv/)，以及一个容器引擎 —— [Docker](https://www.docker.com/) **或** [Podman](https://podman.io/)。ClawBench 会自动检测已安装的那个；也可以用 `export CONTAINER_ENGINE=docker` 或 `export CONTAINER_ENGINE=podman` 强制指定。
