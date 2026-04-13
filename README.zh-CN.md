@@ -11,10 +11,10 @@
 <a href="#-手动快速开始"><img src="https://img.shields.io/badge/%E4%B8%80%E9%94%AE%E5%90%AF%E5%8A%A8-4F46E5?style=for-the-badge&labelColor=4F46E5&logoColor=white&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMjYzLjQtMjdMMjc4LjIgOS44IDMxNSAyNC42YzMgMS4yIDUgNC4yIDUgNy40cy0yIDYuMi01IDcuNEwyNzguMiA1NC4yIDI2My40IDkxYy0xLjIgMy00LjIgNS03LjQgNXMtNi4yLTItNy40LTVMMjMzLjggNTQuMiAxOTcgMzkuNGMtMy0xLjItNS00LjItNS03LjRzMi02LjIgNS03LjRMMjMzLjggOS44IDI0OC42LTI3YzEuMi0zIDQuMi01IDcuNC01czYuMiAyIDcuNCA1ek0xMTAuNyA0MS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN0w1OS44IDE2NC4yIDkuNyAxNDIuN0MzLjggMTQwLjIgMCAxMzQuNCAwIDEyOHMzLjgtMTIuMiA5LjctMTQuN0w1OS44IDkxLjggODEuMyA0MS43QzgzLjggMzUuOCA4OS42IDMyIDk2IDMyczEyLjIgMy44IDE0LjcgOS43ek00NjQgMzA0YzYuNCAwIDEyLjIgMy44IDE0LjcgOS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN2wtMjEuNS01MC4xLTUwLjEtMjEuNWMtNS45LTIuNS05LjctOC4zLTkuNy0xNC43czMuOC0xMi4yIDkuNy0xNC43bDUwLjEtMjEuNSAyMS41LTUwLjFjMi41LTUuOSA4LjMtOS43IDE0LjctOS43ek00NjAgMGMxMSAwIDIxLjYgNC40IDI5LjUgMTIuMmw0Mi4zIDQyLjNDNTM5LjYgNjIuNCA1NDQgNzMgNTQ0IDg0cy00LjQgMjEuNi0xMi4yIDI5LjVsLTg4LjIgODguMi0xMDEuMy0xMDEuMyA4OC4yLTg4LjJDNDM4LjQgNC40IDQ0OSAwIDQ2MCAwek00NC4yIDM5OC41TDMwOC40IDEzNC4zIDQwOS43IDIzNS42IDE0NS41IDQ5OS44QzEzNy42IDUwNy42IDEyNyA1MTIgMTE2IDUxMnMtMjEuNi00LjQtMjkuNS0xMi4yTDQ0LjIgNDU3LjVDMzYuNCA0NDkuNiAzMiA0MzkgMzIgNDI4czQuNC0yMS42IDEyLjItMjkuNXoiLz48L3N2Zz4=" alt="一键启动"></a>
 
 ```bash
-git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
+uv tool install clawbench-eval && clawbench
 ```
 
-<sub><i>克隆 → 运行 → 搞定。&nbsp; 无需 API key。&nbsp; 无需下载数据集。&nbsp; 无需手动配置。</i></sub>
+<sub><i>安装 → 运行 → 搞定。&nbsp; 无需 API key。&nbsp; 无需下载数据集。&nbsp; 无需手动配置。</i></sub>
 
 ### AI 智能体能完成日常在线任务吗?
 
@@ -69,7 +69,7 @@ git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 # <img src="static/icons/person.svg" width="28" height="28"> 手动快速开始
 
 ```bash
-git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
+uv tool install clawbench-eval && clawbench
 ```
 
 **前置条件:** [Python 3.11+](https://python.org)、[uv](https://docs.astral.sh/uv/)，以及一个容器引擎 —— [Docker](https://www.docker.com/) **或** [Podman](https://podman.io/)。ClawBench 会自动检测已安装的那个；也可以用 `export CONTAINER_ENGINE=docker` 或 `export CONTAINER_ENGINE=podman` 强制指定。
@@ -122,12 +122,11 @@ podman machine start
 
 </details>
 
-**1. 克隆并配置:**
+**1. 配置模型** —— 一次性设置:
 ```bash
-git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
-cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型 API 密钥
-# `.env`（用于注册一次性邮箱的 PurelyMail 凭证）已经随仓库提交，开箱即用。
-# 只有想覆盖默认值或添加 HF_TOKEN 时才需要编辑。
+clawbench configure                # 用 $EDITOR 打开 models.yaml
+# PurelyMail 凭证（用于注册一次性邮箱）已经随 wheel 一起发布，开箱即用。
+# 想用自己的账号，跑 `clawbench configure --secrets` 覆盖即可。
 ```
 
 > [!NOTE]
@@ -138,25 +137,44 @@ cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型
 > [!TIP]
 > **推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
 > ```bash
-> ./run.sh
+> clawbench
 > ```
-> 需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
+> 需要交互式终端。管道 / CI / 非 TTY 环境请直接用 `clawbench run` 或 `clawbench batch`。
 
 **(b) 指定模型跑单个任务:**
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 容器启动后,脚本会打印一个 **noVNC URL**（如 `http://localhost:6080/vnc.html`）—— 在浏览器中打开即可实时观看 agent 操作。如果 6080 端口被占用,会自动选一个空闲端口。
 
-结果落在 `test-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
+结果落在 `./claw-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
 
 **(c) 通过 noVNC 手动控制浏览器** —— 产出人工参考轨迹:
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats --human
+clawbench run 001-daily-life-food-uber-eats --human
 ```
 打开脚本打印的 noVNC URL,在浏览器里亲手完成任务,完事后关掉标签页。端口被占时会自动换一个。
+
+<details>
+<summary><b>从源码开发</b> &nbsp;— 克隆 + ``./run.sh``（面向贡献者）</summary>
+
+如果你要改 driver、bundled test-cases 或者容器构建本身，用源码 checkout 更合适。
+
+```bash
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
+cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型 API 密钥
+# `.env`（PurelyMail 凭证，用于一次性邮箱注册）已经随仓库提交，开箱即用。
+# 只有想覆盖默认值或添加 HF_TOKEN 时才需要编辑。
+./run.sh                                           # 交互式 TUI
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # 单个任务
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats --human             # 人工参考
+```
+
+这条路径让你在 ``src/clawbench/``、``chrome-extension/``、``test-cases/`` 上实时改代码实时生效 —— 调 harness 本身的时候很顺手。其他场景用上面的 PyPI 安装就够快。
+
+</details>
 
 <br/>
 
