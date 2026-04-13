@@ -12,6 +12,10 @@
 
 <sub><i>克隆 → 运行 → 搞定。&nbsp; 无需 API key。&nbsp; 无需下载数据集。&nbsp; 无需手动配置。</i></sub>
 
+```bash
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
+```
+
 ### AI 智能体能完成日常在线任务吗?
 
 我们让 6 个前沿 AI 智能体去做人们每天都在做的事 --<br/>

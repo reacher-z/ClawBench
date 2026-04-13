@@ -12,6 +12,10 @@
 
 <sub><i>Clone → Run → Done. &nbsp; No API keys. &nbsp; No dataset download. &nbsp; No manual setup.</i></sub>
 
+```bash
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
+```
+
 ### Can AI Agents Complete Everyday Online Tasks?
 
 We asked 6 frontier AI agents to do what people do every day --<br/>
