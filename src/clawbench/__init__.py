@@ -17,6 +17,7 @@ from importlib.metadata import PackageNotFoundError, version
 __version__ = "0.0.0+unknown"
 for _dist in (
     "clawbench-eval",     # primary (README Quick Start)
+    "clawbench-cli",
     "nail-clawbench",     # org-prefixed alias
     "clawbench-harness",
     "harness-bench",

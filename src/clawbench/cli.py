@@ -114,7 +114,18 @@ def run_cmd(
 ) -> None:
     """Run a single test case against a model (or in --human mode)."""
     from clawbench import run as _run
-    argv: list[str] = [str(test_case_dir)]
+    # Accept three forms for the case argument:
+    #   (a) an absolute / already-existing path (user points at their own case),
+    #   (b) ``test-cases/<name>`` relative to the project (dev convenience),
+    #   (c) a bare case name like ``006-daily-life-food-uber-eats`` — looked up
+    #       inside the wheel's bundled test-cases. This is the common case from
+    #       the TUI, which passes only the case name.
+    resolved = test_case_dir
+    if not resolved.exists():
+        bundled = _paths.test_cases_dir() / test_case_dir.name
+        if bundled.exists():
+            resolved = bundled
+    argv: list[str] = [str(resolved)]
     if model:
         argv.append(model)
     if human:

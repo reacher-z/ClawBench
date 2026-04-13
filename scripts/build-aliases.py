@@ -63,6 +63,7 @@ def root_version() -> str:
 ALIAS_NAMES = [
     "harness-bench",
     "clawbench-eval",
+    "clawbench-cli",
     "openclawbench",
     "clawbench-harness",
     "claw-harness",
