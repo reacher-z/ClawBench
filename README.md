@@ -122,12 +122,11 @@ podman machine start
 
 </details>
 
-**1. Clone and configure:**
+**1. Configure models** — one-time setup:
 ```bash
-git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
-cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
-# `.env` (PurelyMail creds for disposable-email signups) is already committed
-# and works out of the box. Edit it only to override defaults or add HF_TOKEN.
+clawbench configure                # opens models.yaml in $EDITOR
+# PurelyMail credentials for disposable-email signups ship with the wheel
+# and work out of the box. Override them via `clawbench configure --secrets`.
 ```
 
 > [!NOTE]
@@ -138,25 +137,44 @@ cp models/models.example.yaml models/models.yaml   # edit: add your model API ke
 > [!TIP]
 > **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
 > ```bash
-> ./run.sh
+> clawbench
 > ```
-> Needs an interactive terminal. For pipes / CI / non-TTY, call `test-driver/run.py` or `test-driver/batch.py` directly.
+> Needs an interactive terminal. For pipes / CI / non-TTY, use `clawbench run` or `clawbench batch` directly.
 
 **(b) Run one specific task against a specific model:**
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
-Results land in `test-output/<model>/<timestamp>-001-.../` with the full five-layer recording.
+Results land in `./claw-output/<model>/<timestamp>-001-.../` with the full five-layer recording.
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats --human
+clawbench run 001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
+
+<details>
+<summary><b>Develop from source</b> &nbsp;— clone + ``./run.sh`` for contributors</summary>
+
+Prefer the repo checkout if you want to modify the driver, the bundled test-cases, or the container build itself.
+
+```bash
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
+cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
+# `.env` (PurelyMail creds for disposable-email signups) is already committed
+# and works out of the box. Edit it only to override defaults or add HF_TOKEN.
+./run.sh                                           # interactive TUI
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats --human             # human mode
+```
+
+This path gives you live-reload on ``src/clawbench/``, ``chrome-extension/``, and ``test-cases/`` — useful when iterating on the harness itself. For everything else, the PyPI install above is faster.
+
+</details>
 
 <br/>
 

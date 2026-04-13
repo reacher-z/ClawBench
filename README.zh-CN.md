@@ -122,12 +122,11 @@ podman machine start
 
 </details>
 
-**1. 克隆并配置:**
+**1. 配置模型** —— 一次性设置:
 ```bash
-git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
-cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型 API 密钥
-# `.env`（用于注册一次性邮箱的 PurelyMail 凭证）已经随仓库提交，开箱即用。
-# 只有想覆盖默认值或添加 HF_TOKEN 时才需要编辑。
+clawbench configure                # 用 $EDITOR 打开 models.yaml
+# PurelyMail 凭证（用于注册一次性邮箱）已经随 wheel 一起发布，开箱即用。
+# 想用自己的账号，跑 `clawbench configure --secrets` 覆盖即可。
 ```
 
 > [!NOTE]
@@ -138,25 +137,44 @@ cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型
 > [!TIP]
 > **推荐 &rarr; 交互式 TUI** &nbsp; 引导式选择模型 + 测试用例
 > ```bash
-> ./run.sh
+> clawbench
 > ```
-> 需要交互式终端。管道 / CI / 非 TTY 环境请直接调用 `test-driver/run.py` 或 `test-driver/batch.py`。
+> 需要交互式终端。管道 / CI / 非 TTY 环境请直接用 `clawbench run` 或 `clawbench batch`。
 
 **(b) 指定模型跑单个任务:**
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 容器启动后,脚本会打印一个 **noVNC URL**（如 `http://localhost:6080/vnc.html`）—— 在浏览器中打开即可实时观看 agent 操作。如果 6080 端口被占用,会自动选一个空闲端口。
 
-结果落在 `test-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
+结果落在 `./claw-output/<model>/<timestamp>-001-.../`,包含完整的五层录制。
 
 **(c) 通过 noVNC 手动控制浏览器** —— 产出人工参考轨迹:
 ```bash
-uv run --project test-driver test-driver/run.py \
-  test-cases/001-daily-life-food-uber-eats --human
+clawbench run 001-daily-life-food-uber-eats --human
 ```
 打开脚本打印的 noVNC URL,在浏览器里亲手完成任务,完事后关掉标签页。端口被占时会自动换一个。
+
+<details>
+<summary><b>从源码开发</b> &nbsp;— 克隆 + ``./run.sh``（面向贡献者）</summary>
+
+如果你要改 driver、bundled test-cases 或者容器构建本身，用源码 checkout 更合适。
+
+```bash
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
+cp models/models.example.yaml models/models.yaml   # 编辑：填入你的模型 API 密钥
+# `.env`（PurelyMail 凭证，用于一次性邮箱注册）已经随仓库提交，开箱即用。
+# 只有想覆盖默认值或添加 HF_TOKEN 时才需要编辑。
+./run.sh                                           # 交互式 TUI
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # 单个任务
+uv run claw-bench run \
+  test-cases/001-daily-life-food-uber-eats --human             # 人工参考
+```
+
+这条路径让你在 ``src/clawbench/``、``chrome-extension/``、``test-cases/`` 上实时改代码实时生效 —— 调 harness 本身的时候很顺手。其他场景用上面的 PyPI 安装就够快。
+
+</details>
 
 <br/>
 
