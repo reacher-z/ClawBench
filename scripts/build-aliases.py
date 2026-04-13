@@ -60,18 +60,25 @@ def root_version() -> str:
 # First wave (packaging PR): harness-bench, clawbench-eval, clawbench-cli,
 # openclawbench, clawbench-harness, claw-harness, nail-clawbench.
 #
-# Second wave (defensive squat of adjacent harness/agent names): harnessos,
-# r2agent, claw-ai, claw-agent, claw-eval.
+# Second wave (adjacent harness/agent names): harnessos, r2agent, claw-ai,
+# claw-agent, claw-eval.
+#
+# Third wave (research-themed squats): everyday-bench, everyday-agent,
+# life-bench, realtask-bench, web-harness, task-harness, video-mcq,
+# mcq-bench, vlm-judge, video-judge, nail-bench, nail-agent, nail-eval,
+# nail-group.
 #
 # Names we tried and couldn't take:
-#   - 403 (already owned): harness, browser-use, computer-use, claw, clawbot
+#   - 403 (already owned): harness, browser-use, computer-use, claw,
+#     clawbot, openclaw, claw-ops, agent-harness
 #   - 400 similarity (too close to something we just took or pre-existing):
 #     openclaw-bench, claw-bench-harness, harnessbench, harness-os, clawai,
-#     clawagent, claweval
-# These live nowhere and are omitted on purpose. For hyphen/underscore
-# variants of names we DID take (``claw-ai`` ↔ ``claw_ai``), PEP 503
-# normalization means pip resolves them to the same distribution anyway —
-# so ``pip install claw_ai`` still lands on our package.
+#     clawagent, claweval, lifebench, agentharness, webharness, taskharness,
+#     videomcq, mcqbench
+# For hyphen/underscore variants of names we DID take (``claw-ai`` ↔
+# ``claw_ai``), PEP 503 normalization means pip resolves them to the same
+# distribution anyway — so ``pip install claw_ai`` still lands on our
+# package.
 ALIAS_NAMES = [
     "harness-bench",
     "clawbench-eval",
@@ -85,6 +92,20 @@ ALIAS_NAMES = [
     "claw-ai",
     "claw-agent",
     "claw-eval",
+    "everyday-bench",
+    "everyday-agent",
+    "life-bench",
+    "realtask-bench",
+    "web-harness",
+    "task-harness",
+    "video-mcq",
+    "mcq-bench",
+    "vlm-judge",
+    "video-judge",
+    "nail-bench",
+    "nail-agent",
+    "nail-eval",
+    "nail-group",
 ]
 
 PYPROJECT_TEMPLATE = '''\

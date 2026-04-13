@@ -28,6 +28,20 @@ for _dist in (
     "claw-ai",
     "claw-agent",
     "claw-eval",
+    "everyday-bench",     # third-wave research-themed squats
+    "everyday-agent",
+    "life-bench",
+    "realtask-bench",
+    "web-harness",
+    "task-harness",
+    "video-mcq",
+    "mcq-bench",
+    "vlm-judge",
+    "video-judge",
+    "nail-bench",
+    "nail-agent",
+    "nail-eval",
+    "nail-group",
     "claw-bench",         # original primary (blocked; left for future)
     "clawbench",          # original alias  (blocked; left for future)
 ):
