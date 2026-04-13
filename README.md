@@ -26,11 +26,11 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 <p align="center">
 <img src="static/icons/globe.svg" width="24" height="24">&nbsp;<b>Live Websites</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/cube.svg" width="24" height="24">&nbsp;<b>Isolated Containers</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/shield-halved.svg" width="24" height="24">&nbsp;<b>Request Interceptor</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/layer-group.svg" width="24" height="24">&nbsp;<b>Five-Layer Recording</b>
 </p>
 

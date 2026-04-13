@@ -26,11 +26,11 @@
 
 <p align="center">
 <img src="static/icons/globe.svg" width="24" height="24">&nbsp;<b>真实网站</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/cube.svg" width="24" height="24">&nbsp;<b>隔离容器</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/shield-halved.svg" width="24" height="24">&nbsp;<b>请求拦截器</b>
-&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="static/icons/layer-group.svg" width="24" height="24">&nbsp;<b>五层录制</b>
 </p>
 
