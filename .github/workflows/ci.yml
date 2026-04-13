@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14]
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Run pytest
+        run: uv run pytest tests/ -v
+
+      - name: Build wheel
+        run: uv build --wheel
+
+      - name: Install wheel into fresh env and smoke-test
+        run: |
+          uv venv /tmp/fresh --python ${{ matrix.python-version }} --seed
+          /tmp/fresh/bin/pip install dist/claw_bench-*.whl
+          /tmp/fresh/bin/claw-bench --help
+          /tmp/fresh/bin/claw-bench version
+          /tmp/fresh/bin/claw-bench cases | tail -5
+          /tmp/fresh/bin/claw-bench configure --show

@@ -1,0 +1,94 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claw-bench"
+version = "0.1.0"
+description = "ClawBench: Can AI Agents Complete Everyday Online Tasks?"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [
+    { name = "Yuxuan Zhang" },
+    { name = "The ClawBench Authors" },
+]
+keywords = [
+    "benchmark",
+    "ai-agents",
+    "browser-automation",
+    "web-agents",
+    "computer-use",
+    "browser-use",
+    "evaluation",
+    "llm",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "click>=8.1",
+    "fpdf2>=2.8",
+    "huggingface_hub>=0.27",
+    "platformdirs>=4.0",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "questionary>=2.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+claw-bench = "clawbench.cli:main"
+clawbench = "clawbench.cli:main"
+
+[project.urls]
+Homepage = "https://claw-bench.com"
+Repository = "https://github.com/reacher-z/ClawBench"
+Documentation = "https://github.com/reacher-z/ClawBench#readme"
+Issues = "https://github.com/reacher-z/ClawBench/issues"
+Paper = "https://arxiv.org/abs/2604.08523"
+Dataset = "https://huggingface.co/datasets/NAIL-Group/ClawBench"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clawbench"]
+# Keep the developer's live ``models/models.yaml`` (which may contain
+# real API keys committed for local convenience) out of the published
+# wheel. The bundled seed template is ``models/models.example.yaml`` —
+# see ``clawbench.paths.bundled_models_yaml``.
+exclude = [
+    "src/clawbench/data/models/models.yaml",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/clawbench",
+    "pyproject.toml",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
