@@ -43,6 +43,8 @@ for _dist in (
     "nail-eval",
     "nail-group",
     "harness-hub",        # fourth-wave singleton winner
+    "r2-harness",         # ninth wave
+    "scaling-law",
     "claw-bench",         # original primary (blocked; left for future)
     "clawbench",          # original alias  (blocked; left for future)
 ):

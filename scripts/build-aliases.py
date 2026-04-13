@@ -113,6 +113,8 @@ ALIAS_NAMES = [
     # AI-agent generic-permutation namespace is effectively fully claimed
     # on PyPI.
     "harness-hub",
+    "r2-harness",
+    "scaling-law",
 ]
 # Exhaustive negative result: waves 4-8 tried ~200 additional permutations
 # (generic {computer|browser|harness|claw} × {bench|eval|agent|design},
