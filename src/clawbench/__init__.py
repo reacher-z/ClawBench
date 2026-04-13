@@ -42,6 +42,7 @@ for _dist in (
     "nail-agent",
     "nail-eval",
     "nail-group",
+    "harness-hub",        # fourth-wave singleton winner
     "claw-bench",         # original primary (blocked; left for future)
     "clawbench",          # original alias  (blocked; left for future)
 ):
