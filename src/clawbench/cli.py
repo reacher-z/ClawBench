@@ -33,6 +33,7 @@ import click
 from clawbench import __version__
 from clawbench import doctor as _doctor
 from clawbench import paths as _paths
+from clawbench.run import DEFAULT_SECRETS
 
 
 # ---------------------------------------------------------------------------
@@ -339,10 +340,24 @@ def _write_secrets_interactive() -> None:
     updated: dict[str, str] = dict(existing)
     for key, label in keys:
         cur = existing.get(key, "")
-        hint = f" [current: {_redact(cur)}]" if cur else ""
+        default = DEFAULT_SECRETS.get(key, "")
+        # Existing values are redacted (user has already committed to them
+        # and might share the terminal); shipped defaults are shown in
+        # full so a new user can see exactly what they're accepting.
+        if cur:
+            hint = f" [current: {_redact(cur)}]"
+        elif default:
+            hint = f" [default: {default}]"
+        else:
+            hint = ""
         val = click.prompt(f"  {label}{hint}", default="", show_default=False).strip()
         if val:
             updated[key] = val
+        elif not cur and default:
+            # User just hit enter on a shipped default — persist it so
+            # secrets.env is self-documenting and the value survives
+            # future default-rotations.
+            updated[key] = default
 
     lines = ["# claw-bench secrets — chmod 600", ""]
     lines += [f'{k}="{v}"' for k, v in updated.items()]

@@ -70,6 +70,19 @@ def load_dotenv(path: Path) -> dict[str, str]:
     return env
 
 
+# PurelyMail credentials we ship as defaults so ``pip install``
+# followed by ``clawbench`` works with zero configuration. These are
+# the same credentials committed in the repo's ``.env`` (which is
+# intentional — the key is shared project infrastructure, not a
+# personal secret). Users who want to point ClawBench at their own
+# PurelyMail account override via env var, ``./.env``, or
+# ``clawbench configure --secrets``.
+DEFAULT_SECRETS: dict[str, str] = {
+    "PURELY_MAIL_API_KEY": "pm-live-4c2a5524-392b-4117-a722-0aab7a3bf885",
+    "PURELY_MAIL_DOMAIN": "clawbench.cc",
+}
+
+
 def _load_runtime_env() -> dict[str, str]:
     """Build the runtime env dict from, in order of precedence:
 
@@ -77,6 +90,8 @@ def _load_runtime_env() -> dict[str, str]:
     2. ``$CWD/.env`` — legacy source-install layout (if present).
     3. ``user_config_dir()/secrets.env`` — persisted secrets from
        ``claw-bench configure --secrets``.
+    4. :data:`DEFAULT_SECRETS` — wheel-shipped defaults for the
+       PurelyMail credentials so a fresh install works immediately.
 
     Earlier sources win; later sources fill in missing keys only. This lets
     ``PURELY_MAIL_API_KEY=... claw-bench run ...`` work without any config
@@ -86,7 +101,12 @@ def _load_runtime_env() -> dict[str, str]:
     cwd_env = load_dotenv(Path.cwd() / ".env")
     user_env = load_dotenv(_paths.user_secrets_path())
     for key in ("PURELY_MAIL_API_KEY", "PURELY_MAIL_DOMAIN", "HF_TOKEN", "HF_REPO_ID"):
-        val = os.environ.get(key) or cwd_env.get(key) or user_env.get(key) or ""
+        val = (
+            os.environ.get(key)
+            or cwd_env.get(key)
+            or user_env.get(key)
+            or DEFAULT_SECRETS.get(key, "")
+        )
         if val:
             merged[key] = val
     return merged
