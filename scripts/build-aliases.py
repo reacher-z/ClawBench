@@ -55,11 +55,23 @@ def root_version() -> str:
         raise RuntimeError("could not find version in root pyproject.toml")
     return m.group(1)
 
-# The six alias distribution names successfully registered on PyPI.
-# Three other candidates (``openclaw-bench``, ``claw-bench-harness``,
-# ``harnessbench``) were rejected by PyPI's similarity check as too
-# close to names we had already taken — so they live nowhere and are
-# omitted here on purpose.
+# Alias distribution names successfully registered on PyPI.
+#
+# First wave (packaging PR): harness-bench, clawbench-eval, clawbench-cli,
+# openclawbench, clawbench-harness, claw-harness, nail-clawbench.
+#
+# Second wave (defensive squat of adjacent harness/agent names): harnessos,
+# r2agent, claw-ai, claw-agent, claw-eval.
+#
+# Names we tried and couldn't take:
+#   - 403 (already owned): harness, browser-use, computer-use, claw, clawbot
+#   - 400 similarity (too close to something we just took or pre-existing):
+#     openclaw-bench, claw-bench-harness, harnessbench, harness-os, clawai,
+#     clawagent, claweval
+# These live nowhere and are omitted on purpose. For hyphen/underscore
+# variants of names we DID take (``claw-ai`` ↔ ``claw_ai``), PEP 503
+# normalization means pip resolves them to the same distribution anyway —
+# so ``pip install claw_ai`` still lands on our package.
 ALIAS_NAMES = [
     "harness-bench",
     "clawbench-eval",
@@ -68,6 +80,11 @@ ALIAS_NAMES = [
     "clawbench-harness",
     "claw-harness",
     "nail-clawbench",
+    "harnessos",
+    "r2agent",
+    "claw-ai",
+    "claw-agent",
+    "claw-eval",
 ]
 
 PYPROJECT_TEMPLATE = '''\
