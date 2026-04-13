@@ -996,6 +996,117 @@ def _run_streamed(cmd: list[str], *, status_msg: str) -> int:
     return rc
 
 
+def _run_interactive(cmd: list[str], *, status_msg: str) -> int:
+    """Run a command with inherited stdio so ``sudo`` / password prompts work.
+
+    :func:`_run_streamed` PIPEs stdout so the Rich spinner stays clean, but
+    that also swallows the TTY that ``sudo`` needs to prompt for a password.
+    For the one-shot install commands we want the opposite: give the child
+    the real terminal and forget about the spinner.
+    """
+    console.print(f"  [dim]{status_msg}[/]")
+    console.print(f"  [dim]$[/] {' '.join(cmd)}")
+    console.print()
+    try:
+        return subprocess.run(cmd).returncode
+    except KeyboardInterrupt:
+        return 130
+
+
+def _detect_install_plans() -> tuple[str, list[dict]]:
+    """Return ``(system_label, plans)`` for the current host.
+
+    ``plans`` is a list of install recipes appropriate for this machine —
+    empty if we can't detect a supported package manager (the caller then
+    falls back to a static manual-install panel).
+
+    Each recipe carries:
+      engine    — ``"podman"`` or ``"docker"``
+      label     — short human-readable label (menu item text)
+      cmds      — ``list[list[str]]`` of commands to run in order
+      sudo      — True if any command needs a TTY (sudo password)
+      after     — optional post-install note the user must see
+    """
+    system = platform.system()
+    plans: list[dict] = []
+
+    if system == "Darwin":
+        label = "macOS"
+        if shutil.which("brew"):
+            plans.append({
+                "engine": "podman",
+                "label": "Install podman via Homebrew   (recommended)",
+                "cmds": [["brew", "install", "podman"]],
+                "sudo": False,
+                "after": None,
+            })
+            plans.append({
+                "engine": "docker",
+                "label": "Install Docker Desktop via Homebrew",
+                "cmds": [["brew", "install", "--cask", "docker"]],
+                "sudo": False,
+                "after": (
+                    "Docker Desktop is a GUI app. Launch it from "
+                    "Applications (or ``open -a Docker``) before you re-run."
+                ),
+            })
+    elif system == "Linux":
+        # Try to pull a friendlier distro name out of /etc/os-release so
+        # the user sees "Ubuntu 22.04" instead of bare "Linux".
+        label = "Linux"
+        try:
+            for line in Path("/etc/os-release").read_text().splitlines():
+                if line.startswith("PRETTY_NAME="):
+                    label = line.split("=", 1)[1].strip().strip('"')
+                    break
+        except OSError:
+            pass
+
+        if shutil.which("apt-get"):
+            plans.append({
+                "engine": "podman",
+                "label": "Install podman via apt   (recommended)",
+                "cmds": [
+                    ["sudo", "apt-get", "update"],
+                    ["sudo", "apt-get", "install", "-y", "podman"],
+                ],
+                "sudo": True,
+                "after": None,
+            })
+        elif shutil.which("dnf"):
+            plans.append({
+                "engine": "podman",
+                "label": "Install podman via dnf   (recommended)",
+                "cmds": [["sudo", "dnf", "install", "-y", "podman"]],
+                "sudo": True,
+                "after": None,
+            })
+        elif shutil.which("pacman"):
+            plans.append({
+                "engine": "podman",
+                "label": "Install podman via pacman   (recommended)",
+                "cmds": [
+                    ["sudo", "pacman", "-S", "--noconfirm", "podman"],
+                ],
+                "sudo": True,
+                "after": None,
+            })
+        elif shutil.which("zypper"):
+            plans.append({
+                "engine": "podman",
+                "label": "Install podman via zypper   (recommended)",
+                "cmds": [["sudo", "zypper", "--non-interactive", "install", "podman"]],
+                "sudo": True,
+                "after": None,
+            })
+    else:
+        # Windows and friends — no automated path yet; the caller shows
+        # the static manual-install panel.
+        label = system or "unknown"
+
+    return label, plans
+
+
 def _fix_engine(engine: str, status: str, detail: str) -> bool:
     """Show an actionable panel for the engine problem and offer a fix.
 
@@ -1009,28 +1120,120 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
     is_win = platform.system() == "Windows"
 
     if status == "not_installed":
+        system_label, plans = _detect_install_plans()
+
+        # No package manager we know how to drive — keep the old static
+        # panel as a graceful fallback so the user at least sees the
+        # copy-pastable commands.
+        if not plans:
+            console.print()
+            console.print(Panel(
+                Text.assemble(
+                    Text("No container engine found.\n\n", style="bold"),
+                    Text(
+                        "ClawBench runs every task inside a container, so "
+                        "you need either Podman (recommended) or Docker "
+                        "installed. I couldn't detect a supported package "
+                        "manager on this system, so here are the manual "
+                        "install commands:\n\n"
+                        "macOS:   brew install podman && podman machine init && podman machine start\n"
+                        "Linux:   sudo apt install podman   (or dnf, pacman, zypper)\n"
+                        "Windows: winget install RedHat.Podman && podman machine init && podman machine start",
+                        style="dim",
+                    ),
+                ),
+                title=f"[bold]Container engine not installed — {system_label}[/]",
+            ))
+            console.print()
+            return False
+
+        # Normal path: show what we detected and offer to run the install.
         console.print()
         console.print(Panel(
             Text.assemble(
                 Text("No container engine found.\n\n", style="bold"),
                 Text(
-                    "ClawBench runs every task inside a container, so you "
-                    "need either Docker or Podman installed before any mode "
-                    "(including Human mode) can work.\n\n"
-                    "macOS:   brew install --cask docker\n"
-                    "         — or —\n"
-                    "         brew install podman && podman machine init && podman machine start\n\n"
-                    "Linux:   sudo apt install podman   (or docker.io)\n\n"
-                    "Windows: winget install Docker.DockerDesktop\n"
-                    "         — or —\n"
-                    "         winget install RedHat.Podman && podman machine init && podman machine start",
+                    f"Detected system: {system_label}.\n\n"
+                    "ClawBench runs every task inside a container, so one "
+                    "of podman / docker has to be installed. Pick an option "
+                    "below — I'll run the install for you, or print the "
+                    "commands so you can run them yourself.",
                     style="dim",
                 ),
             ),
             title="[bold]Container engine not installed[/]",
         ))
         console.print()
-        return False
+
+        choices = [
+            questionary.Choice(title=p["label"], value=("install", idx))
+            for idx, p in enumerate(plans)
+        ]
+        choices.append(questionary.Choice(
+            title="Just print the commands — I'll run them myself",
+            value=("print", None),
+        ))
+        choices.append(questionary.Choice(title="Cancel", value=("cancel", None)))
+
+        pick = questionary.select(
+            "How would you like to proceed?",
+            choices=choices, style=STYLE,
+        ).ask()
+        if pick is None or pick[0] == "cancel":
+            return False
+
+        if pick[0] == "print":
+            console.print()
+            for p in plans:
+                console.print(f"  [bold]{p['label']}[/]")
+                for cmd in p["cmds"]:
+                    console.print(f"    $ {' '.join(cmd)}")
+                console.print()
+            return False
+
+        plan = plans[pick[1]]
+        console.print()
+        console.print("  [dim]About to run:[/]")
+        for cmd in plan["cmds"]:
+            console.print(f"    [dim]$[/] {' '.join(cmd)}")
+        console.print()
+        if plan["sudo"]:
+            console.print(
+                "  [yellow]Note:[/] These commands need ``sudo`` — "
+                "you'll be prompted for your password.\n"
+            )
+        if not questionary.confirm(
+            "Run these commands now?", default=True, style=STYLE,
+        ).ask():
+            return False
+
+        runner = _run_interactive if plan["sudo"] else _run_streamed
+        for cmd in plan["cmds"]:
+            rc = runner(cmd, status_msg=f"Installing {plan['engine']}...")
+            if rc != 0:
+                return False
+
+        if plan["after"]:
+            console.print()
+            console.print(f"  [yellow]Next step:[/] {plan['after']}")
+            console.print()
+
+        # Re-check and chain into the follow-up branches if needed
+        # (podman on macOS now needs ``machine init && machine start`` —
+        # the existing ``podman_no_machine`` branch below handles that).
+        new_engine, new_status, new_detail = _check_engine()
+        if new_status == "ready":
+            console.print(f"  [green]\u2713[/] {plan['engine']} is ready.")
+            return True
+        if new_status == "not_installed":
+            console.print()
+            console.print(
+                "  [yellow]Install finished, but the engine isn't on "
+                "PATH yet.[/] Open a new terminal and re-run ``claw-bench``."
+            )
+            console.print()
+            return False
+        return _fix_engine(new_engine, new_status, new_detail)
 
     if engine == "podman" and status == "podman_no_machine":
         console.print()
