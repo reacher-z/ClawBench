@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -633,6 +634,101 @@ def mode_configure() -> None:
             _edit_model(data)
         elif action == "Delete a model":
             _delete_model(data)
+
+
+# ---------------------------------------------------------------------------
+# Mode: Configure secrets
+# ---------------------------------------------------------------------------
+
+_SECRET_KEYS: list[tuple[str, str]] = [
+    ("PURELY_MAIL_API_KEY", "PurelyMail API key"),
+    ("PURELY_MAIL_DOMAIN", "PurelyMail domain"),
+    ("HF_TOKEN", "HuggingFace token (optional)"),
+    ("HF_REPO_ID", "HuggingFace dataset repo id (optional)"),
+]
+
+
+def _redact_secret(v: str) -> str:
+    if len(v) <= 4:
+        return "****"
+    return v[:2] + "****" + v[-2:]
+
+
+def _read_secrets_file(path: Path) -> dict[str, str]:
+    out: dict[str, str] = {}
+    if not path.exists():
+        return out
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        out[k.strip()] = v.strip().strip('"').strip("'")
+    return out
+
+
+def mode_configure_secrets() -> None:
+    """Prompt for PurelyMail + HF credentials and persist to secrets.env.
+
+    Mirrors ``clawbench configure --secrets`` so TUI users have the same
+    capability without dropping to the CLI. Blank answers keep the existing
+    value; shipped defaults are shown in the clear so a new user can accept
+    them by hitting enter.
+    """
+    # Import here — ``clawbench.run`` pulls heavier deps we don't want at
+    # TUI startup, and this screen is cold-path.
+    from clawbench.run import DEFAULT_SECRETS
+
+    target = _paths.user_secrets_path()
+    existing = _read_secrets_file(target)
+
+    console.print()
+    console.print(Panel(
+        Text.assemble(
+            Text("Configure secrets", style="bold"),
+            "\n",
+            Text(f"Writes to {target}", style="dim"),
+            "\n",
+            Text("Leave blank to keep the current value.", style="dim"),
+        ),
+    ))
+    console.print()
+
+    updated: dict[str, str] = dict(existing)
+    for key, label in _SECRET_KEYS:
+        cur = existing.get(key, "")
+        default = DEFAULT_SECRETS.get(key, "")
+        if cur:
+            hint = f"  [current: {_redact_secret(cur)}]"
+        elif default:
+            hint = f"  [default: {default}]"
+        else:
+            hint = ""
+        val = questionary.text(
+            f"{label}{hint}",
+            default="",
+            style=STYLE,
+        ).ask()
+        if val is None:
+            console.print("\n[dim]Cancelled.[/]")
+            return
+        val = val.strip()
+        if val:
+            updated[key] = val
+        elif not cur and default:
+            updated[key] = default
+
+    lines = ["# claw-bench secrets — chmod 600", ""]
+    lines += [f'{k}="{v}"' for k, v in updated.items()]
+    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    try:
+        target.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    except OSError:
+        pass
+
+    console.print()
+    console.print(f"  [green]Wrote {len(updated)} key(s) to {target}[/]")
+    console.print()
 
 
 def _add_model(data: dict) -> None:
@@ -1476,6 +1572,7 @@ def main() -> None:
                 questionary.Choice("Batch run   (models x cases)", value="batch"),
                 questionary.Choice("Human mode  (no agent, noVNC)", value="human"),
                 questionary.Choice("Configure models", value="configure"),
+                questionary.Choice("Configure secrets", value="configure_secrets"),
                 questionary.Choice("Change theme", value="theme"),
                 questionary.Choice("Exit", value="exit"),
             ],
@@ -1498,6 +1595,10 @@ def main() -> None:
         if mode == "configure":
             mode_configure()
             models = load_models()
+            continue
+
+        if mode == "configure_secrets":
+            mode_configure_secrets()
             continue
 
         # Every run mode (including Human) needs a live engine. If it
