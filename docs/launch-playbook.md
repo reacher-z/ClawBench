@@ -155,7 +155,7 @@ specific examples over abstract framings.
 Lead with the leaderboard screenshot.
 
 **Bonus targets:** Last Week in AI, Import AI (Jack Clark), The Neuron,
-AI Breakfast. All take submissions via their contact form.
+AI Breakfast, Etude AI. All take submissions via their contact form.
 
 ---
 
