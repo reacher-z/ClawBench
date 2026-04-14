@@ -635,6 +635,45 @@ def mode_configure() -> None:
             _delete_model(data)
 
 
+# ---------------------------------------------------------------------------
+# Mode: Star on GitHub
+# ---------------------------------------------------------------------------
+
+_STAR_URL = "https://github.com/reacher-z/ClawBench"
+
+
+def _open_star_page() -> None:
+    """Open the repo page in the user's default browser and print the URL.
+
+    Browser-open is best-effort (headless VMs, SSH sessions, locked-down
+    kiosks) — we always print the URL so the user can click it from a
+    modern terminal emulator that auto-linkifies http URLs.
+    """
+    import webbrowser
+
+    console.print()
+    console.print(Panel(
+        Text.assemble(
+            Text("Thanks for using ClawBench", style="bold"),
+            "\n",
+            Text("Stars help other AI-agent researchers find the benchmark.",
+                 style="dim"),
+            "\n\n",
+            Text(_STAR_URL, style="bold"),
+        ),
+    ))
+    console.print()
+    try:
+        opened = webbrowser.open(_STAR_URL)
+    except Exception:
+        opened = False
+    if opened:
+        console.print("  [dim]Opened in your default browser.[/]")
+    else:
+        console.print("  [dim]Copy the link above to open it manually.[/]")
+    console.print()
+
+
 def _add_model(data: dict) -> None:
     # -- Step 1: Pick provider ----------------------------------------------
     # Selecting one of the presets auto-fills base_url + api_type and shows
@@ -1477,14 +1516,21 @@ def main() -> None:
                 questionary.Choice("Human mode  (no agent, noVNC)", value="human"),
                 questionary.Choice("Configure models", value="configure"),
                 questionary.Choice("Change theme", value="theme"),
+                questionary.Choice("Star us on GitHub", value="star"),
                 questionary.Choice("Exit", value="exit"),
             ],
             style=STYLE,
         ).ask()
 
         if mode is None or mode == "exit":
+            from clawbench.support import rich_star_prompt
+            rich_star_prompt(console)
             console.print("\n[dim]Bye.[/]")
             return
+
+        if mode == "star":
+            _open_star_page()
+            continue
 
         if mode == "theme":
             theme = _pick_theme()

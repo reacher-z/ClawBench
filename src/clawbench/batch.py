@@ -591,6 +591,9 @@ async def async_main(args: argparse.Namespace) -> int:
                 hf_env,
             )
 
+    from clawbench.support import print_star_prompt
+    print_star_prompt()
+
     has_errors = any(j.status == "error" for j in jobs)
     return 1 if has_errors else 0
 

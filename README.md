@@ -546,6 +546,27 @@ If you use ClawBench in your research, please cite:
 </tr>
 </table>
 
+## Support ClawBench
+
+If ClawBench is useful for your research or product work,
+the single most helpful thing you can do is **[star the repo](https://github.com/reacher-z/ClawBench)** —
+it surfaces the benchmark to other AI-agent researchers and helps us justify
+continued dataset curation.
+
+<p align="center">
+<a href="https://github.com/reacher-z/ClawBench">
+<img src="https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo">
+</a>
+</p>
+
+Open to contributions — new test cases, bug fixes, or evaluation submissions for a model we haven't scored yet. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+<p align="center">
+<a href="https://github.com/reacher-z/ClawBench/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=reacher-z/ClawBench" alt="Contributors">
+</a>
+</p>
+
 ## Star History
 
 <a href="https://star-history.com/#reacher-z/ClawBench&Date">
