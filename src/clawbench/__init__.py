@@ -23,6 +23,11 @@ for _dist in (
     "harness-bench",
     "openclawbench",
     "claw-harness",
+    "harnessos",          # second-wave defensive squats
+    "r2agent",
+    "claw-ai",
+    "claw-agent",
+    "claw-eval",
     "claw-bench",         # original primary (blocked; left for future)
     "clawbench",          # original alias  (blocked; left for future)
 ):
