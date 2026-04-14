@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -1515,6 +1516,7 @@ def main() -> None:
                 questionary.Choice("Batch run   (models x cases)", value="batch"),
                 questionary.Choice("Human mode  (no agent, noVNC)", value="human"),
                 questionary.Choice("Configure models", value="configure"),
+                questionary.Choice("Configure secrets", value="configure_secrets"),
                 questionary.Choice("Change theme", value="theme"),
                 questionary.Choice("Star us on GitHub", value="star"),
                 questionary.Choice("Exit", value="exit"),
@@ -1544,6 +1546,10 @@ def main() -> None:
         if mode == "configure":
             mode_configure()
             models = load_models()
+            continue
+
+        if mode == "configure_secrets":
+            mode_configure_secrets()
             continue
 
         # Every run mode (including Human) needs a live engine. If it

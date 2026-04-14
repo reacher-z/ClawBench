@@ -23,6 +23,28 @@ for _dist in (
     "harness-bench",
     "openclawbench",
     "claw-harness",
+    "harnessos",          # second-wave defensive squats
+    "r2agent",
+    "claw-ai",
+    "claw-agent",
+    "claw-eval",
+    "everyday-bench",     # third-wave research-themed squats
+    "everyday-agent",
+    "life-bench",
+    "realtask-bench",
+    "web-harness",
+    "task-harness",
+    "video-mcq",
+    "mcq-bench",
+    "vlm-judge",
+    "video-judge",
+    "nail-bench",
+    "nail-agent",
+    "nail-eval",
+    "nail-group",
+    "harness-hub",        # fourth-wave singleton winner
+    "r2-harness",         # ninth wave
+    "scaling-law",
     "claw-bench",         # original primary (blocked; left for future)
     "clawbench",          # original alias  (blocked; left for future)
 ):
