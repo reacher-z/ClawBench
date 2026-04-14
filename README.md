@@ -18,9 +18,22 @@ uv tool install clawbench-eval && clawbench
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
-We asked 6 frontier AI agents to do what people do every day --<br/>
+We asked frontier AI agents to do what people do every day --<br/>
 order food, book travel, apply for jobs, write reviews, manage projects.<br/>
-**The best model completed only 33.3% of tasks.**
+**Even the best agent fails nearly 40% of them.**
+
+**Latest scores** &nbsp;&middot;&nbsp; [paper results ↓](#-results)
+
+| Rank | Model | Pass rate |
+|:----:|:------|:---------:|
+| 1 | Claude Opus 4.6   | **61.4%** |
+| 2 | Claude Sonnet 4.6 | 56.2% |
+| 3 | Claude Haiku 4.5  | 30.1% |
+| 4 | GPT-5.4           | 25.5% |
+| 5 | GPT-5.4 mini      | 24.8% |
+| 6 | Kimi K2.5         | 17.6% |
+
+<sub>Per-task results: [`eval-results/`](eval-results/). &nbsp; Last refreshed 2026-04-14.</sub>
 
 ---
 
