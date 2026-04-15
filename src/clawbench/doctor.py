@@ -1,10 +1,10 @@
-"""``claw-bench doctor`` — diagnostic checks for a ClawBench install.
+"""``clawbench doctor`` — diagnostic checks for a ClawBench install.
 
 Every check is a callable that returns a :class:`CheckResult`. The CLI
 layer is responsible for rendering; this module just reports facts.
 
 Split out from the TUI's inline engine probe so we can run the same
-checks from CI, from ``claw-bench doctor``, and from inside the TUI
+checks from CI, from ``clawbench doctor``, and from inside the TUI
 "fix this for me" flow without duplicating code.
 """
 
@@ -63,7 +63,7 @@ def check_image() -> CheckResult:
             "container image",
             "warn",
             f"'{_image.IMAGE_NAME}' not present",
-            "Run `claw-bench build` (or let `claw-bench run` pull on first use).",
+            "Run `clawbench build` (or let `clawbench run` pull on first use).",
         )
     ok, msg = _image.verify_image_version(eng)
     if ok:
@@ -94,7 +94,7 @@ def check_models_yaml() -> CheckResult:
             "models.yaml",
             "warn",
             "not yet created",
-            "Run `claw-bench configure` to seed from the bundled template.",
+            "Run `clawbench configure` to seed from the bundled template.",
         )
     try:
         import yaml
@@ -107,7 +107,7 @@ def check_models_yaml() -> CheckResult:
             "models.yaml",
             "warn",
             f"{dst} is empty — no models configured",
-            "Edit the file (`claw-bench configure`) and add at least one model.",
+            "Edit the file (`clawbench configure`) and add at least one model.",
         )
     return CheckResult("models.yaml", "ok", f"{count} model(s) configured")
 

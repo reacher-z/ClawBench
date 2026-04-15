@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "claw-bench"
+name = "clawbench-eval"
 version = "0.1.5"
 description = "ClawBench: Can AI Agents Complete Everyday Online Tasks?"
 readme = "README.md"
@@ -54,12 +54,12 @@ dev = [
 ]
 
 [project.scripts]
-# The hyphenated form is canonical; ``clawbench`` and ``clawbench-eval``
-# are aliases so users who remember the PyPI name they installed under
-# can just type that as the command.
-claw-bench = "clawbench.cli:main"
+# ``clawbench`` is the primary command; ``clawbench-eval`` and
+# ``claw-bench`` are aliases so users who remember the PyPI name they
+# installed under can just type that as the command.
 clawbench = "clawbench.cli:main"
 clawbench-eval = "clawbench.cli:main"
+claw-bench = "clawbench.cli:main"
 
 [project.urls]
 Homepage = "https://claw-bench.com"

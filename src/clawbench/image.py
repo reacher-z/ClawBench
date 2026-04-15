@@ -8,7 +8,7 @@ build when pull fails (offline, rate-limited, arch mismatch).
 Why pull-first, build-fallback:
 
 - A first-time ``docker build`` takes 5-10 minutes on a fresh system.
-  For users who just typed ``pip install claw-bench``, that is an awful
+  For users who just typed ``uv tool install clawbench-eval``, that is an awful
   first impression. A prebuilt image on GHCR is an order of magnitude
   faster and already exists on the release pipeline.
 - But pulls can fail in ways builds cannot (behind an enterprise proxy,
@@ -123,5 +123,5 @@ def verify_image_version(engine: str | None = None) -> tuple[bool, str]:
         return True, ""
     return False, (
         f"image version label '{label}' != package version '{__version__}'. "
-        f"Consider `claw-bench build --no-cache` to rebuild."
+        f"Consider `clawbench build --no-cache` to rebuild."
     )

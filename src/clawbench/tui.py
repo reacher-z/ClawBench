@@ -923,17 +923,17 @@ def _require_tty() -> None:
     console.print("  For non-interactive use, call the CLI directly:")
     console.print()
     console.print(
-        f"    [{ACCENT2}]claw-bench run[/] "
+        f"    [{ACCENT2}]clawbench run[/] "
         f"[{ACCENT2}]001-daily-life-food-uber-eats claude-sonnet-4-6[/]"
     )
     console.print()
     console.print(
-        f"    [{ACCENT2}]claw-bench batch[/] "
+        f"    [{ACCENT2}]clawbench batch[/] "
         f"[{ACCENT2}]--all-models --case-range 1-50 --max-concurrent 3[/]"
     )
     console.print()
     console.print(
-        f"  See [{ACCENT2}]claw-bench --help[/] for full CLI usage."
+        f"  See [{ACCENT2}]clawbench --help[/] for full CLI usage."
     )
     console.print()
     sys.exit(1)
@@ -1297,7 +1297,7 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
             console.print()
             console.print(
                 "  [yellow]Install finished, but the engine isn't on "
-                "PATH yet.[/] Open a new terminal and re-run ``claw-bench``."
+                "PATH yet.[/] Open a new terminal and re-run ``clawbench``."
             )
             console.print()
             return False
