@@ -166,6 +166,8 @@ clawbench run 001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
 
+**(d) Pair with an external browser agent** — e.g. [Claude for Chrome](https://claude.com/claude-for-chrome) running in your own browser. See [`docs/integrations.md`](docs/integrations.md) for the flow and caveats.
+
 <details>
 <summary><b>Develop from source</b> &nbsp;— clone + ``./run.sh`` for contributors</summary>
 
