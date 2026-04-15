@@ -2,6 +2,7 @@
 
 # ClawBench
 
+[![Star this repo](https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
 [![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/papers/2604.08523)
 [![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
@@ -22,20 +23,7 @@ uv tool install clawbench-eval && clawbench
 
 我们让前沿 AI 智能体去做人们每天都在做的事 --<br/>
 点外卖、订酒店、投简历、写评价、管理项目。<br/>
-**即使最强的模型，也有近 40% 的任务完成不了。**
-
-**最新榜单** &nbsp;&middot;&nbsp; [论文版排名 ↓](#-results-结果)
-
-| 排名 | 模型 | 通过率 |
-|:----:|:------|:---------:|
-| 1 | Claude Opus 4.6   | **61.4%** |
-| 2 | Claude Sonnet 4.6 | 56.2% |
-| 3 | Claude Haiku 4.5  | 30.1% |
-| 4 | GPT-5.4           | 25.5% |
-| 5 | GPT-5.4 mini      | 24.8% |
-| 6 | Kimi K2.5         | 17.6% |
-
-<sub>详细结果见 [`eval-results/`](eval-results/)。&nbsp; 更新日期 2026-04-14。</sub>
+**即使最强的模型，也只能完成其中约三分之一。**
 
 ---
 
