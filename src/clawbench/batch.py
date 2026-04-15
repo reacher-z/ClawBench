@@ -502,7 +502,7 @@ async def async_main(args: argparse.Namespace) -> int:
     # builds show a clear "~2GB, 5–10min" banner and live step counter instead
     # of a wall of apt/npm output.
     engine = detect_engine()
-    # Ensure child `claw-bench run` processes (and the imported helper below)
+    # Ensure child `clawbench run` processes (and the imported helper below)
     # use the same engine as we just detected.
     os.environ["CONTAINER_ENGINE"] = engine
     from clawbench import run as _run_mod  # lazy: import after CONTAINER_ENGINE is set

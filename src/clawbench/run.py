@@ -100,12 +100,12 @@ def _load_runtime_env() -> dict[str, str]:
     1. ``os.environ`` — normal env vars (highest priority).
     2. ``$CWD/.env`` — legacy source-install layout (if present).
     3. ``user_config_dir()/secrets.env`` — persisted secrets from
-       ``claw-bench configure --secrets``.
+       ``clawbench configure --secrets``.
     4. :data:`DEFAULT_SECRETS` — wheel-shipped defaults for the
        PurelyMail credentials so a fresh install works immediately.
 
     Earlier sources win; later sources fill in missing keys only. This lets
-    ``PURELY_MAIL_API_KEY=... claw-bench run ...`` work without any config
+    ``PURELY_MAIL_API_KEY=... clawbench run ...`` work without any config
     file, while still picking up a persisted key for users who prefer one.
     """
     merged: dict[str, str] = {}
@@ -820,7 +820,7 @@ def main(argv: list[str] | None = None) -> None:
     if missing:
         for k in missing:
             print(f"ERROR: {k} not set (checked env, ./.env, and {_paths.user_secrets_path()})")
-        print("  Tip: run `claw-bench configure --secrets` to persist these keys")
+        print("  Tip: run `clawbench configure --secrets` to persist these keys")
         sys.exit(1)
     pm_key: str = env["PURELY_MAIL_API_KEY"]
     pm_domain: str = env["PURELY_MAIL_DOMAIN"]

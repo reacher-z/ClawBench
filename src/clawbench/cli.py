@@ -1,10 +1,10 @@
-"""``claw-bench`` command-line entry point (click-based).
+"""``clawbench`` command-line entry point (click-based).
 
 Design notes:
 
-- Bare ``claw-bench`` launches the TUI. This preserves muscle memory from
+- Bare ``clawbench`` launches the TUI. This preserves muscle memory from
   the old ``./run.sh`` and keeps the zero-friction experience for users
-  who just typed ``pip install claw-bench`` and hit enter.
+  who just typed ``uv tool install clawbench-eval`` and hit enter.
 - Every power-user action has an explicit subcommand so scripts don't
   need to navigate a menu (``run``, ``batch``, ``build``, ``cases``,
   ``models``, ``configure``, ``doctor``, ``version``).
@@ -58,13 +58,13 @@ def _echo_result(r: _doctor.CheckResult) -> None:
     invoke_without_command=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
-@click.version_option(__version__, "-V", "--version", prog_name="claw-bench")
+@click.version_option(__version__, "-V", "--version", prog_name="clawbench")
 @click.pass_context
 def main(ctx: click.Context) -> None:
     """ClawBench — benchmark AI agents on 153 everyday web tasks.
 
     Run without a subcommand to launch the interactive TUI. Use
-    ``claw-bench run``, ``batch``, ``build``, ``doctor``, etc. for
+    ``clawbench run``, ``batch``, ``build``, ``doctor``, etc. for
     scripting.
     """
     if ctx.invoked_subcommand is None:
@@ -287,7 +287,7 @@ def models_cmd() -> None:
         click.echo(f"ERROR: cannot read {path}: {e}", err=True)
         sys.exit(1)
     if not data:
-        click.echo(f"No models configured. Edit {path} or run `claw-bench configure`.")
+        click.echo(f"No models configured. Edit {path} or run `clawbench configure`.")
         return
     click.echo(f"Models configured in {path}:")
     for name in sorted(data):
@@ -373,7 +373,7 @@ def _write_secrets_interactive() -> None:
             # future default-rotations.
             updated[key] = default
 
-    lines = ["# claw-bench secrets — chmod 600", ""]
+    lines = ["# clawbench secrets — chmod 600", ""]
     lines += [f'{k}="{v}"' for k, v in updated.items()]
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
     try:
@@ -396,7 +396,7 @@ def _redact(v: str) -> str:
 @main.command("doctor")
 def doctor_cmd() -> None:
     """Validate engine, image, test-cases, output perms, and secrets."""
-    click.echo("claw-bench diagnostics\n")
+    click.echo("clawbench diagnostics\n")
     results = _doctor.run_all()
     for r in results:
         _echo_result(r)
