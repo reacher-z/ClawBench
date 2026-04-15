@@ -475,7 +475,48 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). In short: create a directory under `test
 
 ## Contributing
 
-We welcome contributions -- especially new test cases. See [CONTRIBUTING.md](CONTRIBUTING.md).
+We welcome contributions -- especially new test cases. If you've ever ordered groceries, booked an appointment, or filed a form online, you already know how to write one. Most PRs are a single JSON file and land in under a day.
+
+**Quick wins:**
+
+- [Add a new test case](CONTRIBUTING.md#adding-a-new-test-case) (~30 min, no container expertise needed)
+- [Add a new category](CONTRIBUTING.md#what-were-looking-for) of 10+ tasks &rarr; co-author invitation on the next paper revision
+- [Submit a new model](CONTRIBUTING.md#what-were-looking-for) to the public leaderboard
+- Browse [good first issues](https://github.com/reacher-z/ClawBench/labels/good%20first%20issue)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide and contributor recognition policy.
+
+## Community
+
+Come hang out with researchers, builders, and contributors working on real-world browser agents.
+
+<table>
+<tr>
+<td align="center" width="33%">
+<a href="https://discord.gg/clawbench">
+<img src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+</a>
+<br/>
+<sub><b>English community</b><br/>Agent builders, researchers, contributors</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/community.md#%E5%BE%AE%E4%BF%A1%E7%BE%A4-chinese">
+<img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4-%E5%8A%A0%E5%85%A5-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="微信群">
+</a>
+<br/>
+<sub><b>中文社区</b><br/>研究者、开发者、贡献者交流</sub>
+</td>
+<td align="center" width="33%">
+<a href="https://github.com/reacher-z/ClawBench/discussions">
+<img src="https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions">
+</a>
+<br/>
+<sub><b>Async Q&A</b><br/>Searchable, long-form, permanent</sub>
+</td>
+</tr>
+</table>
+
+See [docs/community.md](docs/community.md) for channel layout, house rules, and 微信群 加入方式.
 
 ## Citation
 

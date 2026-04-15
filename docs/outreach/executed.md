@@ -8,20 +8,22 @@ Running log of every submission made on the user's behalf. Account-tied channels
 |---|---|---|---|
 | 2026-04-15 | walkinglabs/awesome-harness-engineering | [#8](https://github.com/walkinglabs/awesome-harness-engineering/pull/8) | Open |
 | 2026-04-15 | reacher-z/ClawBench (self, `growth-kit-v1`) | [#52](https://github.com/reacher-z/ClawBench/pull/52) | Open |
+| 2026-04-15 | ranpox/awesome-computer-use | [#23](https://github.com/ranpox/awesome-computer-use/pull/23) | Open |
+| 2026-04-15 | angrykoala/awesome-browser-automation | [#98](https://github.com/angrykoala/awesome-browser-automation/pull/98) | Open |
 
 ## PRs queued — awaiting user go-ahead
 
 Drafted in [awesome-lists-targets.md](awesome-lists-targets.md). One PR per repo; agent per PR to avoid cross-contamination; disclosure in each PR body.
 
 ### Tier 1
-- [ ] steel-dev/awesome-web-agents
+- [BLOCKED] steel-dev/awesome-web-agents — existing PR #42 from earlier session (outdated 33.3% stats). User to decide: close+reopen, edit in place, or force-push update.
 - [ ] ZJU-REAL/Awesome-GUI-Agents
-- [ ] ranpox/awesome-computer-use
+- [x] ranpox/awesome-computer-use — [PR #23](https://github.com/ranpox/awesome-computer-use/pull/23)
 - [ ] cdxeve/awesome-computer-use-agents
 - [ ] dataanswer/awesome-agent-benchmarks
 - [ ] Jenqyang/Awesome-AI-Agents
 - [ ] kyrolabs/awesome-agents
-- [ ] angrykoala/awesome-browser-automation
+- [x] angrykoala/awesome-browser-automation — [PR #98](https://github.com/angrykoala/awesome-browser-automation/pull/98)
 
 ### Tier 2 (second wave, 5-7 days later to avoid appearing campaign-y)
 - [ ] onejune2018/Awesome-LLM-Eval
