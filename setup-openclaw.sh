@@ -25,6 +25,19 @@ mkdir -p ~/.openclaw/agents/main/agent
 
 # Restrict exec to safe read-only commands (allowlist mode).
 # The agent cannot run curl, python, node, etc. — only ls/cat/grep and default safe bins.
+#
+# Three things are needed for the allowlist to actually enforce in --local mode:
+#   1. security: "allowlist" — engage the allowlist code path.
+#   2. ask: "off" — disable the approval-prompt flow. With the default
+#      "on-miss", non-allowlisted commands fall through to a gateway-side
+#      approval request which auto-resolves to allow-once in --local mode
+#      (no human approver wired), defeating the allowlist entirely.
+#   3. safeBinProfiles for ls/cat/find/file — the built-in
+#      SAFE_BIN_PROFILES only ships profiles for jq/grep/cut/sort/head/tail/
+#      tr/uniq/wc, so any safeBins entry not in that set is silently dropped
+#      ("ignoring unprofiled safeBins entries" warning in gateway.log).
+#      User-provided profiles are merged with the built-in, so we only need
+#      to declare the 4 missing bins. Empty `{}` profiles allow any args.
 cat > ~/.openclaw/openclaw.json << JSONEOF
 {
   "gateway": {
@@ -33,8 +46,16 @@ cat > ~/.openclaw/openclaw.json << JSONEOF
   },
   "tools": {
     "exec": {
+      "host": "gateway",
       "security": "allowlist",
-      "safeBins": ["ls", "cat", "find", "file", "jq", "cut", "uniq", "head", "tail", "tr", "wc", "grep", "sort"]
+      "ask": "off",
+      "safeBins": ["ls", "cat", "find", "file", "jq", "cut", "uniq", "head", "tail", "tr", "wc", "grep", "sort"],
+      "safeBinProfiles": {
+        "ls": {},
+        "cat": {},
+        "find": {},
+        "file": {}
+      }
     }
   },
   "agents": {
@@ -69,6 +90,26 @@ cat > ~/.openclaw/openclaw.json << JSONEOF
   }
 }
 JSONEOF
+
+# Write the exec-approvals file with ask=off and askFallback=deny.
+# This is the *only* place the per-tool/per-host approval policy actually
+# lives — `tools.exec.ask` in openclaw.json is just a per-call default that
+# gets combined with this file via maxAsk(). If we don't pin ask=off here,
+# the agent's ask defaults to "on-miss" (DEFAULT_ASK) and any unprofiled
+# command falls into the gateway approval flow, which auto-resolves in
+# --local mode without a wired human approver — defeating the allowlist.
+cat > ~/.openclaw/exec-approvals.json << 'APPROVALSEOF'
+{
+  "version": 1,
+  "defaults": {
+    "security": "allowlist",
+    "ask": "off",
+    "askFallback": "deny"
+  },
+  "agents": {}
+}
+APPROVALSEOF
+chmod 600 ~/.openclaw/exec-approvals.json
 
 # Generate auth-profiles.json with multi-key rotation support
 python3 -c "

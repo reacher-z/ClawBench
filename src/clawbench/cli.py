@@ -103,6 +103,8 @@ def tui_cmd() -> None:
               help="Directory to write output to (default: ./claw-output).")
 @click.option("--no-build", is_flag=True, help="Skip building the container image.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload even if configured.")
+@click.option("--harness", type=click.Choice(["openclaw", "opencode"]), default=None,
+              help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def run_cmd(
     ctx: click.Context,
@@ -112,6 +114,7 @@ def run_cmd(
     output_dir: Path | None,
     no_build: bool,
     no_upload: bool,
+    harness: str | None,
 ) -> None:
     """Run a single test case against a model (or in --human mode)."""
     from clawbench import run as _run
@@ -137,6 +140,8 @@ def run_cmd(
         argv.append("--no-build")
     if no_upload:
         argv.append("--no-upload")
+    if harness:
+        argv += ["--harness", harness]
     argv += list(ctx.args)
     _run.main(argv)
 
@@ -165,6 +170,8 @@ def run_cmd(
               help="Min seconds between container starts (default: 15).")
 @click.option("--dry-run", is_flag=True, help="Print job matrix without running.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload for all runs.")
+@click.option("--harness", type=click.Choice(["openclaw", "opencode"]), default=None,
+              help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def batch_cmd(
     ctx: click.Context,
@@ -178,6 +185,7 @@ def batch_cmd(
     stagger_delay: float,
     dry_run: bool,
     no_upload: bool,
+    harness: str | None,
 ) -> None:
     """Run a model x case cross-product concurrently."""
     from clawbench import batch as _batch
@@ -200,6 +208,8 @@ def batch_cmd(
         argv.append("--dry-run")
     if no_upload:
         argv.append("--no-upload")
+    if harness:
+        argv += ["--harness", harness]
     argv += list(ctx.args)
     _batch.main(argv)
 
@@ -210,19 +220,23 @@ def batch_cmd(
 
 @main.command("build")
 @click.option("--no-cache", is_flag=True, help="Ignore layer cache — full rebuild.")
-def build_cmd(no_cache: bool) -> None:
-    """Build the clawbench container image from the bundled Dockerfile."""
+@click.option("--harness", type=click.Choice(["openclaw", "opencode"]),
+              default="openclaw",
+              help="Coding-agent harness layer to build (default: openclaw).")
+def build_cmd(no_cache: bool, harness: str) -> None:
+    """Build the base + harness container images from the bundled Dockerfiles."""
     from clawbench import run as _run
     # ``run.docker_build`` already retries with --no-cache on stale-cache
     # detection; if the user explicitly asks for a cold build, we blow the
-    # cache up front by removing the existing image and then rebuilding.
+    # cache up front by removing the existing images and then rebuilding.
     if no_cache:
         from clawbench.engine import detect_engine
         eng = detect_engine()
         if eng:
-            subprocess.run([eng, "image", "rm", "-f", "clawbench"],
-                           capture_output=True)
-    _run.docker_build()
+            for tag in (_run.BASE_IMAGE, _run.harness_image(harness)):
+                subprocess.run([eng, "image", "rm", "-f", tag],
+                               capture_output=True)
+    _run.docker_build(harness)
 
 
 # ---------------------------------------------------------------------------
