@@ -8,19 +8,23 @@ English section below · 中文内容见下方
 
 ## Discord (English)
 
-**Invite:** https://discord.gg/clawbench
+**Invite:** https://discord.gg/twYkYyP23
 
 ### Channels
 
-| Channel | What goes there |
-|---|---|
-| `#announcements` | Maintainer-only — new releases, leaderboard updates, paper revisions |
-| `#general` | Open discussion about browser agents, benchmarks, the state of the art |
-| `#contributors` | Coordination for people working on test cases and framework changes |
-| `#model-submissions` | Help with getting a new model onto the public leaderboard |
-| `#help` | Running into an install or container-engine problem? Ask here |
-| `#research` | Paper discussion, related work, evaluation methodology |
-| `#showcase` | Demo videos, GIFs, interesting failure modes |
+We use Discord for real-time coordination and structured discussions. Some channels are set up as **Forums** to help track specific topics and issues efficiently.
+
+| Channel | Format | Description | Suggested Tags / Use Case |
+| :--- | :--- | :--- | :--- |
+| `#announcements` | Text | **Maintainer-only** — new releases, leaderboard updates, and major paper revisions. | - |
+| `#discussion` | Text | Open-ended real-time chat about browser agents, benchmarks, and SOTA. | General chat |
+| `#contributors` | Text | Coordination for people working on test cases and framework changes. | Dev-talk |
+| `#model-submissions` | **Forum** | Getting a new model onto the public leaderboard. | `pending`, `tested`, `integrated` |
+| `#help` | **Forum** | Troubleshooting installation or container-engine problems. | `installation`, `docker`, `solved` |
+| `#research-sharing` | **Forum** | Deep dives into paper discussion and evaluation methodology. | `paper-review`, `methodology` |
+| `#showcase` | **Forum** | Sharing demo videos, GIFs, and interesting agent failure modes. | Demos |
+
+---
 
 ### House rules
 
@@ -41,7 +45,7 @@ Open a merged PR to ClawBench (any kind — test case, fix, doc). Post the PR li
 
 扫描二维码入群：
 
-<img src="../static/community/wechat-qr.png" width="200" alt="ClawBench WeChat group QR code">
+<img src="../static/community/wechat_grp_422.jpg" width="200" alt="ClawBench WeChat group QR code">
 
 > **注意:** 微信群二维码 7 天失效。如果二维码失效,请:
 > 1. 在 GitHub issue 区留言 "需要最新微信群二维码" + 你的联系方式,
