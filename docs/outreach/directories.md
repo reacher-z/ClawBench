@@ -15,7 +15,7 @@ Goal: maximize discoverability by non-academic audiences and AI search (SearchGP
 ### dev.to
 - URL: https://dev.to/new
 - Tags: `ai`, `machinelearning`, `opensource`, `benchmark`
-- Title: `We ran 7 frontier AI agents on 153 real websites — they peaked at 61% pass rate`
+- Title: `We ran 7 frontier AI agents on 153 real websites — they peaked at 33.3% pass rate`
 - Cross-post canonical to arXiv/HF — set `canonical_url` front-matter.
 - Body: HN body (lightly edited) + embedded results table + call-to-action at bottom.
 

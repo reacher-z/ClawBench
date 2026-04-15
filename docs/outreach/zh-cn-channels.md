@@ -30,7 +30,7 @@
 **规则:** 发帖需积分 (建议 >100). 非广告口吻 — 讲故事 / 动机 / 技术难点, 项目链接放文末. 时间: 工作日 10:00 或 21:00 北京时间.
 
 **文案 (CN):**
-> 折腾了半年,开源一个 AI 浏览器 agent 的 benchmark:153 个日常任务(下单/订机票/填表),直接跑真实网站而不是模拟器。Claude Opus 目前成功率 61.4%,求 V 友来怼 baseline。GitHub: reacher-z/ClawBench
+> 折腾了半年,开源一个 AI 浏览器 agent 的 benchmark:153 个日常任务(下单/订机票/填表),直接跑真实网站而不是模拟器。我们测了 7 个前沿模型,最高通过率 33.3%,绝大多数不到 40%。求 V 友来怼 baseline。GitHub: reacher-z/ClawBench
 
 ## 3. 机器之心 (jiqizhixin.com)
 
@@ -42,7 +42,7 @@
 
 **投稿邮箱:** `ai@qbitai.com`
 
-**风格:** "XX 大学团队开源 XXX" 标题党, 需要 1-2 个亮眼数字 (如"最强模型也只有 62% 通过率"). 响应更快.
+**风格:** "XX 大学团队开源 XXX" 标题党, 需要 1-2 个亮眼数字 (如"最强模型也只有 33.3% 通过率"). 响应更快.
 
 ## 5. 新智元 (aiera.com.cn)
 
@@ -52,7 +52,7 @@
 
 ## 机器之心/量子位/新智元 通用 pitch (CN)
 
-> UBC、Vector Institute、清华、港科大、浙大、上交、CMU、Waterloo 等机构联合 Etude AI / UniPat AI / Netmind.ai 推出 ClawBench:首个聚焦真实网页的 AI 浏览器 agent 评测基准。153 个任务覆盖电商、出行、政务、办公场景,配套 Chrome 插件可一键复现。主流 agent 最高仅 62% 通过率,暴露 DOM 噪声与多步推理的硬伤。Paper: huggingface.co/papers/2604.08523,Repo: github.com/reacher-z/ClawBench
+> UBC、Vector Institute、清华、港科大、浙大、上交、CMU、Waterloo 等机构联合 Etude AI / UniPat AI / Netmind.ai 推出 ClawBench:首个聚焦真实网页的 AI 浏览器 agent 评测基准。153 个任务覆盖电商、出行、政务、办公场景,配套 Chrome 插件可一键复现。我们评测了 7 个前沿模型,最高通过率仅 33.3%,绝大多数不到 40%,暴露 DOM 噪声与多步推理的硬伤。Paper: huggingface.co/papers/2604.08523,Repo: github.com/reacher-z/ClawBench
 
 ## 6. 掘金 (juejin.cn)
 

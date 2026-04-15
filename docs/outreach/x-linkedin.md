@@ -20,7 +20,7 @@ Indeed task: apply to 3 software jobs. Perimeter X bot-check intercepted on page
 Gmail task: email the recruiter. Agent composed a perfect message, forgot to fill the To: field, and sent it into the void. Logged the blank send as a completed task.
 
 **6/7**
-Across 144 live production sites and 1,071 runs, the best frontier model passed 62%. The median was under 40%. WebArena scores do not survive contact with real CAPTCHAs, real cookies, real date pickers.
+Across 144 live production sites and 1,071 runs, the best frontier model passed 33.3%. Most models landed under 40%. WebArena scores do not survive contact with real CAPTCHAs, real cookies, real date pickers.
 
 **7/7**
 ClawBench is live. Paper: huggingface.co/papers/2604.08523. Code + harness: github.com/reacher-z/ClawBench. Leaderboard + recorded rollouts: claw-bench.com. Run your own agent in one command.
@@ -28,7 +28,7 @@ ClawBench is live. Paper: huggingface.co/papers/2604.08523. Code + harness: gith
 ## Thread B — Researcher hook (ML Twitter)
 
 **1/5**
-New benchmark: ClawBench. 153 everyday tasks on 144 live production websites, evaluated on 7 frontier agents. Designed to measure what WebArena cannot: the long tail of real-site quirks. Headline result: best agent 62%, most under 40%.
+New benchmark: ClawBench. 153 everyday tasks on 144 live production websites, evaluated on 7 frontier agents. Designed to measure what WebArena cannot: the long tail of real-site quirks. Headline result: best agent 33.3%, most under 40%.
 
 **2/5**
 Methodology: interception-layer design. Agents drive real sites up to the final submit (checkout, send, book), which we block and verify server-side. No mocks, no replays, no synthetic DOMs. The agent sees production HTML, production anti-bot, production latency.
@@ -45,7 +45,7 @@ Paper: huggingface.co/papers/2604.08523. Repo: github.com/reacher-z/ClawBench. L
 ## Reply / Quote-Tweet scripts
 
 ### 1. For @_akhaliq daily papers roundups
-ClawBench is live on HF Papers — 153 everyday web tasks across 6 frontier models. Live leaderboard: claw-bench.com. HF Space demo: <URL>. Paper: hf.co/papers/2604.08523
+ClawBench is live on HF Papers — 153 everyday web tasks across 7 frontier models. Live leaderboard: claw-bench.com. HF Space demo: <URL>. Paper: hf.co/papers/2604.08523
 
 ### 2. For @GoogleAI / @OpenAI agent announcements
 Congrats on the release. If you want an external signal on real-site behavior, ClawBench has 144 live production sites and video rollouts per run. Happy to add your model to the leaderboard: claw-bench.com.
@@ -54,7 +54,7 @@ Congrats on the release. If you want an external signal on real-site behavior, C
 WebArena is the right abstraction for controlled eval. ClawBench is the complement: same task shape, run against live production sites with real anti-bot and real date pickers. The gap between the two is informative.
 
 ### 4. For "AI agents are almost there" takes
-The best frontier agent we measured on 153 everyday tasks passes 62%. The failure reel on claw-bench.com is the clearest answer to how close "almost there" actually is.
+The best frontier agent we measured on 153 everyday tasks passes 33.3%. The failure reel on claw-bench.com is the clearest answer to how close "almost there" actually is.
 
 ### 5. For browser-use / Playwright agent posts
 Nice work. If you want a standardized harness to score it, ClawBench ships a one-command runner against 144 live sites with server-side grading. github.com/reacher-z/ClawBench.
@@ -65,7 +65,7 @@ Announcing ClawBench, a new benchmark for AI browser agents operating on live pr
 
 ClawBench covers 153 everyday tasks across 144 real sites, including Uber Eats, Calendly, Indeed, and Gmail. Unlike sandboxed web benchmarks, agents drive the actual production stack, with real anti-bot systems, real cookie walls, and real latency. Grading uses an interception layer: the agent performs the task end-to-end, and we block the final submission to verify intent server-side. Nothing is mocked.
 
-We evaluated 7 frontier models across 1,071 runs. The strongest agent passes roughly 62% of tasks. The median is under 40%. Models that score strongly on WebArena regress sharply on site-specific friction such as CAPTCHAs, ambiguous date pickers, and form-validation quirks, suggesting current agent capability does not transfer cleanly from clean environments to production ones.
+We evaluated 7 frontier models across 1,071 runs. The strongest agent (Claude Sonnet 4.6) passes roughly 33.3% of tasks, and most models land under 40%. Models that score strongly on WebArena regress sharply on site-specific friction such as CAPTCHAs, ambiguous date pickers, and form-validation quirks, suggesting current agent capability does not transfer cleanly from clean environments to production ones.
 
 The release includes the full task suite, grading harness, and recorded video rollouts for every run, which we have found particularly useful for debugging failure modes.
 

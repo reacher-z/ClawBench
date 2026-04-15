@@ -4,7 +4,7 @@ Send 3–5 days before launch. Verified channels first; unverified flagged so yo
 
 Shared fact pack:
 - 153 everyday web tasks on 144 live production sites, 15 categories
-- Best frontier model ~62% pass; several under 40%
+- 7 frontier models evaluated; best pass rate 33.3%, most under 40%
 - Key design: submission-interception layer blocks only the final write request
 - Paper: https://huggingface.co/papers/2604.08523
 - Repo: https://github.com/reacher-z/ClawBench
@@ -26,11 +26,11 @@ Shared fact pack:
 
 ## 1. TLDR AI
 
-**Subject:** New benchmark: frontier agents top out at 62% on everyday web tasks
+**Subject:** New benchmark: frontier agents top out at 33.3% on everyday web tasks
 
 Hi Dan,
 
-Quick one for TLDR AI. We released ClawBench, a benchmark of 153 real web tasks (checkouts, bookings, form submissions) run on live sites. The best frontier model passes 62%; several major ones score under 40%.
+Quick one for TLDR AI. We released ClawBench, a benchmark of 153 real web tasks (checkouts, bookings, form submissions) run on live sites, evaluated on 7 frontier models. The best one passes 33.3%; most land under 40%.
 
 The interesting engineering bit: a submission-interception layer blocks only the final write request, so agents execute the full flow end-to-end without ever creating real orders, tickets, or accounts. No sandboxed mirror sites.
 
@@ -49,7 +49,7 @@ Thanks,
 
 Hey Ben,
 
-If you're covering browser agents this week — we just dropped ClawBench. 153 everyday tasks (buy this, book that, submit this form) on 144 live sites. Top frontier model: 62%. Plenty of big names under 40%.
+If you're covering browser agents this week — we just dropped ClawBench. 153 everyday tasks (buy this, book that, submit this form) on 144 live sites, 7 frontier models. Top score: 33.3%. Most of the big names land under 40%.
 
 The useful-today angle: we built a submission-interception layer that lets agents run the whole flow on the real site but blocks the final write. So you can actually test agents on Amazon, DoorDash, StubHub without a graveyard of accidental orders.
 
@@ -60,9 +60,9 @@ Worth a bite? Happy to send you a short GIF of an agent failing hilariously on a
 
 ## 3. The Rundown AI
 
-**Subject:** Frontier agents hit 62% on real-world web tasks — builders can ship this today
+**Subject:** Frontier agents hit 33.3% on real-world web tasks — builders can ship this today
 
-For founders shipping agent products: ClawBench just benchmarked the frontier on 153 real consumer web tasks and the ceiling is 62%. Below 40% for several well-known models. That's the live gap every agent startup is selling into.
+For founders shipping agent products: ClawBench just benchmarked 7 frontier models on 153 real consumer web tasks and the ceiling is 33.3%. Most land below 40%. That's the live gap every agent startup is selling into.
 
 What makes it builder-useful: a submission-interception layer blocks only the final write call, so your agent runs the full real-world flow (Amazon, Uber, Airbnb, DMV forms) without side effects. You can wire this into your own eval loop tomorrow.
 
@@ -78,7 +78,7 @@ Happy to share the per-category failure modes.
 
 Hi Jack,
 
-Thought this fit Import AI's recurring thread on agent capability evaluation. ClawBench is a 153-task benchmark that runs agents on the actual live consumer web — 144 real sites across 15 categories — rather than sandboxed mirrors. Best frontier model: 62% pass. Several major models below 40%.
+Thought this fit Import AI's recurring thread on agent capability evaluation. ClawBench is a 153-task benchmark that runs agents on the actual live consumer web — 144 real sites across 15 categories — rather than sandboxed mirrors. We evaluated 7 frontier models: the top score is 33.3%, and most land below 40%.
 
 The methodological contribution worth flagging: a submission-interception layer intercepts only the terminal write request. The agent traverses real login, state, and UI surfaces, but no real order, booking, or account is created. This sidesteps the usual tradeoff between realism and ethics in web-agent eval.
 
@@ -96,7 +96,7 @@ Best,
 
 **Subject:** We made AI agents shop, book, and fail on real websites. They failed a lot.
 
-Fun one for you: we built ClawBench — a benchmark that sends AI agents to do 153 very normal things on real websites (buy socks, book a haircut, apply for a job). The best frontier model got a 62%. Some big names couldn't crack 40%. A D minus in internet.
+Fun one for you: we built ClawBench — a benchmark that sends AI agents to do 153 very normal things on real websites (buy socks, book a haircut, apply for a job). We ran 7 frontier models. The best one got 33.3%. Most couldn't crack 40%. A solid F in internet.
 
 To avoid accidentally ordering 400 pairs of socks during testing, we built a layer that lets the agent do everything right up to the final "Submit" click, then quietly intercepts it. The agent thinks it won. The internet is unharmed.
 
@@ -107,11 +107,11 @@ Happy to send you the funniest failure clips for the newsletter.
 
 ## 6. Last Week in AI (VERIFIED)
 
-**Subject:** New benchmark paper: live-web agent evaluation, 62% ceiling
+**Subject:** New benchmark paper: live-web agent evaluation, 33.3% ceiling
 
 Hi Andrey and team,
 
-Submitting for potential coverage. ClawBench (arXiv 2604.08523) evaluates browser agents on 153 everyday tasks across 144 live consumer websites. Headline numbers: 62% for the strongest frontier model; several models below 40%.
+Submitting for potential coverage. ClawBench (arXiv 2604.08523) evaluates 7 frontier browser agents on 153 everyday tasks across 144 live consumer websites. Headline numbers: 33.3% for the strongest frontier model; most below 40%.
 
 Two points likely relevant to your academic-leaning readership:
 
@@ -126,11 +126,11 @@ Happy to answer questions on methodology or share the full results CSV.
 
 ## 7. AI Breakfast
 
-**Subject:** ClawBench: 153 web tasks, 62% frontier ceiling
+**Subject:** ClawBench: 153 web tasks, 33.3% frontier ceiling
 
 Quick tip for AI Breakfast.
 
-ClawBench — new benchmark for browser agents on the live consumer web. 153 tasks, 144 real sites, 15 categories. Best frontier model passes 62%; several under 40%. A submission-interception layer blocks only the final write request, so agents run end-to-end on real sites without side effects.
+ClawBench — new benchmark for browser agents on the live consumer web. 153 tasks, 144 real sites, 15 categories, 7 frontier models. Best model passes 33.3%; most under 40%. A submission-interception layer blocks only the final write request, so agents run end-to-end on real sites without side effects.
 
 - Paper: https://huggingface.co/papers/2604.08523
 - Repo: https://github.com/reacher-z/ClawBench
@@ -142,7 +142,7 @@ Happy to send a one-line-per-model results snippet formatted for the newsletter.
 
 Framing for an internal post (longer form than a cold pitch):
 
-Open with the motivation — demo videos make agent progress look finished; live-site evaluation tells a different story. Introduce ClawBench — 153 tasks, 144 real sites, 15 categories — and state the top line: 62% for the best frontier model, several majors under 40%.
+Open with the motivation — demo videos make agent progress look finished; live-site evaluation tells a different story. Introduce ClawBench — 153 tasks, 144 real sites, 15 categories, 7 frontier models — and state the top line: 33.3% for the best frontier model (Claude Sonnet 4.6), most of the seven under 40%.
 
 Middle: the submission-interception layer. Why we wanted real websites over mirrors; the engineering of intercepting only the final write request; how it preserves full-fidelity agent traces (auth, state, UI drift) without creating real orders, accounts, or bookings. Show one or two failure traces.
 
@@ -150,11 +150,11 @@ Close: paper, code, leaderboard, invitation for the Etude AI community to submit
 
 ## 9. Generic tip email (≤120 words, re-usable)
 
-**Subject:** Tip: ClawBench — frontier agents cap at 62% on live-web tasks
+**Subject:** Tip: ClawBench — frontier agents cap at 33.3% on live-web tasks
 
 Hi,
 
-Quick tip in case it fits your coverage. We released ClawBench, a benchmark of 153 everyday tasks run on 144 live consumer websites (checkouts, bookings, forms). Best frontier model: 62% pass. Several major models under 40%.
+Quick tip in case it fits your coverage. We released ClawBench, a benchmark of 153 everyday tasks run on 144 live consumer websites (checkouts, bookings, forms), evaluated on 7 frontier models. Top score: 33.3%. Most under 40%.
 
 The technical twist: a submission-interception layer blocks only the final write request, so agents run end-to-end on real sites without side effects.
 

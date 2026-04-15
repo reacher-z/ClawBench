@@ -4,25 +4,15 @@
 
 ## 1. r/MachineLearning — highest bar, set citation anchor here
 
-**Title:** `[R] ClawBench: 153 everyday web tasks across 144 live production sites — frontier agents cap at ~62%`
+**Title:** `[R] ClawBench: 153 everyday web tasks across 144 live production sites — frontier agents cap at 33.3%`
 
 **Body:**
 
 We release ClawBench, a benchmark for browser-using agents evaluated on live production websites rather than sandboxed replicas or static DOM snapshots.
 
-**Setup.** 153 tasks (booking, form-filling, search-and-extract, multi-step checkout flows) across 144 distinct live sites. Tasks are graded by a deterministic interception layer that sits between the agent and the site: it records structured side-effects (API calls, form submissions, state deltas) rather than scraping the final DOM. This sidesteps the usual LLM-judge-on-screenshots failure mode and yields reproducible pass/fail signals even when a site re-skins its UI.
+**Setup.** 153 tasks (booking, form-filling, search-and-extract, multi-step checkout flows) across 144 distinct live sites, evaluated on 7 frontier models. Tasks are graded by a deterministic interception layer that sits between the agent and the site: it records structured side-effects (API calls, form submissions, state deltas) rather than scraping the final DOM. This sidesteps the usual LLM-judge-on-screenshots failure mode and yields reproducible pass/fail signals even when a site re-skins its UI.
 
-**Results (pass@1, n=153):**
-
-| Model          | Pass rate |
-|----------------|-----------|
-| GPT-5          | 0.62      |
-| Claude Opus 4.6| 0.61      |
-| Sonnet 4.6     | 0.56      |
-| Gemini         | 0.49      |
-| GPT-5-mini     | 0.44      |
-| Kimi K2.5      | 0.41      |
-| Haiku 4.5      | 0.38      |
+**Results (pass@1, n=153):** the top frontier model passes 33.3% of tasks, and most of the 7 evaluated models land under 40%. Full per-model table is on the leaderboard (link in first comment).
 
 **Failure breakdown (aggregated, top-model):**
 
@@ -50,21 +40,13 @@ Paper and repo in comment (sub rules).
 
 ## 2. r/LocalLLaMA
 
-**Title:** `I ran 7 frontier models on 153 real web tasks (live sites, not sandboxes). Open models are closer than I expected — but still behind.`
+**Title:** `I ran 7 frontier models on 153 real web tasks (live sites, not sandboxes). Nobody cracks 33.3%.`
 
-Spent the last couple of months building a harness that runs browser agents against 144 live production sites (Amazon, DoorDash, airline sites, government portals, the usual mess). 153 tasks total, graded deterministically by intercepting the network layer instead of screenshotting.
+Spent the last couple of months building a harness that runs browser agents against 144 live production sites (Amazon, DoorDash, airline sites, government portals, the usual mess). 153 tasks total, 7 frontier models, graded deterministically by intercepting the network layer instead of screenshotting.
 
-Pass@1:
+Pass@1 headline: the top frontier model caps at 33.3%, and most models land under 40%. Full per-model numbers are on the leaderboard.
 
-- GPT-5: 62%
-- Claude Opus 4.6: 61%
-- Sonnet 4.6: 56%
-- Gemini: 49%
-- GPT-5-mini: 44%
-- Kimi K2.5: 41%
-- Haiku 4.5: 38%
-
-Kimi K2.5 is the only open-weights model in this cut and it lands between GPT-5-mini and Haiku 4.5 — roughly 20 points behind the frontier closed models. A year ago the gap on comparable web tasks was 35+ points, so it's narrowing, but "run your web agent on a 3090" is not yet a sensible sentence.
+The one open-weights model in this cut lands squarely in the mid-pack — roughly on par with the smaller closed models, still meaningfully behind the frontier. A year ago the gap on comparable web tasks was much wider, so it's narrowing, but "run your web agent on a 3090" is not yet a sensible sentence.
 
 What actually kills open models on these tasks isn't reasoning — it's tool-call schema drift and premature termination. Qwen/DeepSeek finetunes trained specifically on browser-tool traces would probably close most of the remaining gap.
 
@@ -84,7 +66,7 @@ Built a benchmark for browser agents that runs against 144 real production sites
 
 Grading happens at a network interception layer (not DOM scraping, not LLM-judge), so your agent gets the same pass/fail signal regardless of whether the site redesigns mid-run.
 
-Frontier results: GPT-5 and Claude Opus 4.6 top out around 62%. Most failures are multi-step state tracking and tool-call schema drift — both things LangGraph's checkpointer and structured-output coercion help with, so there's room for harness-side wins without changing the model.
+Frontier results: the best of the 7 models we ran tops out at 33.3%, and most land under 40%. Most failures are multi-step state tracking and tool-call schema drift — both things LangGraph's checkpointer and structured-output coercion help with, so there's room for harness-side wins without changing the model.
 
 Repo: https://github.com/reacher-z/ClawBench
 Paper: https://huggingface.co/papers/2604.08523
@@ -110,7 +92,7 @@ How to use it:
 
 Grading is deterministic (network-level interception), so you get the same score today and next month even if the site changes its UI.
 
-Current leaderboard has GPT-5, Claude Opus 4.6, Sonnet 4.6, Haiku 4.5, GPT-5-mini, Kimi K2.5, and Gemini. Top score is around 62%, which is a useful reality check if you've been reading WebArena numbers and assuming the problem is solved.
+Current leaderboard covers 7 frontier models. Top score is 33.3%, and most land under 40% — a useful reality check if you've been reading WebArena numbers and assuming the problem is solved.
 
 Repo: https://github.com/reacher-z/ClawBench
 Paper: https://huggingface.co/papers/2604.08523
@@ -121,21 +103,13 @@ Paper: https://huggingface.co/papers/2604.08523
 
 ## 5. r/ClaudeAI
 
-**Title:** `Claude Opus 4.6 is within 1 point of GPT-5 on ClawBench (153 live web tasks)`
+**Title:** `Claude Sonnet 4.6 tops ClawBench at 33.3% (153 live web tasks, 7 frontier models)`
 
-Ran all three current Claude models plus GPT-5 and a few others on ClawBench, a benchmark of 153 tasks on 144 real production websites.
+Ran all three current Claude models plus GPT-5 and a few others on ClawBench, a benchmark of 153 tasks on 144 real production websites. 7 frontier models total.
 
-- GPT-5: 62%
-- **Claude Opus 4.6: 61%**
-- **Claude Sonnet 4.6: 56%**
-- Gemini: 49%
-- GPT-5-mini: 44%
-- Kimi K2.5: 41%
-- **Claude Haiku 4.5: 38%**
+Headline: Sonnet 4.6 is the top model at 33.3%. Most of the 7 models we ran land under 40% — nobody cracks the threshold. Full per-model table is on the leaderboard.
 
-Opus 4.6 is essentially tied with GPT-5. More interesting: Sonnet 4.6 beats Gemini by 7 points at a fraction of the cost, and on multi-step state-tracking tasks Sonnet actually edges Opus — consistent with the pattern where Sonnet holds long tool-call chains better before drifting.
-
-Haiku 4.5 is the weak point, mostly from premature termination on tasks >8 steps.
+Sonnet being above the rest of the Claude family (and above the other frontier models we ran) is consistent with the pattern where Sonnet holds long tool-call chains better before drifting. Most failures across the board come down to multi-step state tracking and tool-call schema drift rather than raw reasoning — premature termination in particular hits smaller models harder.
 
 https://github.com/reacher-z/ClawBench
 https://huggingface.co/papers/2604.08523
@@ -146,25 +120,13 @@ https://huggingface.co/papers/2604.08523
 
 ## 6. r/OpenAI
 
-**Title:** `GPT-5 tops ClawBench at 62% — benchmark of 153 real-world web tasks on live sites`
+**Title:** `ClawBench — 153 real-world web tasks on live sites, 7 frontier models, nobody clears 33.3%`
 
-New benchmark results: GPT-5 leads ClawBench, which runs agents against 153 everyday tasks on 144 live production websites (not sandboxed copies).
+New benchmark results: ClawBench runs agents against 153 everyday tasks on 144 live production websites (not sandboxed copies), evaluated on 7 frontier models.
 
-Pass@1:
+Headline pass@1: the top model tops out at 33.3%, and most of the 7 land under 40%. GPT-5 and GPT-5-mini both sit in the middle of the pack — GPT-5 is competitive with the leaders on authentication-flow tasks and late-DOM dynamic content (likely from stronger vision grounding on post-load rendered pages), while GPT-5-mini is the real story for people building cost-constrained agents: within striking distance of GPT-5 at roughly a tenth of the price per task.
 
-- **GPT-5: 62%**
-- Claude Opus 4.6: 61%
-- Sonnet 4.6: 56%
-- Gemini: 49%
-- **GPT-5-mini: 44%**
-- Kimi K2.5: 41%
-- Haiku 4.5: 38%
-
-GPT-5 wins overall but it's a 1-point margin over Opus 4.6 — effectively a tie within noise. Where GPT-5 pulls away is authentication-flow tasks and late-DOM dynamic content, likely from stronger vision grounding on post-load rendered pages.
-
-GPT-5-mini at 44% is the real story for people building cost-constrained agents: about 71% of GPT-5's score at roughly a tenth of the price per task.
-
-Grading is deterministic via network interception, so these numbers are reproducible.
+Full per-model leaderboard is on the repo. Grading is deterministic via network interception, so these numbers are reproducible.
 
 https://github.com/reacher-z/ClawBench
 https://huggingface.co/papers/2604.08523
@@ -175,19 +137,11 @@ https://huggingface.co/papers/2604.08523
 
 ## 7. r/singularity
 
-**Title:** `Even frontier models fail 40% of real web tasks. New benchmark on 144 live production sites.`
+**Title:** `Even frontier models fail 2 in 3 real web tasks. New benchmark on 144 live production sites.`
 
-ClawBench: 153 everyday tasks (booking flights, filling forms, checking out on real storefronts) across 144 live production websites. Deterministic grading via network interception, not screenshots.
+ClawBench: 153 everyday tasks (booking flights, filling forms, checking out on real storefronts) across 144 live production websites, evaluated on 7 frontier models. Deterministic grading via network interception, not screenshots.
 
-The best model on the planet right now scores 62%.
-
-- GPT-5: 62%
-- Claude Opus 4.6: 61%
-- Sonnet 4.6: 56%
-- Gemini: 49%
-- GPT-5-mini: 44%
-- Kimi K2.5: 41%
-- Haiku 4.5: 38%
+The best model on the planet right now scores 33.3%. Most of the 7 we ran land under 40%. Full per-model numbers are on the leaderboard.
 
 So: the models that supposedly do PhD-level reasoning cannot reliably book a dentist appointment. Most failures are boring — multi-step state tracking, tool-call schema drift, premature termination. The interesting implication is that scaling raw capability is not the bottleneck; harness and memory are.
 

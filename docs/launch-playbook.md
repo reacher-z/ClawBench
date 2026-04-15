@@ -43,14 +43,14 @@ Treat this as a checklist to copy-paste from, not prose to read.
 
 ## HN post draft
 
-**Title:** Show HN: ClawBench – 153 everyday web tasks even GPT-5 fails
+**Title:** Show HN: ClawBench – 153 everyday web tasks even frontier agents fail
 
 **Body:**
 
-> We ran GPT-5, Claude Opus 4.6, Gemini, and three others against 153
-> real-world web tasks - ordering food on Uber Eats, booking on Calendly,
-> filling out Indeed applications, etc. The best one passed 62%. Several
-> frontier models sit under 40%.
+> We ran 7 frontier models against 153 real-world web tasks - ordering
+> food on Uber Eats, booking on Calendly, filling out Indeed
+> applications, etc. The best one passed 33.3%. Most frontier models
+> sit under 40%.
 >
 > ClawBench is open source. Everything runs in a container with Chrome +
 > a recorded extension - you point it at a model and it gives you back a
@@ -68,14 +68,14 @@ Treat this as a checklist to copy-paste from, not prose to read.
 >
 > Leaderboard: <HF Space URL>
 > Repo: https://github.com/reacher-z/ClawBench
-> Install: `pip install claw-bench` (or: open in Codespaces, one click)
+> Install: `uv tool install clawbench-eval` (or: open in Codespaces, one click)
 >
 > Happy to answer questions about the methodology, the scoring rubric,
 > or why your favorite model isn't on the board yet (usually: we're
 > still running it).
 
 **Rationale:**
-- Front-loads the number (153) and the punchline (best passes 62%)
+- Front-loads the number (153) and the punchline (best passes 33.3%)
 - Ends with install instructions - people should be able to try it in the
   time it takes to read the comments
 - Don't include GIF in HN body (HN doesn't render images); link to the
@@ -89,10 +89,9 @@ Goal: one killer clip per tweet, 5 tweets max. People retweet funny
 failures, not pass rates.
 
 **Tweet 1 (hook):**
-> I gave GPT-5, Claude Opus, and 4 other frontier models 153 real web
-> chores. 
+> I gave 7 frontier models 153 real web chores.
 >
-> Best one finished 62%. The rest? Chaos.
+> Best one finished 33.3%. The rest? Chaos.
 >
 > [15s clip: agent repeatedly failing Uber Eats CAPTCHA]
 >
@@ -116,7 +115,7 @@ failures, not pass rates.
 **Tweet 5 (CTA):**
 > 153 tasks. 15 categories. Every pass/fail justified.
 >
-> Try it: pip install claw-bench
+> Try it: uv tool install clawbench-eval
 > Leaderboard: <link>
 > Repo: <link>
 >
@@ -133,13 +132,13 @@ this year. Spend the time picking it.
 Send 3-5 days before launch. Short. Include a hook + one metric + a link.
 
 **TLDR AI** (tldr.tech/ai - Dan Ni, ~500K subscribers):
-> Subject: ClawBench: frontier models fail 40% of everyday web tasks
+> Subject: ClawBench: frontier models fail most everyday web tasks
 >
 > Hi Dan,
 >
 > Launching Tuesday: a 153-task benchmark for browser agents where even
-> the best frontier model only passes 62%. Open source, `pip install
-> claw-bench`, live leaderboard on HF Spaces.
+> the best frontier model only passes 33.3%. Open source, `uv tool
+> install clawbench-eval`, live leaderboard on HF Spaces.
 >
 > The fun part is the failure reel - CAPTCHAs, 4-step flows, and
 > Perimeter X walls that break every model we tested. Happy to share an

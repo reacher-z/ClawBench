@@ -2,8 +2,8 @@
 
 ## Title options
 
-1. `ClawBench: 153 live-web tasks where the best agent still fails 4 in 10`
-2. `We ran 7 frontier agents on 153 real websites. Best one passes 61%`
+1. `ClawBench: 153 live-web tasks where the best agent still fails 2 in 3`
+2. `We ran 7 frontier agents on 153 real websites. Best one passes 33.3%`
 3. `ClawBench: benchmark for web agents that runs on real sites without side effects`
 
 **Recommended:** Option 2. States the number, states the delta, doesn't oversell.
@@ -14,7 +14,7 @@ Tuesday or Wednesday, 07:30–08:30am PT (peak HN front-page window).
 
 ## Body (~250 words)
 
-Show HN: ClawBench, a benchmark of 153 everyday web tasks on 144 live production sites. We ran 7 frontier agents on it. The best one (Claude Opus 4.6) passes 61.4%. Everyone else is in the 17 to 56 range, and several sub-10.
+Show HN: ClawBench, a benchmark of 153 everyday web tasks on 144 live production sites. We ran 7 frontier agents on it. The top score is 33.3%, and most models land under 40%.
 
 Tasks are the things people actually do online: order Pad Thai on Uber Eats, book a pet sitter on Rover, apply to a job on Greenhouse, schedule a dentist, file an RMA, reserve an OpenTable slot. 15 categories. The sites are the real sites, not mirrors. To keep agents off anyone's credit card, we wrote a CDP-level interceptor that sits in front of Chromium and captures the final write request (checkout POST, form submit, email send) right before it hits the wire. The agent gets all the way to the "Place Order" tap; the tap just never lands. Everything before that is real: real search, real login, real cart, real captchas.
 
@@ -24,7 +24,7 @@ Some failure patterns we kept seeing:
 - Job-application uploads succeed but the resume goes into the cover-letter field.
 - Travel bookings pick the right dates in the date picker, then submit the default dates that were there before.
 
-Install: `pip install claw-bench`.
+Install: `uv tool install clawbench-eval`.
 Paper: https://huggingface.co/papers/2604.08523
 Repo: https://github.com/reacher-z/ClawBench
 

@@ -64,16 +64,16 @@
 ## Launch-day 5 targeted replies/QTs
 
 **1. To @_akhaliq** (reply to his daily HF Papers roundup, day-of):
-> ClawBench is live on HF Papers — 153 everyday web tasks across 6 frontier models. Live leaderboard: claw-bench.com. HF Space demo: <URL>. Paper: hf.co/papers/2604.08523
+> ClawBench is live on HF Papers — 153 everyday web tasks across 7 frontier models. Live leaderboard: claw-bench.com. HF Space demo: <URL>. Paper: hf.co/papers/2604.08523
 
 **2. To @emollick** (standalone tweet, @-tagged):
-> .@emollick — we ran 6 frontier models on 153 tasks a person finishes in under a minute (buying toothpaste, booking a haircut, renewing a library card). Best model: 47%. Humans: 96%. Full breakdown by task category: [chart]. Repo: github.com/reacher-z/ClawBench
+> .@emollick — we ran 7 frontier models on 153 tasks a person finishes in under a minute (buying toothpaste, booking a haircut, renewing a library card). Best model: 33.3%. Humans: 96%. Full breakdown by task category: [chart]. Repo: github.com/reacher-z/ClawBench
 
 **3. To @gneubig** (reply to any recent OpenHands/agents tweet):
 > Relevant to your eval work — ClawBench has 153 live-web tasks with a dual-judge protocol (model + rule-based verifier, 94% agreement). OpenHands included in the leaderboard. Judge ablation + per-task traces open-sourced: <URL>
 
 **4. To @percyliang** (QT his most recent HELM or benchmark-transparency tweet):
-> In the holistic-eval spirit — ClawBench reports per-category results (shopping, scheduling, forms, research, multi-step) across 6 frontier models, with full per-task traces and judge transparency. 153 tasks, no held-out set gaming: <URL>
+> In the holistic-eval spirit — ClawBench reports per-category results (shopping, scheduling, forms, research, multi-step) across 7 frontier models, with full per-task traces and judge transparency. 153 tasks, no held-out set gaming: <URL>
 
 **5. To @AravSrinivas** (@-tagged, standalone):
 > .@AravSrinivas Perplexity is in our browser-agent benchmark — 153 everyday web tasks. It's one of the top-3 on research-type tasks but drops on multi-step forms. Full leaderboard + per-task breakdown: <URL>
