@@ -665,97 +665,41 @@ def mode_configure() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Mode: Configure secrets
+# Mode: Star on GitHub
 # ---------------------------------------------------------------------------
 
-_SECRET_KEYS: list[tuple[str, str]] = [
-    ("PURELY_MAIL_API_KEY", "PurelyMail API key"),
-    ("PURELY_MAIL_DOMAIN", "PurelyMail domain"),
-    ("HF_TOKEN", "HuggingFace token (optional)"),
-    ("HF_REPO_ID", "HuggingFace dataset repo id (optional)"),
-]
+_STAR_URL = "https://github.com/reacher-z/ClawBench"
 
 
-def _redact_secret(v: str) -> str:
-    if len(v) <= 4:
-        return "****"
-    return v[:2] + "****" + v[-2:]
+def _open_star_page() -> None:
+    """Open the repo page in the user's default browser and print the URL.
 
-
-def _read_secrets_file(path: Path) -> dict[str, str]:
-    out: dict[str, str] = {}
-    if not path.exists():
-        return out
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        out[k.strip()] = v.strip().strip('"').strip("'")
-    return out
-
-
-def mode_configure_secrets() -> None:
-    """Prompt for PurelyMail + HF credentials and persist to secrets.env.
-
-    Mirrors ``clawbench configure --secrets`` so TUI users have the same
-    capability without dropping to the CLI. Blank answers keep the existing
-    value; shipped defaults are shown in the clear so a new user can accept
-    them by hitting enter.
+    Browser-open is best-effort (headless VMs, SSH sessions, locked-down
+    kiosks) — we always print the URL so the user can click it from a
+    modern terminal emulator that auto-linkifies http URLs.
     """
-    # Import here — ``clawbench.run`` pulls heavier deps we don't want at
-    # TUI startup, and this screen is cold-path.
-    from clawbench.run import DEFAULT_SECRETS
-
-    target = _paths.user_secrets_path()
-    existing = _read_secrets_file(target)
+    import webbrowser
 
     console.print()
     console.print(Panel(
         Text.assemble(
-            Text("Configure secrets", style="bold"),
+            Text("Thanks for using ClawBench", style="bold"),
             "\n",
-            Text(f"Writes to {target}", style="dim"),
-            "\n",
-            Text("Leave blank to keep the current value.", style="dim"),
+            Text("Stars help other AI-agent researchers find the benchmark.",
+                 style="dim"),
+            "\n\n",
+            Text(_STAR_URL, style="bold"),
         ),
     ))
     console.print()
-
-    updated: dict[str, str] = dict(existing)
-    for key, label in _SECRET_KEYS:
-        cur = existing.get(key, "")
-        default = DEFAULT_SECRETS.get(key, "")
-        if cur:
-            hint = f"  [current: {_redact_secret(cur)}]"
-        elif default:
-            hint = f"  [default: {default}]"
-        else:
-            hint = ""
-        val = questionary.text(
-            f"{label}{hint}",
-            default="",
-            style=STYLE,
-        ).ask()
-        if val is None:
-            console.print("\n[dim]Cancelled.[/]")
-            return
-        val = val.strip()
-        if val:
-            updated[key] = val
-        elif not cur and default:
-            updated[key] = default
-
-    lines = ["# claw-bench secrets — chmod 600", ""]
-    lines += [f'{k}="{v}"' for k, v in updated.items()]
-    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
     try:
-        target.chmod(stat.S_IRUSR | stat.S_IWUSR)
-    except OSError:
-        pass
-
-    console.print()
-    console.print(f"  [green]Wrote {len(updated)} key(s) to {target}[/]")
+        opened = webbrowser.open(_STAR_URL)
+    except Exception:
+        opened = False
+    if opened:
+        console.print("  [dim]Opened in your default browser.[/]")
+    else:
+        console.print("  [dim]Copy the link above to open it manually.[/]")
     console.print()
 
 
@@ -1602,14 +1546,21 @@ def main() -> None:
                 questionary.Choice("Configure models", value="configure"),
                 questionary.Choice("Configure secrets", value="configure_secrets"),
                 questionary.Choice("Change theme", value="theme"),
+                questionary.Choice("Star us on GitHub", value="star"),
                 questionary.Choice("Exit", value="exit"),
             ],
             style=STYLE,
         ).ask()
 
         if mode is None or mode == "exit":
+            from clawbench.support import rich_star_prompt
+            rich_star_prompt(console)
             console.print("\n[dim]Bye.[/]")
             return
+
+        if mode == "star":
+            _open_star_page()
+            continue
 
         if mode == "theme":
             theme = _pick_theme()

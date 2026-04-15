@@ -546,6 +546,26 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 </tr>
 </table>
 
+## 支持 ClawBench
+
+如果 ClawBench 对你的研究或产品工作有帮助，
+最有用的支持就是**[给仓库点一个 Star](https://github.com/reacher-z/ClawBench)** ——
+这能让更多 AI agent 研究者发现这个 benchmark，也帮我们持续投入数据集维护。
+
+<p align="center">
+<a href="https://github.com/reacher-z/ClawBench">
+<img src="https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=for-the-badge&logo=github&logoColor=white" alt="Star this repo">
+</a>
+</p>
+
+欢迎贡献 —— 新的 test case、bug 修复，或者是我们还没评测过的模型结果提交。参见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
+<p align="center">
+<a href="https://github.com/reacher-z/ClawBench/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=reacher-z/ClawBench" alt="Contributors">
+</a>
+</p>
+
 ## Star 历史
 
 <a href="https://star-history.com/#reacher-z/ClawBench&Date">

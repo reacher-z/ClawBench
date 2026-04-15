@@ -998,6 +998,8 @@ def main(argv: list[str] | None = None) -> None:
 
     if intercepted:
         print(f"\nINTERCEPTED — results in {output_dir}")
+        from clawbench.support import print_star_prompt
+        print_star_prompt()
     else:
         print(f"\nNOT INTERCEPTED — results in {output_dir}")
         sys.exit(1)
