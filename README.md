@@ -7,6 +7,8 @@
 [![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
 [![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench)
+[![Open in GitHub Codespaces](https://img.shields.io/badge/Codespaces-Open-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
 <a href="#-human-quick-start"><img src="https://img.shields.io/badge/Run%20in%20one%20line%20of%20code-4F46E5?style=for-the-badge&labelColor=4F46E5&logoColor=white&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMjYzLjQtMjdMMjc4LjIgOS44IDMxNSAyNC42YzMgMS4yIDUgNC4yIDUgNy40cy0yIDYuMi01IDcuNEwyNzguMiA1NC4yIDI2My40IDkxYy0xLjIgMy00LjIgNS03LjQgNXMtNi4yLTItNy40LTVMMjMzLjggNTQuMiAxOTcgMzkuNGMtMy0xLjItNS00LjItNS03LjRzMi02LjIgNS03LjRMMjMzLjggOS44IDI0OC42LTI3YzEuMi0zIDQuMi01IDcuNC01czYuMiAyIDcuNCA1ek0xMTAuNyA0MS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN0w1OS44IDE2NC4yIDkuNyAxNDIuN0MzLjggMTQwLjIgMCAxMzQuNCAwIDEyOHMzLjgtMTIuMiA5LjctMTQuN0w1OS44IDkxLjggODEuMyA0MS43QzgzLjggMzUuOCA4OS42IDMyIDk2IDMyczEyLjIgMy44IDE0LjcgOS43ek00NjQgMzA0YzYuNCAwIDEyLjIgMy44IDE0LjcgOS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN2wtMjEuNS01MC4xLTUwLjEtMjEuNWMtNS45LTIuNS05LjctOC4zLTkuNy0xNC43czMuOC0xMi4yIDkuNy0xNC43bDUwLjEtMjEuNSAyMS41LTUwLjFjMi41LTUuOSA4LjMtOS43IDE0LjctOS43ek00NjAgMGMxMSAwIDIxLjYgNC40IDI5LjUgMTIuMmw0Mi4zIDQyLjNDNTM5LjYgNjIuNCA1NDQgNzMgNTQ0IDg0cy00LjQgMjEuNi0xMi4yIDI5LjVsLTg4LjIgODguMi0xMDEuMy0xMDEuMyA4OC4yLTg4LjJDNDM4LjQgNC40IDQ0OSAwIDQ2MCAwek00NC4yIDM5OC41TDMwOC40IDEzNC4zIDQwOS43IDIzNS42IDE0NS41IDQ5OS44QzEzNy42IDUwNy42IDEyNyA1MTIgMTE2IDUxMnMtMjEuNi00LjQtMjkuNS0xMi4yTDQ0LjIgNDU3LjVDMzYuNCA0NDkuNiAzMiA0MzkgMzIgNDI4czQuNC0yMS42IDEyLjItMjkuNXoiLz48L3N2Zz4=" alt="Run in one line of code"></a>
 
@@ -18,9 +20,22 @@ uv tool install clawbench-eval && clawbench
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
-We asked 6 frontier AI agents to do what people do every day --<br/>
+We asked frontier AI agents to do what people do every day --<br/>
 order food, book travel, apply for jobs, write reviews, manage projects.<br/>
-**The best model completed only 33.3% of tasks.**
+**Even the best agent fails nearly 40% of them.**
+
+**Latest scores** &nbsp;&middot;&nbsp; [paper results ↓](#-results)
+
+| Rank | Model | Pass rate |
+|:----:|:------|:---------:|
+| 1 | Claude Opus 4.6   | **61.4%** |
+| 2 | Claude Sonnet 4.6 | 56.2% |
+| 3 | Claude Haiku 4.5  | 30.1% |
+| 4 | GPT-5.4           | 25.5% |
+| 5 | GPT-5.4 mini      | 24.8% |
+| 6 | Kimi K2.5         | 17.6% |
+
+<sub>Per-task results: [`eval-results/`](eval-results/). &nbsp; Last refreshed 2026-04-14.</sub>
 
 ---
 
@@ -460,7 +475,48 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). In short: create a directory under `test
 
 ## Contributing
 
-We welcome contributions -- especially new test cases. See [CONTRIBUTING.md](CONTRIBUTING.md).
+We welcome contributions -- especially new test cases. If you've ever ordered groceries, booked an appointment, or filed a form online, you already know how to write one. Most PRs are a single JSON file and land in under a day.
+
+**Quick wins:**
+
+- [Add a new test case](CONTRIBUTING.md#adding-a-new-test-case) (~30 min, no container expertise needed)
+- [Add a new category](CONTRIBUTING.md#what-were-looking-for) of 10+ tasks &rarr; co-author invitation on the next paper revision
+- [Submit a new model](CONTRIBUTING.md#what-were-looking-for) to the public leaderboard
+- Browse [good first issues](https://github.com/reacher-z/ClawBench/labels/good%20first%20issue)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide and contributor recognition policy.
+
+## Community
+
+Come hang out with researchers, builders, and contributors working on real-world browser agents.
+
+<table>
+<tr>
+<td align="center" width="33%">
+<a href="https://discord.gg/clawbench">
+<img src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+</a>
+<br/>
+<sub><b>English community</b><br/>Agent builders, researchers, contributors</sub>
+</td>
+<td align="center" width="33%">
+<a href="docs/community.md#%E5%BE%AE%E4%BF%A1%E7%BE%A4-chinese">
+<img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4-%E5%8A%A0%E5%85%A5-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="微信群">
+</a>
+<br/>
+<sub><b>中文社区</b><br/>研究者、开发者、贡献者交流</sub>
+</td>
+<td align="center" width="33%">
+<a href="https://github.com/reacher-z/ClawBench/discussions">
+<img src="https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions">
+</a>
+<br/>
+<sub><b>Async Q&A</b><br/>Searchable, long-form, permanent</sub>
+</td>
+</tr>
+</table>
+
+See [docs/community.md](docs/community.md) for channel layout, house rules, and 微信群 加入方式.
 
 ## Citation
 

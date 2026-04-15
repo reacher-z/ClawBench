@@ -7,6 +7,8 @@
 [![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
 [![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
 [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench)
+[![Discord](https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench)
+[![Codespaces](https://img.shields.io/badge/Codespaces-%E4%B8%80%E9%94%AE%E6%89%93%E5%BC%80-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
 <a href="#-手动快速开始"><img src="https://img.shields.io/badge/%E4%B8%80%E9%94%AE%E5%90%AF%E5%8A%A8-4F46E5?style=for-the-badge&labelColor=4F46E5&logoColor=white&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMjYzLjQtMjdMMjc4LjIgOS44IDMxNSAyNC42YzMgMS4yIDUgNC4yIDUgNy40cy0yIDYuMi01IDcuNEwyNzguMiA1NC4yIDI2My40IDkxYy0xLjIgMy00LjIgNS03LjQgNXMtNi4yLTItNy40LTVMMjMzLjggNTQuMiAxOTcgMzkuNGMtMy0xLjItNS00LjItNS03LjRzMi02LjIgNS03LjRMMjMzLjggOS44IDI0OC42LTI3YzEuMi0zIDQuMi01IDcuNC01czYuMiAyIDcuNCA1ek0xMTAuNyA0MS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN0w1OS44IDE2NC4yIDkuNyAxNDIuN0MzLjggMTQwLjIgMCAxMzQuNCAwIDEyOHMzLjgtMTIuMiA5LjctMTQuN0w1OS44IDkxLjggODEuMyA0MS43QzgzLjggMzUuOCA4OS42IDMyIDk2IDMyczEyLjIgMy44IDE0LjcgOS43ek00NjQgMzA0YzYuNCAwIDEyLjIgMy44IDE0LjcgOS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN2wtMjEuNS01MC4xLTUwLjEtMjEuNWMtNS45LTIuNS05LjctOC4zLTkuNy0xNC43czMuOC0xMi4yIDkuNy0xNC43bDUwLjEtMjEuNSAyMS41LTUwLjFjMi41LTUuOSA4LjMtOS43IDE0LjctOS43ek00NjAgMGMxMSAwIDIxLjYgNC40IDI5LjUgMTIuMmw0Mi4zIDQyLjNDNTM5LjYgNjIuNCA1NDQgNzMgNTQ0IDg0cy00LjQgMjEuNi0xMi4yIDI5LjVsLTg4LjIgODguMi0xMDEuMy0xMDEuMyA4OC4yLTg4LjJDNDM4LjQgNC40IDQ0OSAwIDQ2MCAwek00NC4yIDM5OC41TDMwOC40IDEzNC4zIDQwOS43IDIzNS42IDE0NS41IDQ5OS44QzEzNy42IDUwNy42IDEyNyA1MTIgMTE2IDUxMnMtMjEuNi00LjQtMjkuNS0xMi4yTDQ0LjIgNDU3LjVDMzYuNCA0NDkuNiAzMiA0MzkgMzIgNDI4czQuNC0yMS42IDEyLjItMjkuNXoiLz48L3N2Zz4=" alt="一键启动"></a>
 
@@ -18,9 +20,22 @@ uv tool install clawbench-eval && clawbench
 
 ### AI 智能体能完成日常在线任务吗?
 
-我们让 6 个前沿 AI 智能体去做人们每天都在做的事 --<br/>
+我们让前沿 AI 智能体去做人们每天都在做的事 --<br/>
 点外卖、订酒店、投简历、写评价、管理项目。<br/>
-**最强的模型也只完成了 33.3% 的任务。**
+**即使最强的模型，也有近 40% 的任务完成不了。**
+
+**最新榜单** &nbsp;&middot;&nbsp; [论文版排名 ↓](#-results-结果)
+
+| 排名 | 模型 | 通过率 |
+|:----:|:------|:---------:|
+| 1 | Claude Opus 4.6   | **61.4%** |
+| 2 | Claude Sonnet 4.6 | 56.2% |
+| 3 | Claude Haiku 4.5  | 30.1% |
+| 4 | GPT-5.4           | 25.5% |
+| 5 | GPT-5.4 mini      | 24.8% |
+| 6 | Kimi K2.5         | 17.6% |
+
+<sub>详细结果见 [`eval-results/`](eval-results/)。&nbsp; 更新日期 2026-04-14。</sub>
 
 ---
 
@@ -460,7 +475,48 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 
 ## 贡献
 
-我们欢迎贡献 -- 尤其是新的测试用例。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+我们特别欢迎第一次参与开源的贡献者。如果你平时在网上订过外卖、预约过医生、填过表单,你就已经具备写一个测试用例的能力 —— 大部分 PR 只是单个 JSON 文件,通常一天内合并。
+
+**上手快的几件事:**
+
+- [新增一个测试用例](CONTRIBUTING.md#adding-a-new-test-case)(约 30 分钟,不需要懂容器)
+- [新增一个类别](CONTRIBUTING.md#what-were-looking-for) 覆盖 10+ 个任务 &rarr; 获邀成为下一版论文共同作者
+- [提交一个新模型](CONTRIBUTING.md#what-were-looking-for) 上公共 leaderboard
+- 浏览 [good first issues](https://github.com/reacher-z/ClawBench/labels/good%20first%20issue)
+
+详见 [CONTRIBUTING.md](CONTRIBUTING.md),包含完整流程和贡献者致谢政策。
+
+## 社区
+
+欢迎来和研究者、开发者、贡献者一起讨论真实世界的浏览器 agent。
+
+<table>
+<tr>
+<td align="center" width="33%">
+<a href="docs/community.md#%E5%BE%AE%E4%BF%A1%E7%BE%A4-chinese">
+<img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4-%E5%8A%A0%E5%85%A5-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="微信群">
+</a>
+<br/>
+<sub><b>中文社区</b><br/>二维码 + 群规见 docs/community.md</sub>
+</td>
+<td align="center" width="33%">
+<a href="https://discord.gg/clawbench">
+<img src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+</a>
+<br/>
+<sub><b>English</b><br/>国际研究者和开发者</sub>
+</td>
+<td align="center" width="33%">
+<a href="https://github.com/reacher-z/ClawBench/discussions">
+<img src="https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions">
+</a>
+<br/>
+<sub><b>异步问答</b><br/>可搜索 / 长期保存</sub>
+</td>
+</tr>
+</table>
+
+详情(频道划分、群规、微信群加入方式)见 [docs/community.md](docs/community.md)。
 
 ## 引用
 
