@@ -24,14 +24,6 @@ COPY --from=node:24-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
-# Pin openclaw version — patched below for #47879 (--autoConnect → --browserUrl)
-RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g openclaw@2026.3.13
-
-# Patch: replace --autoConnect with --browserUrl http://127.0.0.1:9222 in all dist files
-# See https://github.com/openclaw/openclaw/issues/47879
-RUN find /usr/local/lib/node_modules/openclaw/dist -name '*.js' -exec \
-    sed -i 's/"--autoConnect"/"--browserUrl","http:\/\/127.0.0.1:9222"/g' {} +
-
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /usr/local/bin/uv
 
 WORKDIR /app
@@ -39,9 +31,6 @@ COPY extension-server/ ./extension-server/
 RUN cd extension-server && UV_PYTHON_PREFERENCE=only-system uv sync
 
 COPY chrome-extension/ ./chrome-extension/
-
-COPY setup-openclaw.sh /setup-openclaw.sh
-RUN chmod +x /setup-openclaw.sh
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

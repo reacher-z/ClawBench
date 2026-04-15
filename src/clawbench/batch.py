@@ -205,6 +205,7 @@ async def run_job(
     all_jobs: list[Job],
     batch_start: float,
     no_upload: bool = False,
+    harness: str | None = None,
 ) -> None:
     assert shutdown_event is not None
     try:
@@ -239,6 +240,8 @@ async def run_job(
                 ]
                 if no_upload:
                     cmd_parts.append("--no-upload")
+                if harness:
+                    cmd_parts += ["--harness", harness]
                 proc = await asyncio.create_subprocess_exec(
                     *cmd_parts,
                     stdout=asyncio.subprocess.PIPE,
@@ -503,7 +506,7 @@ async def async_main(args: argparse.Namespace) -> int:
     # use the same engine as we just detected.
     os.environ["CONTAINER_ENGINE"] = engine
     from clawbench import run as _run_mod  # lazy: import after CONTAINER_ENGINE is set
-    _run_mod.docker_build()
+    _run_mod.docker_build(args.harness)
 
     batch_ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     out_root = Path(args.output_dir).resolve() if args.output_dir else _paths.default_output_dir()
@@ -555,7 +558,7 @@ async def async_main(args: argparse.Namespace) -> int:
     all_tasks = [
         asyncio.create_task(
             run_job(j, sem, throttle, base_output, log_dir, jobs, batch_start,
-                    no_upload=args.no_upload)
+                    no_upload=args.no_upload, harness=args.harness)
         )
         for j in jobs
     ]
@@ -609,6 +612,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--dry-run", action="store_true", help="Print job matrix without running")
     p.add_argument("--no-upload", dest="no_upload", action="store_true",
                    help="Skip HuggingFace upload for all runs")
+    from clawbench.run import HARNESSES, DEFAULT_HARNESS
+    p.add_argument("--harness", choices=HARNESSES, default=DEFAULT_HARNESS,
+                   help=f"Coding-agent harness (default: {DEFAULT_HARNESS})")
     args = p.parse_args(argv)
 
     rc = asyncio.run(async_main(args))

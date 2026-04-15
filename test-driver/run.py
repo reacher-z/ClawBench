@@ -27,7 +27,24 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-IMAGE = "clawbench"
+HARNESSES = ("openclaw", "opencode")
+DEFAULT_HARNESS = "openclaw"
+BASE_IMAGE = "clawbench-base"
+
+
+def harness_image(harness: str) -> str:
+    """Return the docker image tag for a given harness name."""
+    return f"clawbench-{harness}"
+
+
+# Per-harness Dockerfile + setup + run-script filenames at PROJECT_ROOT.
+_HARNESS_DOCKERFILES: dict[str, str] = {
+    "openclaw": "Dockerfile.openclaw",
+    "opencode": "Dockerfile.opencode",
+}
+
+# Kept for back-compat with old callers / scripts that imported IMAGE.
+IMAGE = harness_image(DEFAULT_HARNESS)
 console = Console()
 
 
@@ -282,9 +299,9 @@ def build_instruction(task: dict) -> str:
 
 # -- Docker --
 
-def _image_exists() -> bool:
+def _image_exists(ref: str = IMAGE) -> bool:
     return subprocess.run(
-        [ENGINE, "image", "inspect", IMAGE],
+        [ENGINE, "image", "inspect", ref],
         capture_output=True,
     ).returncode == 0
 
@@ -379,35 +396,13 @@ def _looks_like_stale_cache(output_lines: list[str]) -> bool:
     return any(p in blob for p in patterns)
 
 
-def docker_build() -> None:
-    """Build (or rebuild) the clawbench image with a live progress spinner.
-
-    The first build pulls ~2GB (python base, chromium, ffmpeg, noVNC, Node,
-    openclaw) and takes several minutes; subsequent rebuilds are near-instant
-    when the layer cache is warm. We show a banner only for the cold path.
-
-    If the build fails with a pattern that suggests stale layer-cache
-    (e.g. a lockfile mismatch), we automatically retry once with
-    ``--no-cache`` so the user doesn't have to debug it manually.
-    """
-    first_build = not _image_exists()
-
-    if first_build:
-        console.print()
-        console.print(Panel(
-            "[bold]First-time container build.[/]\n"
-            "This downloads ~2 GB (chromium, ffmpeg, noVNC, Node, openclaw)\n"
-            "and typically takes [bold]5–10 minutes[/] on a decent connection.\n"
-            "[dim]Subsequent runs reuse the layer cache and finish in seconds.[/]",
-            title="[bold]Building clawbench image[/]",
-            border_style="cyan",
-        ))
-
-    cmd = [ENGINE, "build", "-t", IMAGE, str(PROJECT_ROOT)]
+def _build_one(dockerfile: str, tag: str) -> None:
+    """Run a single ``docker build`` with the shared spinner and stale-cache
+    retry. Exits the process on failure."""
+    cmd = [ENGINE, "build", "-f", str(PROJECT_ROOT / dockerfile),
+           "-t", tag, str(PROJECT_ROOT)]
     rc, last_line, output_lines = _run_build(cmd)
 
-    # If the build failed and the output looks like a stale-cache
-    # problem, retry once with --no-cache before giving up.
     if rc != 0 and _looks_like_stale_cache(output_lines):
         console.print()
         console.print(
@@ -419,16 +414,50 @@ def docker_build() -> None:
             "(full rebuild, may take a few minutes)…[/]"
         )
         console.print()
-        cmd_nc = [ENGINE, "build", "--no-cache", "-t", IMAGE, str(PROJECT_ROOT)]
+        cmd_nc = [ENGINE, "build", "--no-cache", "-f", str(PROJECT_ROOT / dockerfile),
+                  "-t", tag, str(PROJECT_ROOT)]
         rc, last_line, output_lines = _run_build(cmd_nc)
 
     if rc != 0:
-        console.print(f"[red bold]Build failed[/] (exit {rc})")
+        console.print(f"[red bold]Build failed[/] (exit {rc}) for [bold]{tag}[/]")
         if last_line:
             console.print(f"  Last output: [dim]{last_line}[/]")
         sys.exit(rc)
 
-    console.print("[green]✓[/] Container image ready")
+
+def docker_build(harness: str = DEFAULT_HARNESS) -> None:
+    """Build the base + harness images with a live progress spinner.
+
+    The first build pulls ~2GB (python base, chromium, ffmpeg, noVNC, Node,
+    plus the harness CLI) and takes several minutes; subsequent rebuilds
+    are near-instant when the layer cache is warm. We show a banner only
+    for the cold path.
+
+    If a build fails with a pattern that suggests stale layer-cache
+    (e.g. a lockfile mismatch), we automatically retry once with
+    ``--no-cache`` so the user doesn't have to debug it manually.
+    """
+    if harness not in _HARNESS_DOCKERFILES:
+        raise ValueError(
+            f"Unknown harness {harness!r}; expected one of {list(_HARNESS_DOCKERFILES)}"
+        )
+    target_image = harness_image(harness)
+    first_build = not _image_exists(target_image)
+
+    if first_build:
+        console.print()
+        console.print(Panel(
+            "[bold]First-time container build.[/]\n"
+            f"This downloads ~2 GB (chromium, ffmpeg, noVNC, Node, {harness})\n"
+            "and typically takes [bold]5–10 minutes[/] on a decent connection.\n"
+            "[dim]Subsequent runs reuse the layer cache and finish in seconds.[/]",
+            title=f"[bold]Building {target_image} image[/]",
+            border_style="cyan",
+        ))
+
+    _build_one("Dockerfile.base", BASE_IMAGE)
+    _build_one(_HARNESS_DOCKERFILES[harness], target_image)
+    console.print(f"[green]✓[/] Container image ready ({target_image})")
 
 
 def _fix_data_ownership(data_dir: Path) -> None:
@@ -467,7 +496,7 @@ def _fix_data_ownership(data_dir: Path) -> None:
         [
             ENGINE, "run", "--rm",
             "-v", f"{data_dir.resolve()}:/fix",
-            IMAGE,
+            BASE_IMAGE,
             "chown", "-R", f"{uid}:{os.getgid()}", "/fix",
         ],
         check=False,
@@ -514,6 +543,8 @@ def docker_run_human(name: str, instruction: str, schema_path: Path,
                      personal_info_dir: Path,
                      time_limit_s: int = 1800,
                      host_port: int = 6080) -> None:
+    # Human mode has no agent harness — base image carries everything
+    # needed (Xvfb, Chrome, extension-server, noVNC).
     cmd = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
@@ -524,7 +555,7 @@ def docker_run_human(name: str, instruction: str, schema_path: Path,
         "-p", f"{host_port}:6080",
         "-v", f"{schema_path.resolve()}:/eval-schema.json:ro",
         "-v", f"{personal_info_dir.resolve()}:/my-info:ro",
-        IMAGE,
+        BASE_IMAGE,
     ]
     run(cmd)
 
@@ -532,7 +563,8 @@ def docker_run_human(name: str, instruction: str, schema_path: Path,
 def docker_run(name: str, instruction: str, schema_path: Path,
                personal_info_dir: Path, model_cfg: dict,
                time_limit_s: int = 1800,
-               host_port: int | None = None) -> None:
+               host_port: int | None = None,
+               harness: str = DEFAULT_HARNESS) -> None:
     env_flags = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
@@ -559,7 +591,7 @@ def docker_run(name: str, instruction: str, schema_path: Path,
         env_flags += ["-e", f"TEMPERATURE={model_cfg['temperature']}"]
     if model_cfg.get("max_tokens") is not None:
         env_flags += ["-e", f"MAX_TOKENS={model_cfg['max_tokens']}"]
-    run([*env_flags, IMAGE])
+    run([*env_flags, harness_image(harness)])
 
 
 def docker_wait(name: str) -> None:
@@ -598,10 +630,10 @@ def docker_wait(name: str) -> None:
 
 def docker_copy(name: str, output_dir: Path) -> None:
     run([ENGINE, "cp", f"{name}:/data", str(output_dir / "data")])
-    # Remove internal marker file and bulky logs
+    # Remove internal marker file and bulky harness logs
     (output_dir / "data" / ".stop-requested").unlink(missing_ok=True)
-    (output_dir / "data" / "agent.log").unlink(missing_ok=True)
-    (output_dir / "data" / "gateway.log").unlink(missing_ok=True)
+    for log_file in (output_dir / "data").glob("*.log"):
+        log_file.unlink(missing_ok=True)
 
 
 def docker_logs(name: str) -> None:
@@ -630,6 +662,8 @@ def ensure_interception(output_dir: Path):
         "vnc_disconnected": "Session stopped: human disconnected from VNC without triggering the interceptor.",
         "chrome_cdp_timeout": "Session stopped: Chrome CDP was not ready after 30s (browser failed to start).",
         "gateway_failed": "Session stopped: OpenClaw gateway died on startup.",
+        "opencode_failed": "Session stopped: opencode process died on startup.",
+        "missing_harness": "Session stopped: container image was built without a harness layer.",
     }
     description = descriptions.get(reason, f"Session stopped: {reason}.")
     schema_file = output_dir / "eval-schema.json"
@@ -696,6 +730,8 @@ def main():
                         help="Skip building the container image (assumes it already exists)")
     parser.add_argument("--no-upload", dest="no_upload", action="store_true",
                         help="Skip HuggingFace upload even if HF_TOKEN is configured")
+    parser.add_argument("--harness", choices=HARNESSES, default=DEFAULT_HARNESS,
+                        help=f"Coding-agent harness (default: {DEFAULT_HARNESS})")
     args = parser.parse_args()
 
     if not args.human and args.model is None:
@@ -734,23 +770,24 @@ def main():
     model_cfg: dict | None = None
     if args.human:
         safe_model = "human"
+        harness_tag = "human"
     else:
         model_cfg = load_model_config(args.model)
         safe_model = re.sub(r'[/:]+', '--', args.model)
+        harness_tag = args.harness
 
-    container = f"clawbench-{case_name}-{safe_model}-{int(time.time())}"
+    container = f"clawbench-{harness_tag}-{case_name}-{safe_model}-{int(time.time())}"
+    run_dir_name = f"{harness_tag}-{case_name}-{safe_model}-{ts}"
 
     if args.output_dir is not None:
-        output_dir = args.output_dir.resolve() / safe_model / \
-            f"{case_name}-{safe_model}-{ts}"
+        output_dir = args.output_dir.resolve() / safe_model / run_dir_name
     else:
-        output_dir = PROJECT_ROOT / "test-output" / \
-            safe_model / f"{case_name}-{safe_model}-{ts}"
+        output_dir = PROJECT_ROOT / "test-output" / safe_model / run_dir_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not args.no_build:
         step("Building container image")
-        docker_build()
+        docker_build(args.harness)
 
     email = None
     personal_info_tmp: Path | None = None
@@ -808,7 +845,8 @@ def main():
             docker_run(container, instruction, schema_path,
                        personal_info_tmp, model_cfg,
                        time_limit_s=time_limit_s,
-                       host_port=host_port)
+                       host_port=host_port,
+                       harness=args.harness)
 
             vnc_url = f"http://localhost:{host_port}/vnc.html"
             console.print(f"\n  noVNC: [link={vnc_url}]{vnc_url}[/link]")
@@ -841,6 +879,7 @@ def main():
                 "task_json_sha256": task_json_sha256,
                 "instruction": task["instruction"],
                 "model": "human",
+                "harness": "human",
                 "thinking_level": None,
                 "temperature": None,
                 "max_tokens": None,
@@ -858,6 +897,7 @@ def main():
                 "task_json_sha256": task_json_sha256,
                 "instruction": task["instruction"],
                 "model": model_cfg["model"],
+                "harness": args.harness,
                 "thinking_level": model_cfg.get("thinking_level"),
                 "temperature": model_cfg.get("temperature"),
                 "max_tokens": model_cfg.get("max_tokens"),
@@ -871,7 +911,7 @@ def main():
 
         if do_upload:
             step("Uploading to HuggingFace")
-            repo_path = f"{safe_model}/{case_name}-{safe_model}-{ts}"
+            repo_path = f"{safe_model}/{run_dir_name}"
             upload_run(output_dir, repo_path, hf_env)
 
     finally:

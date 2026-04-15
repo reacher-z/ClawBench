@@ -440,6 +440,16 @@ def mode_single(models: list[str], cases: list[str]) -> None:
         if not models:
             return
 
+    console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
+    harness = questionary.select(
+        "Harness:",
+        choices=["openclaw", "opencode"],
+        default="openclaw",
+        style=STYLE,
+    ).ask()
+    if harness is None:
+        return
+
     console.print(f"\n[bold {ACCENT}]--- Select Test Case ---[/]\n")
     case = questionary.select(
         "Case (arrow keys, or type to filter):",
@@ -451,7 +461,12 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     if case is None:
         return
 
-    ok = _confirm_launch({"Mode": "Single run", "Model": model, "Case": case})
+    ok = _confirm_launch({
+        "Mode": "Single run",
+        "Model": model,
+        "Harness": harness,
+        "Case": case,
+    })
     if not ok:
         return
 
@@ -459,6 +474,7 @@ def mode_single(models: list[str], cases: list[str]) -> None:
         [
             sys.executable, "-m", "clawbench", "run",
             case, model,
+            "--harness", harness,
         ],
         hint=(
             "  [dim]Tip: once the container starts, open the noVNC URL\n"
@@ -489,6 +505,16 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
             models = load_models()
             continue  # re-show checkbox with updated list
         break
+
+    console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
+    harness = questionary.select(
+        "Harness:",
+        choices=["openclaw", "opencode"],
+        default="openclaw",
+        style=STYLE,
+    ).ask()
+    if harness is None:
+        return
 
     console.print(f"\n[bold {ACCENT}]--- Case Selection ---[/]\n")
     case_mode = questionary.select(
@@ -554,6 +580,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     ok = _confirm_launch({
         "Mode": "Batch run",
         "Models": ", ".join(selected_models),
+        "Harness": harness,
         "Cases": case_summary,
         "Concurrent": concurrent,
         "Dry run": "Yes" if dry else "No",
@@ -566,6 +593,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
         "--models", *selected_models,
         *case_args,
         "--max-concurrent", concurrent,
+        "--harness", harness,
     ]
     if dry:
         cmd.append("--dry-run")

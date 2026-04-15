@@ -4,15 +4,21 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent (OpenClaw). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw` or `opencode`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
 ```
 ClawBench/
   run.sh                          # Entry point -- launches interactive TUI
-  Dockerfile                      # Container image (Chromium + extension + agent)
-  entrypoint.sh                   # Container entrypoint (orchestrates all services)
+  Dockerfile.base                 # Base image (Chromium + extension + Node + uv, harness-agnostic)
+  Dockerfile.openclaw             # Layer that adds the openclaw CLI on top of base
+  Dockerfile.opencode             # Layer that adds opencode + @playwright/mcp on top of base
+  entrypoint.sh                   # Shared infra (Xvfb, Chrome, noVNC, human mode); execs /run-harness.sh in agent mode
+  setup-openclaw.sh               # Generates ~/.openclaw/openclaw.json from env vars (called from run-openclaw.sh)
+  setup-opencode.sh               # Generates ~/.config/opencode/opencode.json from env vars (called from run-opencode.sh)
+  run-openclaw.sh                 # Per-harness agent runner; copied into clawbench-openclaw image as /run-harness.sh
+  run-opencode.sh                 # Per-harness agent runner; copied into clawbench-opencode image as /run-harness.sh
   .env.example                    # Template for PurelyMail credentials
   models/
     models.yaml                   # Model API configs (gitignored -- copy from example)
@@ -64,13 +70,13 @@ cp models/models.example.yaml models/models.yaml
 ./run.sh
 
 # Single run:
-uv run --project test-driver test-driver/run.py test-cases/<case-dir> <model-name>
+uv run --project test-driver test-driver/run.py test-cases/<case-dir> <model-name> --harness openclaw
 
 # Batch run (model x case cross-product):
 uv run --project test-driver test-driver/batch.py \
-  --models <model-name> --all-cases --max-concurrent 3
+  --models <model-name> --all-cases --max-concurrent 3 --harness openclaw
 
-# Human mode (manual browser control via noVNC):
+# Human mode (manual browser control via noVNC; no harness needed):
 uv run --project test-driver test-driver/run.py test-cases/<case-dir> --human
 ```
 
@@ -97,13 +103,15 @@ See `test-cases/task.schema.json` for the full schema.
 
 Each run produces:
 ```
-test-output/<model>/<case>-<model>-<timestamp>/
-  run-meta.json             # Run metadata (model, duration, intercepted)
+test-output/<model>/<harness>-<case>-<model>-<timestamp>/
+  run-meta.json             # Run metadata (harness, model, duration, intercepted)
   eval-schema.json          # Schema used for this run
   data/
     actions.jsonl           # Browser action log
     requests.jsonl          # HTTP request log
-    agent-messages.jsonl    # Agent conversation transcript
+    agent-messages.jsonl    # Agent conversation transcript (shape varies by harness:
+                            #   openclaw → session-schema events; opencode → AI-SDK
+                            #   `step_start`/`tool_use`/`text`/`reasoning`/`step_finish` events)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result
