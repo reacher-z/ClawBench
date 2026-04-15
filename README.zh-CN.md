@@ -484,22 +484,16 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 <a href="docs/community.md#%E5%BE%AE%E4%BF%A1%E7%BE%A4-chinese">
 <img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4-%E5%8A%A0%E5%85%A5-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="微信群">
 </a>
-<br/>
-<sub><b>中文社区</b><br/>二维码 + 群规见 docs/community.md</sub>
 </td>
 <td align="center" width="33%">
 <a href="https://discord.gg/clawbench">
 <img src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
 </a>
-<br/>
-<sub><b>English</b><br/>国际研究者和开发者</sub>
 </td>
 <td align="center" width="33%">
 <a href="https://github.com/reacher-z/ClawBench/discussions">
 <img src="https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions">
 </a>
-<br/>
-<sub><b>异步问答</b><br/>可搜索 / 长期保存</sub>
 </td>
 </tr>
 </table>
