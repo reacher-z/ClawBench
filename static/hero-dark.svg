@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ClawBench — Real-World Browser Agent Benchmark on Everyday Online Tasks">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.5" stop-color="#141a2b"/>
+      <stop offset="1" stop-color="#1c1338"/>
+    </linearGradient>
+    <radialGradient id="warm" cx="0.15" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#d97706" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#d97706" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cool" cx="0.95" cy="0.85" r="0.6">
+      <stop offset="0" stop-color="#6366F1" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="0.5" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#21bca8"/>
+      <stop offset="0.33" stop-color="#7C3AED"/>
+      <stop offset="0.66" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <pattern id="grid" x="0" y="0" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#e4e8ef" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1640" height="440" fill="url(#bg)"/>
+  <rect width="1640" height="440" fill="url(#warm)"/>
+  <rect width="1640" height="440" fill="url(#cool)"/>
+  <rect width="1640" height="440" fill="url(#grid)"/>
+
+  <rect x="100" y="118" width="180" height="3" rx="1.5" fill="url(#accent)" opacity="0.95"/>
+
+  <text x="100" y="102" font-family="'Inter','SF Pro Text','Avenir Next',-apple-system,Segoe UI,sans-serif" font-size="18" font-weight="600" letter-spacing="2.8" fill="#94a3b8">REAL&#8209;WORLD&#160;BROWSER&#160;AGENT&#160;BENCHMARK&#160;&#8226;&#160;153&#160;TASKS&#160;&#8226;&#160;144&#160;LIVE&#160;WEBSITES</text>
+
+  <text x="100" y="232" font-family="'Iowan Old Style',Palatino,Georgia,'Times New Roman',serif" font-size="128" font-weight="700" fill="#e4e8ef" letter-spacing="-2">Claw<tspan fill="url(#violet)">Bench</tspan></text>
+
+  <text x="100" y="300" font-family="'Iowan Old Style',Palatino,Georgia,'Times New Roman',serif" font-size="30" font-style="italic" fill="#94a3b8">Can AI agents complete everyday online tasks?</text>
+  <text x="100" y="338" font-family="'Iowan Old Style',Palatino,Georgia,'Times New Roman',serif" font-size="30" font-style="italic" fill="#94a3b8">Even the best agent only completes about 1 in 3.</text>
+
+  <g transform="translate(1160 110)" font-family="'Inter','SF Pro Text','Avenir Next',sans-serif" font-size="16" font-weight="600">
+    <path d="M90 40 Q 180 20, 270 40" fill="none" stroke="#e4e8ef" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <path d="M90 130 Q 180 150, 270 130" fill="none" stroke="#e4e8ef" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <path d="M90 220 Q 180 200, 270 220" fill="none" stroke="#e4e8ef" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="3 4"/>
+
+    <g>
+      <rect x="0" y="18" width="180" height="44" rx="22" fill="#1f2937" stroke="#7C3AED" stroke-width="1.5"/>
+      <circle cx="22" cy="40" r="5" fill="#a78bfa"/>
+      <text x="40" y="46" fill="#e4e8ef">order food</text>
+    </g>
+    <g>
+      <rect x="200" y="18" width="180" height="44" rx="22" fill="#1f2937" stroke="#7C3AED" stroke-width="1.5"/>
+      <circle cx="222" cy="40" r="5" fill="#a78bfa"/>
+      <text x="240" y="46" fill="#e4e8ef">book travel</text>
+    </g>
+    <g>
+      <rect x="0" y="108" width="180" height="44" rx="22" fill="#1f2937" stroke="#4F46E5" stroke-width="1.5"/>
+      <circle cx="22" cy="130" r="5" fill="#a78bfa"/>
+      <text x="40" y="136" fill="#e4e8ef">apply for jobs</text>
+    </g>
+    <g>
+      <rect x="200" y="108" width="180" height="44" rx="22" fill="#1f2937" stroke="#4F46E5" stroke-width="1.5"/>
+      <circle cx="222" cy="130" r="5" fill="#a78bfa"/>
+      <text x="240" y="136" fill="#e4e8ef">write reviews</text>
+    </g>
+    <g>
+      <rect x="0" y="198" width="180" height="44" rx="22" fill="#1f2937" stroke="#7C3AED" stroke-width="1.5"/>
+      <circle cx="22" cy="220" r="5" fill="#a78bfa"/>
+      <text x="40" y="226" fill="#e4e8ef">manage projects</text>
+    </g>
+    <g>
+      <rect x="200" y="198" width="180" height="44" rx="22" fill="#1f2937" stroke="#7C3AED" stroke-width="1.5"/>
+      <circle cx="222" cy="220" r="5" fill="#a78bfa"/>
+      <text x="240" y="226" fill="#e4e8ef">shop online</text>
+    </g>
+  </g>
+
+  <rect x="100" y="390" width="1440" height="1" fill="#e4e8ef" fill-opacity="0.12"/>
+  <text x="100" y="415" font-family="'Inter','SF Pro Text',sans-serif" font-size="14" fill="#94a3b8">uv tool install clawbench-eval &#160;&#8226;&#160; 5-layer recording &#160;&#8226;&#160; 15 life categories &#160;&#8226;&#160; one-line run</text>
+</svg>
