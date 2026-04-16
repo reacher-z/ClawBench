@@ -16,6 +16,15 @@
 [![Discord](https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench)
 [![Codespaces](https://img.shields.io/badge/Codespaces-%E4%B8%80%E9%94%AE%E6%89%93%E5%BC%80-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
+<p align="center"><sub><i>已被收录于</i></sub></p>
+<p align="center">
+  <a href="https://github.com/walkinglabs/awesome-harness-engineering"><img alt="awesome-harness-engineering" src="https://img.shields.io/badge/Featured-awesome--harness--engineering-7C3AED?style=flat-square&logo=awesomelists&logoColor=white"></a>
+  <a href="https://github.com/Jenqyang/Awesome-AI-Agents"><img alt="Awesome-AI-Agents" src="https://img.shields.io/badge/Featured-Awesome--AI--Agents-7C3AED?style=flat-square&logo=awesomelists&logoColor=white"></a>
+  <a href="https://github.com/ranpox/awesome-computer-use"><img alt="awesome-computer-use" src="https://img.shields.io/badge/Featured-awesome--computer--use-7C3AED?style=flat-square&logo=awesomelists&logoColor=white"></a>
+  <a href="https://github.com/ZJU-REAL/Awesome-GUI-Agents"><img alt="Awesome-GUI-Agents" src="https://img.shields.io/badge/Featured-Awesome--GUI--Agents-7C3AED?style=flat-square&logo=awesomelists&logoColor=white"></a>
+  <a href="https://github.com/zhangxjohn/LLM-Agent-Benchmark-List"><img alt="LLM-Agent-Benchmark-List" src="https://img.shields.io/badge/Featured-LLM--Agent--Benchmark--List-7C3AED?style=flat-square&logo=awesomelists&logoColor=white"></a>
+</p>
+
 <p align="center">
   <a href="https://huggingface.co/papers/2604.08523"><img src="https://img.shields.io/badge/%233_Paper_of_the_Day-FFD21E?style=for-the-badge&logo=huggingface&logoColor=000" alt="#3 Paper of the Day"></a>
 </p>
@@ -39,9 +48,13 @@ uv tool install clawbench-eval && clawbench
 
 ### AI 智能体能完成日常在线任务吗?
 
+**ClawBench 是一个开源基准，用于评测 AI browser agent 在 153 项日常在线任务上的表现 —— 订酒店、点外卖、投简历、管理邮件 —— 涵盖 144 个真实网站。我们用 5 层录制管线加 DOM-match + LLM judge 来衡量端到端任务完成率。目前最高分：33.3%。**
+
 我们让前沿 AI 智能体去做人们每天都在做的事 --<br/>
 点外卖、订酒店、投简历、写评价、管理项目。<br/>
 **即使最强的模型，也只能完成其中约三分之一。**
+
+<sub><i>由 ZJU-REAL 出品 &nbsp;·&nbsp; 姊妹项目：<a href="https://github.com/reacher-z/HarnessBench">HarnessBench</a> &nbsp;·&nbsp; 任意 Chrome 上即可运行。</i></sub>
 
 ---
 
@@ -343,6 +356,20 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 
 <br/>
 
+## ClawBench 与相关工作对比
+
+| Benchmark | 领域 | 环境 | 任务数 | ClawBench 的差异 |
+|-----------|------|------|--------|------------------|
+| [WebArena](https://webarena.dev) | 合成 Web 应用 | 自建副本 | 812 | 真实消费级网站,而非托管后台 UI |
+| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | 通用助手 | 闭卷文本 + 工具 | 466 | 以浏览器为中心;端到端任务执行 |
+| [SWE-bench](https://www.swebench.com) | 软件工程 | GitHub 仓库 | 2,294 | 非代码;面向日常消费场景 |
+| [BrowserGym](https://github.com/ServiceNow/BrowserGym) | Web agent | 无头沙盒 | — | 云端一致;录制真实用户轨迹 |
+| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web) | Web 导航 | 静态轨迹 | 2,350 | 动态真实站点,不回放录像 |
+
+ClawBench 定位:**真实消费级网站、日常任务、端到端录制**。若你想要受控沙盒或回放轨迹,上面这些项目都很出色。若你想知道你的 agent 今天能不能真的点一份外卖、订一张机票,就用 ClawBench。
+
+<br/>
+
 ## 架构
 
 <details>
@@ -523,6 +550,32 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 </table>
 
 详情(频道划分、群规、微信群加入方式)见 [docs/community.md](docs/community.md)。
+
+## 常见问题
+
+**ClawBench 是什么?**
+ClawBench 是一个开源的 AI browser agent 基准 —— 即那些驱动真实浏览器去完成用户任务的系统(基于 GPT、Claude,或开源模型)。它衡量的是 agent 是否真的完成了 153 项日常在线任务,涵盖 144 个真实网站,而不是它产生的文本看起来是否对。
+
+**ClawBench 覆盖哪些任务?**
+15 个生活类别:外卖、订票、投简历、购物、租房、邮件与日历管理、学术研究、软件开发、学习平台等等。每一项都是一个普通人在普通的一周里、在真实网站上可能做的事。
+
+**任务成功如何判定?**
+每个任务运行在隔离的浏览器容器中,并进行 5 层录制(DOM、网络、截图、动作轨迹、控制台)。一套确定性 DOM 检查覆盖可验证步骤;LLM judge 针对录制结果评判剩余的主观项。分数是 agent 端到端满足的检查项比例。
+
+**目前最高分是多少?**
+33.3% —— 大约三分之一的任务完成率 —— 来自我们评测过的最强前沿模型。大多数任务仍能击败我们测试过的每一个模型;提升空间真实存在,基准尚未饱和。
+
+**如何复现已发表的分数?**
+`uv tool install clawbench-eval && clawbench` 安装 harness 并启动交互式 TUI,它会从 Hugging Face 下载任务集、构建容器镜像、并在你选择的模型上运行 153 项任务中的任意子集。无需手动准备数据集,也无需把 API key 贴进配置文件。
+
+**在真实网站上运行 ClawBench 安全吗?**
+runner 使用加固的容器,内置请求拦截器,默认阻止下单付款、注册账号、发送邮件等不可逆动作。需要*模拟*这些动作的任务(比如"加入购物车并结账")会在最后一个可逆步骤终止。若你的研究确实需要,可以按任务放宽拦截器。
+
+**可以贡献新任务或新 harness 吗?**
+可以。任务放在 `src/clawbench/data/test-cases/`,是 YAML 规格 + rubric;详见 `docs/contributing/adding-a-task.md`。Harness(模型与浏览器之间的胶水层)作为 Python entry points 接入 —— harness 侧的脚手架见姊妹项目 [HarnessBench](https://github.com/reacher-z/HarnessBench)。
+
+**ClawBench 和 HarnessBench 是什么关系?**
+同一套评分管线,正交维度。ClawBench 固定 harness、比较不同模型;HarnessBench 固定模型、比较不同 harness。两者共享 153 项任务集、5 层录制、和 DOM + LLM judge —— 分数可直接相互比较。
 
 ## 引用
 
