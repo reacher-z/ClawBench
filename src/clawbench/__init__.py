@@ -54,4 +54,10 @@ for _dist in (
     except PackageNotFoundError:
         continue
 
-__all__ = ["__version__"]
+from clawbench.harnesses import HarnessSpec, discover_harnesses
+
+__all__ = [
+    "__version__",
+    "HarnessSpec",
+    "discover_harnesses",
+]

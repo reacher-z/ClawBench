@@ -28,7 +28,26 @@ from clawbench import paths as _paths
 from clawbench.generate_resume_pdf import generate_resume_pdf
 from clawbench.hf_upload import hf_upload_enabled, upload_run
 
-HARNESSES = ("openclaw", "opencode", "claude-code")
+from clawbench.harnesses import discover_harnesses as _discover_harnesses
+
+# The tuple form is kept for back-compat with callers that imported it
+# directly. It now mirrors whatever the plugin surface discovered at
+# import time (built-ins + any third-party ``clawbench.harnesses`` entry
+# points). Built-in harnesses always come first so ``DEFAULT_HARNESS``
+# stays stable.
+_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code")
+
+
+def _compute_harnesses() -> tuple[str, ...]:
+    discovered = list(_discover_harnesses())
+    ordered: list[str] = [h for h in _BUILTIN_HARNESS_ORDER if h in discovered]
+    for h in discovered:
+        if h not in ordered:
+            ordered.append(h)
+    return tuple(ordered)
+
+
+HARNESSES = _compute_harnesses()
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -348,11 +367,17 @@ def _image_exists(ref: str = IMAGE) -> bool:
     ).returncode == 0
 
 
-_HARNESS_BUILD_FILES: dict[str, tuple[str, ...]] = {
-    "openclaw": ("Dockerfile.openclaw", "setup-openclaw.sh", "run-openclaw.sh"),
-    "opencode": ("Dockerfile.opencode", "setup-opencode.sh", "run-opencode.sh"),
-    "claude-code": ("Dockerfile.claude-code", "setup-claude-code.sh", "run-claude-code.sh"),
-}
+def _harness_build_files(harness: str) -> tuple[str, ...]:
+    """Resolve a harness' (Dockerfile, setup, run) triple via the plugin
+    registry. Falls back to the legacy dict for backward compatibility if a
+    name is registered without the new spec fields populated."""
+    specs = _discover_harnesses()
+    spec = specs.get(harness)
+    if spec is None:
+        raise ValueError(
+            f"Unknown harness {harness!r}; expected one of {sorted(specs)}"
+        )
+    return spec.build_files()
 
 
 def _prepare_build_context(ctx: Path, harness: str = DEFAULT_HARNESS) -> None:
@@ -365,13 +390,10 @@ def _prepare_build_context(ctx: Path, harness: str = DEFAULT_HARNESS) -> None:
     when the package is installed (symlinks under ``src/clawbench/data/``
     resolve to the source tree or to the wheel's site-packages layout).
     The copied trees are tiny (a few MB) so the cost is negligible."""
-    if harness not in _HARNESS_BUILD_FILES:
-        raise ValueError(
-            f"Unknown harness {harness!r}; expected one of {list(_HARNESS_BUILD_FILES)}"
-        )
+    harness_files = _harness_build_files(harness)
     docker_dir = _paths.docker_build_dir()
     base_files = ("Dockerfile.base", "entrypoint.sh")
-    for name in base_files + _HARNESS_BUILD_FILES[harness]:
+    for name in base_files + harness_files:
         shutil.copy2(docker_dir / name, ctx / name)
     shutil.copytree(_paths.extension_server_dir(), ctx / "extension-server",
                     symlinks=False)
