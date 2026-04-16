@@ -1,6 +1,11 @@
 <div align="center">
 
-# ClawBench
+<a href="https://github.com/reacher-z/ClawBench">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="static/hero-dark.svg">
+    <img alt="ClawBench" src="static/hero-light.svg" width="820">
+  </picture>
+</a>
 
 [![Star this repo](https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
