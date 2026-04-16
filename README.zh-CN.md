@@ -158,7 +158,7 @@ clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 容器启动后,脚本会打印一个 **noVNC URL**（如 `http://localhost:6080/vnc.html`）—— 在浏览器中打开即可实时观看 agent 操作。如果 6080 端口被占用,会自动选一个空闲端口。
 
-结果落在 `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/`,包含完整的五层录制。默认 harness 是 `openclaw`；想用 [opencode](https://opencode.ai)（通过 [Playwright MCP](https://github.com/microsoft/playwright-mcp) 驱动浏览器）就加 `--harness opencode`。
+结果落在 `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/`,包含完整的五层录制。默认 harness 是 `openclaw`；想用 [opencode](https://opencode.ai) 就加 `--harness opencode`，想用 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 就加 `--harness claude-code`（两者均通过 [Playwright MCP](https://github.com/microsoft/playwright-mcp) 驱动浏览器）。
 
 **(c) 通过 noVNC 手动控制浏览器** —— 产出人工参考轨迹:
 ```bash
@@ -624,4 +624,4 @@ uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50
 
 Apache 2.0 -- 详见 [LICENSE](LICENSE)。
 
-基于以下开源项目构建: [OpenClaw](https://github.com/openclaw/openclaw) 和 [opencode](https://opencode.ai)（可选的 harness）, [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)（opencode harness 的浏览器控制桥）, [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), [websockify](https://github.com/novnc/websockify) (LGPL 3.0)。
+基于以下开源项目构建: [OpenClaw](https://github.com/openclaw/openclaw)、[opencode](https://opencode.ai) 和 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（可选的 harness）, [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)（opencode 和 claude-code harness 的浏览器控制桥）, [LiteLLM](https://github.com/BerriAI/litellm)（claude-code harness 的 API 转换代理）, [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), [websockify](https://github.com/novnc/websockify) (LGPL 3.0)。

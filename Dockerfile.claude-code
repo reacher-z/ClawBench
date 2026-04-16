@@ -1,0 +1,16 @@
+FROM clawbench-base
+
+# Pin Claude Code and Playwright MCP versions for reproducible builds —
+# matches the openclaw-side `openclaw@2026.3.13` pin pattern.
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g \
+    @anthropic-ai/claude-code@2.1.110 \
+    @playwright/mcp@0.0.70
+
+# LiteLLM proxy translates Anthropic-format requests to other API formats
+# (OpenAI, Google, etc.) so Claude Code can work with any api_type.
+# Only started at runtime when api_type != anthropic-messages.
+RUN pip install --no-cache-dir 'litellm[proxy]'
+
+COPY setup-claude-code.sh /setup-claude-code.sh
+COPY run-claude-code.sh /run-harness.sh
+RUN chmod +x /setup-claude-code.sh /run-harness.sh

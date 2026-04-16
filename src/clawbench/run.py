@@ -28,7 +28,7 @@ from clawbench import paths as _paths
 from clawbench.generate_resume_pdf import generate_resume_pdf
 from clawbench.hf_upload import hf_upload_enabled, upload_run
 
-HARNESSES = ("openclaw", "opencode")
+HARNESSES = ("openclaw", "opencode", "claude-code")
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -351,6 +351,7 @@ def _image_exists(ref: str = IMAGE) -> bool:
 _HARNESS_BUILD_FILES: dict[str, tuple[str, ...]] = {
     "openclaw": ("Dockerfile.openclaw", "setup-openclaw.sh", "run-openclaw.sh"),
     "opencode": ("Dockerfile.opencode", "setup-opencode.sh", "run-opencode.sh"),
+    "claude-code": ("Dockerfile.claude-code", "setup-claude-code.sh", "run-claude-code.sh"),
 }
 
 
@@ -739,6 +740,8 @@ def ensure_interception(output_dir: Path):
         "chrome_cdp_timeout": "Session stopped: Chrome CDP was not ready after 30s (browser failed to start).",
         "gateway_failed": "Session stopped: OpenClaw gateway died on startup.",
         "opencode_failed": "Session stopped: opencode process died on startup.",
+        "claude_code_failed": "Session stopped: Claude Code process died on startup.",
+        "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }
     description = descriptions.get(reason, f"Session stopped: {reason}.")

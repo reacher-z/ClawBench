@@ -27,7 +27,7 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-HARNESSES = ("openclaw", "opencode")
+HARNESSES = ("openclaw", "opencode", "claude-code")
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -41,6 +41,7 @@ def harness_image(harness: str) -> str:
 _HARNESS_DOCKERFILES: dict[str, str] = {
     "openclaw": "Dockerfile.openclaw",
     "opencode": "Dockerfile.opencode",
+    "claude-code": "Dockerfile.claude-code",
 }
 
 # Kept for back-compat with old callers / scripts that imported IMAGE.
@@ -663,6 +664,8 @@ def ensure_interception(output_dir: Path):
         "chrome_cdp_timeout": "Session stopped: Chrome CDP was not ready after 30s (browser failed to start).",
         "gateway_failed": "Session stopped: OpenClaw gateway died on startup.",
         "opencode_failed": "Session stopped: opencode process died on startup.",
+        "claude_code_failed": "Session stopped: Claude Code process died on startup.",
+        "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }
     description = descriptions.get(reason, f"Session stopped: {reason}.")
