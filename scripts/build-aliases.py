@@ -57,8 +57,10 @@ def root_version() -> str:
 
 # Alias distribution names successfully registered on PyPI.
 #
-# First wave (packaging PR): harness-bench, clawbench-eval, clawbench-cli,
-# openclawbench, clawbench-harness, claw-harness, nail-clawbench.
+# First wave (packaging PR): clawbench-eval, clawbench-cli, openclawbench,
+# clawbench-harness, claw-harness, nail-clawbench. ``harness-bench`` was
+# also in this wave but has since been handed over to the HarnessBench
+# project (its own repo; owns the name on PyPI going forward).
 #
 # Second wave (adjacent harness/agent names): harnessos, r2agent, claw-ai,
 # claw-agent, claw-eval.
@@ -80,7 +82,8 @@ def root_version() -> str:
 # distribution anyway — so ``pip install claw_ai`` still lands on our
 # package.
 ALIAS_NAMES = [
-    "harness-bench",
+    # "harness-bench" was split off into its own project (HarnessBench):
+    # https://github.com/reacher-z/HarnessBench — don't re-claim as an alias.
     "clawbench-eval",
     "clawbench-cli",
     "openclawbench",
