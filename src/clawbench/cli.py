@@ -103,7 +103,7 @@ def tui_cmd() -> None:
               help="Directory to write output to (default: ./claw-output).")
 @click.option("--no-build", is_flag=True, help="Skip building the container image.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload even if configured.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode"]), default=None,
+@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]), default=None,
               help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def run_cmd(
@@ -170,7 +170,7 @@ def run_cmd(
               help="Min seconds between container starts (default: 15).")
 @click.option("--dry-run", is_flag=True, help="Print job matrix without running.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload for all runs.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode"]), default=None,
+@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]), default=None,
               help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def batch_cmd(
@@ -220,7 +220,7 @@ def batch_cmd(
 
 @main.command("build")
 @click.option("--no-cache", is_flag=True, help="Ignore layer cache — full rebuild.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode"]),
+@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]),
               default="openclaw",
               help="Coding-agent harness layer to build (default: openclaw).")
 def build_cmd(no_cache: bool, harness: str) -> None:
