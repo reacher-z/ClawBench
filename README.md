@@ -2,14 +2,7 @@
 
 # ClawBench
 
-[![Star this repo](https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench)
-[![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523)
-[![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/papers/2604.08523)
-[![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench)
-[![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
-[![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench)
-[![Open in GitHub Codespaces](https://img.shields.io/badge/Codespaces-Open-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
+[![Star this repo](https://img.shields.io/badge/%E2%98%85%20Star%20this%20repo-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench) [![CI](https://img.shields.io/github/actions/workflow/status/reacher-z/ClawBench/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI)](https://github.com/reacher-z/ClawBench/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/clawbench-eval?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/clawbench-eval/) [![Downloads](https://img.shields.io/pypi/dm/clawbench-eval?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/clawbench-eval/) [![Python](https://img.shields.io/pypi/pyversions/clawbench-eval?style=flat-square&logo=python&logoColor=white)](https://pypi.org/project/clawbench-eval/) [![License](https://img.shields.io/github/license/reacher-z/ClawBench?style=flat-square)](LICENSE) [![Issues](https://img.shields.io/github/issues/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/issues) [![arXiv](https://img.shields.io/badge/arXiv-2604.08523-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2604.08523) [![HF Daily Paper](https://img.shields.io/badge/Daily_Paper-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/papers/2604.08523) [![HF Dataset](https://img.shields.io/badge/Dataset-FFD21E?style=flat-square&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/NAIL-Group/ClawBench) [![Project Page](https://img.shields.io/badge/claw--bench.com-4F46E5?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com) [![GitHub stars](https://img.shields.io/github/stars/reacher-z/ClawBench?style=flat-square&logo=github&color=181717&cacheSeconds=300)](https://github.com/reacher-z/ClawBench) [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench) [![Open in GitHub Codespaces](https://img.shields.io/badge/Codespaces-Open-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
 <p align="center">
   <a href="https://huggingface.co/papers/2604.08523"><img src="https://img.shields.io/badge/%233_Paper_of_the_Day-FFD21E?style=for-the-badge&logo=huggingface&logoColor=000" alt="#3 Paper of the Day"></a>
@@ -173,6 +166,8 @@ Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` wi
 clawbench run 001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
+
+**(d) Pair with an external browser agent** — e.g. [Claude for Chrome](https://claude.com/claude-for-chrome) running in your own browser. See [`docs/integrations.md`](docs/integrations.md) for the flow and caveats.
 
 <details>
 <summary><b>Develop from source</b> &nbsp;— clone + ``./run.sh`` for contributors</summary>
