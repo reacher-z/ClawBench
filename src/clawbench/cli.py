@@ -33,7 +33,17 @@ import click
 from clawbench import __version__
 from clawbench import doctor as _doctor
 from clawbench import paths as _paths
+from clawbench.harnesses import discover_harnesses as _discover_harnesses
 from clawbench.run import DEFAULT_SECRETS
+
+
+def _harness_choice() -> click.Choice:
+    """Build a ``click.Choice`` from the current harness registry.
+
+    Evaluated at module-import time, which runs once per CLI invocation.
+    External plugins registered via ``clawbench.harnesses`` entry points
+    appear in the choice list without code changes."""
+    return click.Choice(sorted(_discover_harnesses()))
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +113,7 @@ def tui_cmd() -> None:
               help="Directory to write output to (default: ./claw-output).")
 @click.option("--no-build", is_flag=True, help="Skip building the container image.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload even if configured.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]), default=None,
+@click.option("--harness", type=_harness_choice(), default=None,
               help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def run_cmd(
@@ -170,7 +180,7 @@ def run_cmd(
               help="Min seconds between container starts (default: 15).")
 @click.option("--dry-run", is_flag=True, help="Print job matrix without running.")
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload for all runs.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]), default=None,
+@click.option("--harness", type=_harness_choice(), default=None,
               help="Coding-agent harness (default: openclaw).")
 @click.pass_context
 def batch_cmd(
@@ -220,7 +230,7 @@ def batch_cmd(
 
 @main.command("build")
 @click.option("--no-cache", is_flag=True, help="Ignore layer cache — full rebuild.")
-@click.option("--harness", type=click.Choice(["openclaw", "opencode", "claude-code"]),
+@click.option("--harness", type=_harness_choice(),
               default="openclaw",
               help="Coding-agent harness layer to build (default: openclaw).")
 def build_cmd(no_cache: bool, harness: str) -> None:

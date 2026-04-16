@@ -61,6 +61,15 @@ clawbench = "clawbench.cli:main"
 clawbench-eval = "clawbench.cli:main"
 claw-bench = "clawbench.cli:main"
 
+# Plugin surface. ClawBench's own harnesses register through the same
+# ``clawbench.harnesses`` entry-point group that third-party packages
+# (e.g. HarnessBench: https://github.com/reacher-z/HarnessBench) use.
+# See ``clawbench.harnesses.discover_harnesses``.
+[project.entry-points."clawbench.harnesses"]
+openclaw     = "clawbench.harnesses.openclaw.spec:spec"
+opencode     = "clawbench.harnesses.opencode.spec:spec"
+claude-code  = "clawbench.harnesses.claude_code.spec:spec"
+
 [project.urls]
 Homepage = "https://claw-bench.com"
 Repository = "https://github.com/reacher-z/ClawBench"
