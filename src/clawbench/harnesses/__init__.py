@@ -54,11 +54,13 @@ def _builtin_specs() -> dict[str, HarnessSpec]:
     from clawbench.harnesses.openclaw import spec as openclaw_spec
     from clawbench.harnesses.opencode import spec as opencode_spec
     from clawbench.harnesses.claude_code import spec as claude_code_spec
+    from clawbench.harnesses.codex import spec as codex_spec
 
     return {
         openclaw_spec.name: openclaw_spec,
         opencode_spec.name: opencode_spec,
         claude_code_spec.name: claude_code_spec,
+        codex_spec.name: codex_spec,
     }
 
 

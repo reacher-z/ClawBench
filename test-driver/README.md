@@ -105,7 +105,7 @@ Test cases can be selected by their numeric ID prefix (e.g. `886` for `886-enter
 
 1. **Load config** — reads `.env` for PurelyMail credentials, loads model config from `models/models.yaml`
 2. **Load test case** — reads `task.json` from the specified test case directory
-3. **Build container image** — runs `docker build` (or `podman build`) to build the `clawbench-base` image and then the harness layer (`clawbench-openclaw`, `clawbench-opencode`, or `clawbench-claude-code`, selected by `--harness`); skipped with `--no-build`
+3. **Build container image** — runs `docker build` (or `podman build`) to build the `clawbench-base` image and then the harness layer (`clawbench-openclaw`, `clawbench-opencode`, `clawbench-claude-code`, or `clawbench-codex`, selected by `--harness`); skipped with `--no-build`
 4. **Create disposable email** — calls PurelyMail API to create `cb<uuid>@<domain>` with a generated password
 5. **Prepare personal info** — copies `shared/alex_green_personal_info.json`, injects the generated email into the contact field, writes `email_credentials.json`, generates `alex_green_resume.pdf` from `resume_template.json` (also with the generated email), and copies any `extra_info` files from the test case. All files are placed in a temporary directory mounted into the container at `/my-info/`
 6. **Write eval schema** — writes the eval schema from `task.json` to `eval-schema.json` in the output directory, then mounts it read-only into the container
@@ -166,7 +166,7 @@ uv run --project test-driver test-driver/batch.py --all-models --all-cases --dry
 | `--stagger-delay SECONDS` | Minimum gap between consecutive container starts (rolling start) | 15 |
 | `--dry-run` | Print job matrix without running | false |
 | `--no-upload` | Skip HuggingFace upload for all runs | false |
-| `--harness {openclaw,opencode,claude-code}` | Coding-agent harness layer to use inside the container | `openclaw` |
+| `--harness {openclaw,opencode,claude-code,codex}` | Coding-agent harness layer to use inside the container | `openclaw` |
 
 `--case-range` can be used standalone (discovers all cases, then filters) or combined with `--cases` (filter the glob results).
 
@@ -259,7 +259,8 @@ test-output/qwen3.5-397b-a17b/openclaw-886-entertainment-hobbies-experience-topg
     actions.jsonl           # Browser action log
     requests.jsonl          # HTTP request log (all browser requests)
     agent-messages.jsonl    # Agent conversation transcript (openclaw session schema,
-                            # opencode AI-SDK events, or claude-code stream-json events)
+                            # opencode AI-SDK events, claude-code stream-json events,
+                            # or codex timestamped session rollout with reasoning interleaved)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result
