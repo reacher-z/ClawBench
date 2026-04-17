@@ -15,11 +15,12 @@ if [ -n "$MAX_TOKENS" ]; then
   echo "WARN: Claude Code CLI does not expose a --max-tokens flag; MAX_TOKENS='$MAX_TOKENS' will be ignored."
 fi
 
-# Extract API key, write env-var exports, and optionally configure the
-# LiteLLM translation proxy for non-Anthropic api_types.
+# Generate /tmp/claude-code-env.sh + /tmp/litellm-config.yaml + /tmp/claude-mcp.json.
+# Everything routes through LiteLLM on localhost:4000
 python3 - <<'PYEOF'
-import json, os
+import json, os, urllib.request
 from pathlib import Path
+import yaml
 
 base_url = os.environ["BASE_URL"]
 model_name = os.environ["MODEL_NAME"]
@@ -43,79 +44,62 @@ if not key and single_key:
 if not key:
     raise SystemExit("ERROR: no API key provided (API_KEYS or API_KEY)")
 
-# ── Decide whether to use the LiteLLM translation proxy ──────────────
-# Claude Code speaks only the Anthropic messages API. For other api_types
-# we start a LiteLLM proxy that accepts Anthropic-format requests on a
-# local port and translates them to the target format.
-needs_proxy = api_type != "anthropic-messages"
+# ── Resolve the upstream model id (OpenRouter only) ──────────────────
+# OpenRouter expects the canonical full id (e.g. "qwen/qwen3.5-...").
+resolved_model = model_name
+is_openrouter = "openrouter.ai" in base_url
+if is_openrouter:
+    try:
+        req = urllib.request.Request(
+            f"{base_url}/models",
+            headers={"Authorization": f"Bearer {key}"},
+        )
+        resp = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        for m in resp.get("data", []):
+            if m["id"].endswith(f"/{model_name}") or m["id"] == model_name:
+                resolved_model = m["id"]
+                break
+    except Exception as e:
+        print(f"WARN: could not resolve OpenRouter model ID: {e}")
 
-if needs_proxy:
-    import urllib.request
-    import yaml  # installed as a litellm dependency
-
-    is_openrouter = "openrouter.ai" in base_url
-
-    if is_openrouter:
-        # LiteLLM's openrouter/ provider properly translates reasoning
-        # content between Anthropic and OpenAI formats. It needs the full
-        # OpenRouter model ID (e.g. "qwen/qwen3.5-397b-a17b"), so resolve
-        # it from the models endpoint.
-        full_model_id = model_name
-        try:
-            req = urllib.request.Request(
-                f"{base_url}/models",
-                headers={"Authorization": f"Bearer {key}"},
-            )
-            resp = json.loads(urllib.request.urlopen(req, timeout=10).read())
-            for m in resp.get("data", []):
-                if m["id"].endswith(f"/{model_name}") or m["id"] == model_name:
-                    full_model_id = m["id"]
-                    break
-        except Exception as e:
-            print(f"WARN: could not resolve OpenRouter model ID: {e}")
-
-        litellm_model = f"openrouter/{full_model_id}"
-        litellm_params = {
-            "model": litellm_model,
-            "api_key": key,
-        }
-    else:
-        # Generic OpenAI-compatible endpoint.
-        _PREFIX_MAP = {
-            "openai-completions": "openai",
-            "openai-responses":   "openai",
-            "google-generative-ai": "gemini",
-        }
-        prefix = _PREFIX_MAP.get(api_type, "openai")
-        litellm_model = f"{prefix}/{model_name}"
-        litellm_params = {
-            "model": litellm_model,
-            "api_key": key,
-            "api_base": base_url,
-        }
-
-    proxy_config = {
-        "model_list": [{
-            "model_name": model_name,
-            "litellm_params": litellm_params,
-        }],
-        # drop_params: silently drop Anthropic-specific params that can't
-        # be translated (e.g. thinking budget) instead of erroring.
-        "litellm_settings": {"drop_params": True},
-    }
-
-    proxy_path = Path("/tmp/litellm-config.yaml")
-    proxy_path.write_text(yaml.dump(proxy_config, default_flow_style=False))
-    os.chmod(proxy_path, 0o600)
-
-    # Claude Code will talk to the local proxy instead of the real endpoint.
-    # The proxy key is arbitrary — LiteLLM proxy doesn't validate it.
-    anthropic_base_url = "http://localhost:4000"
-    anthropic_api_key = "sk-proxy-placeholder"
-    print(f"API proxy enabled: {api_type} → litellm ({litellm_model})")
+# ── Pick the LiteLLM provider prefix ────────────────────────────────
+# The prefix tells LiteLLM which native API format to translate to.
+# We prefer provider-specific prefixes (`openrouter/`, `anthropic/`,
+# `gemini/`) over the generic `openai/` since they have better
+# tool-call and reasoning fidelity.
+litellm_params = {"api_key": key}
+if is_openrouter:
+    litellm_params["model"] = f"openrouter/{resolved_model}"
+elif api_type == "anthropic-messages":
+    litellm_params["model"] = f"anthropic/{model_name}"
+    if not base_url.startswith("https://api.anthropic.com"):
+        litellm_params["api_base"] = base_url
+elif api_type == "google-generative-ai":
+    litellm_params["model"] = f"gemini/{model_name}"
+    if not base_url.startswith("https://generativelanguage.googleapis.com"):
+        litellm_params["api_base"] = base_url
+elif api_type in ("openai-completions", "openai-responses"):
+    litellm_params["model"] = f"openai/{model_name}"
+    litellm_params["api_base"] = base_url
 else:
-    anthropic_base_url = base_url
-    anthropic_api_key = key
+    raise SystemExit(f"ERROR: unsupported api_type for claude-code harness: {api_type}")
+
+proxy_config = {
+    "model_list": [{
+        "model_name": model_name,
+        "litellm_params": litellm_params,
+    }],
+    # drop_params: silently drop Anthropic-specific params that can't
+    # be translated (e.g. thinking budget) instead of erroring.
+    "litellm_settings": {"drop_params": True},
+}
+proxy_path = Path("/tmp/litellm-config.yaml")
+proxy_path.write_text(yaml.dump(proxy_config, default_flow_style=False))
+os.chmod(proxy_path, 0o600)
+
+anthropic_base_url = "http://localhost:4000"
+anthropic_api_key = "sk-proxy-placeholder"
+print(f"API proxy enabled: {api_type} → litellm ({litellm_params['model']})")
 
 # Write a sourceable env file for the run script.
 env_path = Path("/tmp/claude-code-env.sh")

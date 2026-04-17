@@ -196,7 +196,7 @@ clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
-Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai) or `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (both driven via the [Playwright MCP server](https://github.com/microsoft/playwright-mcp)).
+Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), or `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex) (all three driven via the [Playwright MCP server](https://github.com/microsoft/playwright-mcp)).
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
@@ -705,4 +705,4 @@ Open to contributions — new test cases, bug fixes, or evaluation submissions f
 
 Apache 2.0 -- see [LICENSE](LICENSE).
 
-Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode and claude-code harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code harness), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).
+Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and [OpenAI Codex CLI](https://github.com/openai/codex) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, and codex harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code and codex harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).

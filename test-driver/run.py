@@ -27,7 +27,7 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-HARNESSES = ("openclaw", "opencode", "claude-code")
+HARNESSES = ("openclaw", "opencode", "claude-code", "codex")
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -42,6 +42,7 @@ _HARNESS_DOCKERFILES: dict[str, str] = {
     "openclaw": "Dockerfile.openclaw",
     "opencode": "Dockerfile.opencode",
     "claude-code": "Dockerfile.claude-code",
+    "codex": "Dockerfile.codex",
 }
 
 # Kept for back-compat with old callers / scripts that imported IMAGE.
@@ -665,6 +666,7 @@ def ensure_interception(output_dir: Path):
         "gateway_failed": "Session stopped: OpenClaw gateway died on startup.",
         "opencode_failed": "Session stopped: opencode process died on startup.",
         "claude_code_failed": "Session stopped: Claude Code process died on startup.",
+        "codex_failed": "Session stopped: Codex CLI process died on startup.",
         "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }
