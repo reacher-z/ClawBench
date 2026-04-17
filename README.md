@@ -71,6 +71,14 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 </div>
 
+## News
+
+- **[2026.04.16]** Featured in **5 curated awesome-lists**: [awesome-harness-engineering](https://github.com/walkinglabs/awesome-harness-engineering), [Awesome-AI-Agents](https://github.com/Jenqyang/Awesome-AI-Agents), [awesome-computer-use](https://github.com/ranpox/awesome-computer-use), [Awesome-GUI-Agents](https://github.com/ZJU-REAL/Awesome-GUI-Agents), and [LLM-Agent-Benchmark-List](https://github.com/zhangxjohn/LLM-Agent-Benchmark-List).
+- **[2026.04.15]** Sister project [**HarnessBench**](https://github.com/reacher-z/HarnessBench) launched — fixes the base model, varies the harness. Also on [PyPI](https://pypi.org/project/harness-bench/).
+- **[2026.04.14]** Project featured on [**DeepWiki**](https://deepwiki.com/reacher-z/ClawBench) — ask questions about ClawBench in natural language.
+- **[2026.04.11]** Honored to be [**#3 HuggingFace Paper of the Day**](https://huggingface.co/papers/2604.08523)!
+- **[2026.04.11]** Paper released on [arXiv (2604.08523)](https://arxiv.org/abs/2604.08523). Dataset published on [HuggingFace](https://huggingface.co/datasets/NAIL-Group/ClawBench).
+
 <br/>
 
 <p align="center">
