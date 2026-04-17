@@ -53,6 +53,19 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
+# Restrict PATH to safe read-only commands — mirrors the openclaw/opencode
+# allowlist so the agent cannot bypass the browser with curl, python, etc.
+# The agent binary and node/npx (needed for MCP) are also included.
+SAFE_BIN=/tmp/safe-bin
+mkdir -p "$SAFE_BIN"
+for cmd in ls cat find file jq cut uniq head tail tr wc grep sort sh bash; do
+  [ -x "$(command -v "$cmd" 2>/dev/null)" ] && ln -sf "$(command -v "$cmd")" "$SAFE_BIN/$cmd"
+done
+ln -sf "$(command -v claude)" "$SAFE_BIN/claude"
+ln -sf "$(command -v node)"   "$SAFE_BIN/node"
+ln -sf "$(command -v npx)"    "$SAFE_BIN/npx"
+ln -sf "$(command -v npm)"    "$SAFE_BIN/npm"
+
 # Build the claude command.
 # -p (print mode): non-interactive, runs the prompt to completion.
 # --output-format stream-json: streams one JSON object per line to stdout.
@@ -69,7 +82,7 @@ case "${THINKING_LEVEL:-off}" in
 esac
 # --mcp-config is variadic; use -- to stop it consuming the prompt.
 CLAUDE_ARGS+=(--mcp-config /tmp/claude-mcp.json -- "$INSTRUCTION")
-claude "${CLAUDE_ARGS[@]}" \
+PATH="$SAFE_BIN" claude "${CLAUDE_ARGS[@]}" \
   > /data/agent-messages.jsonl 2> /data/agent.log &
 AGENT_PID=$!
 sleep 3
