@@ -40,6 +40,16 @@
   <a href="https://deepwiki.com/reacher-z/ClawBench"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
 </p>
 
+</div>
+
+## 📣 News
+
+- [2026.04.17] 🚀 Added support for the **Codex** harness
+- [2026.04.16] 🦾 Added support for the **Claude Code** harness
+- [2026.04.14] 🛠️ Added support for the **OpenCode** harness
+
+<div align="center">
+
 <p align="center">
   <b>New:</b> Check out our sister project <a href="https://github.com/reacher-z/HarnessBench"><b>HarnessBench</b></a> &mdash;
   fixes the base model, varies the harness. Same scoring pipeline, orthogonal axis.
@@ -91,7 +101,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
    You pick a task            ClawBench spins up           Agent drives the         Interceptor captures
    from 153 real-world        an isolated Docker           browser: navigates,      every action across
    everyday scenarios         container + Chromium         fills forms, clicks      all 5 layers of data
-                                                                                    
+
    ┌──────────────┐           ┌──────────────┐           ┌──────────────┐           ┌──────────────┐
    │  "Book a pet │    ──►    │   Container  │    ──►    │   AI Agent   │    ──►    │   5 layers   │
    │   sitter on  │           │  + Chromium  │           │  browses the │           │  intercepted │
