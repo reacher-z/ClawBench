@@ -71,6 +71,17 @@ uv tool install clawbench-eval && clawbench
 
 </div>
 
+## <img src="static/icons/bullhorn.svg" width="20" height="20"> 动态
+
+- **[2026.04.17]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;新增对 **Codex** Harness 的支持。
+- **[2026.04.16]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;新增对 **Claude Code** Harness 的支持。
+- **[2026.04.16]** 被 **5 个精选 awesome-list** 收录：[awesome-harness-engineering](https://github.com/walkinglabs/awesome-harness-engineering)、[Awesome-AI-Agents](https://github.com/Jenqyang/Awesome-AI-Agents)、[awesome-computer-use](https://github.com/ranpox/awesome-computer-use)、[Awesome-GUI-Agents](https://github.com/ZJU-REAL/Awesome-GUI-Agents)、[LLM-Agent-Benchmark-List](https://github.com/zhangxjohn/LLM-Agent-Benchmark-List)。
+- **[2026.04.15]** 姊妹项目 [**HarnessBench**](https://github.com/reacher-z/HarnessBench) 发布 — 固定模型、比较 Harness。已上架 [PyPI](https://pypi.org/project/harness-bench/)。
+- **[2026.04.14]** <img src="static/icons/screwdriver-wrench.svg" width="14" height="14"> &nbsp;新增对 **OpenCode** Harness 的支持。
+- **[2026.04.14]** 项目被 [**DeepWiki**](https://deepwiki.com/reacher-z/ClawBench) 收录 — 可用自然语言提问 ClawBench 相关问题。
+- **[2026.04.11]** 荣获 [**HuggingFace 当日论文 #3**](https://huggingface.co/papers/2604.08523)!
+- **[2026.04.11]** 论文发布于 [arXiv (2604.08523)](https://arxiv.org/abs/2604.08523)。数据集上线 [HuggingFace](https://huggingface.co/datasets/NAIL-Group/ClawBench)。
+
 <br/>
 
 <p align="center">

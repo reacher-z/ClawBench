@@ -45,6 +45,7 @@
 ## 📣 News
 
 - [2026.04.18] 🌐 Added support for the **browser-use** harness
+- [2026.04.18] 🌐 Added support for the **browser-use** harness
 - [2026.04.17] 🚀 Added support for the **Codex** harness
 - [2026.04.16] 🦾 Added support for the **Claude Code** harness
 - [2026.04.14] 🛠️ Added support for the **OpenCode** harness
@@ -81,6 +82,17 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 <a href="README.zh-CN.md"><img src="static/icons/language.svg" width="16" height="16"> 中文</a>
 
 </div>
+
+## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
+
+- **[2026.04.17]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;Added support for the **Codex** harness.
+- **[2026.04.16]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **Claude Code** harness.
+- **[2026.04.16]** Featured in **5 curated awesome-lists**: [awesome-harness-engineering](https://github.com/walkinglabs/awesome-harness-engineering), [Awesome-AI-Agents](https://github.com/Jenqyang/Awesome-AI-Agents), [awesome-computer-use](https://github.com/ranpox/awesome-computer-use), [Awesome-GUI-Agents](https://github.com/ZJU-REAL/Awesome-GUI-Agents), and [LLM-Agent-Benchmark-List](https://github.com/zhangxjohn/LLM-Agent-Benchmark-List).
+- **[2026.04.15]** Sister project [**HarnessBench**](https://github.com/reacher-z/HarnessBench) launched — fixes the base model, varies the harness. Also on [PyPI](https://pypi.org/project/harness-bench/).
+- **[2026.04.14]** <img src="static/icons/screwdriver-wrench.svg" width="14" height="14"> &nbsp;Added support for the **OpenCode** harness.
+- **[2026.04.14]** Project featured on [**DeepWiki**](https://deepwiki.com/reacher-z/ClawBench) — ask questions about ClawBench in natural language.
+- **[2026.04.11]** Honored to be [**#3 HuggingFace Paper of the Day**](https://huggingface.co/papers/2604.08523)!
+- **[2026.04.11]** Paper released on [arXiv (2604.08523)](https://arxiv.org/abs/2604.08523). Dataset published on [HuggingFace](https://huggingface.co/datasets/NAIL-Group/ClawBench).
 
 <br/>
 
@@ -341,36 +353,36 @@ All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidenc
 
 </div>
 
-| Rank | Model | Overall | Daily | Finance | Work | Dev | Academic | Travel | Social | Pets |
-|:----:|-------|:-------:|:-----:|:-------:|:----:|:---:|:--------:|:------:|:------:|:----:|
-| 1 | **Claude Sonnet 4.6** | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
-| 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
-| 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
-| 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
-| 5 | GPT-5.4 | 6.5 | 9.6 | 0.0 | 0.0 | 11.1 | 7.1 | 7.7 | 0.0 | 9.1 |
-| 6 | Gemini 3.1 Flash Lite | 3.3 | 1.9 | 0.0 | 0.0 | 5.6 | 14.3 | 0.0 | 0.0 | 9.1 |
+| Rank  | Model                 | Overall  |  Daily   | Finance  |   Work   |   Dev    | Academic |  Travel  |  Social  |   Pets   |
+| :---: | --------------------- | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
+|   1   | **Claude Sonnet 4.6** | **33.3** |   44.2   | **50.0** |   19.0   |   11.1   | **50.0** |   23.1   | **38.9** | **18.2** |
+|   2   | GLM-5                 |   24.2   | **30.8** |   16.7   | **38.1** |   16.7   |   28.6   |   0.0    |   16.7   | **18.2** |
+|   3   | Gemini 3 Flash        |   19.0   |   15.4   |   33.3   |   23.8   | **22.2** |   28.6   | **30.8** |   11.1   |   0.0    |
+|   4   | Claude Haiku 4.5      |   18.3   |   15.4   |   22.2   |   19.0   | **27.8** |   21.4   |   7.7    |   16.7   | **18.2** |
+|   5   | GPT-5.4               |   6.5    |   9.6    |   0.0    |   0.0    |   11.1   |   7.1    |   7.7    |   0.0    |   9.1    |
+|   6   | Gemini 3.1 Flash Lite |   3.3    |   1.9    |   0.0    |   0.0    |   5.6    |   14.3   |   0.0    |   0.0    |   9.1    |
 
 <details>
 <summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
 
-| Category | Tasks | Example Platforms |
-|----------|:-----:|-------------------|
-| Daily Life | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
-| Entertainment & Hobbies | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
-| Creation & Initialization | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
-| Rating & Voting | 10 | Trustpilot, G2, Goodreads, RateMyProfessors |
-| Travel | 9 | Booking.com, Expedia, Airbnb, TripAdvisor |
-| Education & Learning | 9 | Coursera, Udemy, Khan Academy, Duolingo |
-| Office & Secretary | 9 | Google Calendar, Slack, Notion, Trello |
-| Beauty & Personal Care | 9 | Sephora, Ulta, Glossier |
-| Job Search & HR | 8 | LinkedIn, Greenhouse, Lever, Workday |
-| Pet & Animal Care | 8 | Chewy, Petco, Rover |
-| Personal Management | 6 | Mint, YNAB, Todoist |
-| Shopping & Commerce | 6 | Amazon, eBay, Etsy, Target |
-| Nonprofit & Charity | 6 | GoFundMe, DonorsChoose |
-| Academia & Research | 5 | Google Scholar, Semantic Scholar, OpenReview |
-| Finance & Investment | 4 | Robinhood, Fidelity, Coinbase |
-| Others | 15 | Automation, Dev & Tech, Government, Home Services, Automotive |
+| Category                  | Tasks | Example Platforms                                             |
+| ------------------------- | :---: | ------------------------------------------------------------- |
+| Daily Life                |  21   | Uber Eats, DoorDash, Instacart, Zillow, Craigslist            |
+| Entertainment & Hobbies   |  15   | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll              |
+| Creation & Initialization |  13   | Squarespace, Wix, Webflow, Ghost, Substack                    |
+| Rating & Voting           |  10   | Trustpilot, G2, Goodreads, RateMyProfessors                   |
+| Travel                    |   9   | Booking.com, Expedia, Airbnb, TripAdvisor                     |
+| Education & Learning      |   9   | Coursera, Udemy, Khan Academy, Duolingo                       |
+| Office & Secretary        |   9   | Google Calendar, Slack, Notion, Trello                        |
+| Beauty & Personal Care    |   9   | Sephora, Ulta, Glossier                                       |
+| Job Search & HR           |   8   | LinkedIn, Greenhouse, Lever, Workday                          |
+| Pet & Animal Care         |   8   | Chewy, Petco, Rover                                           |
+| Personal Management       |   6   | Mint, YNAB, Todoist                                           |
+| Shopping & Commerce       |   6   | Amazon, eBay, Etsy, Target                                    |
+| Nonprofit & Charity       |   6   | GoFundMe, DonorsChoose                                        |
+| Academia & Research       |   5   | Google Scholar, Semantic Scholar, OpenReview                  |
+| Finance & Investment      |   4   | Robinhood, Fidelity, Coinbase                                 |
+| Others                    |  15   | Automation, Dev & Tech, Government, Home Services, Automotive |
 
 </details>
 
@@ -378,13 +390,13 @@ All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidenc
 
 ## How ClawBench compares
 
-| Benchmark | Domain | Environment | Task count | ClawBench difference |
-|-----------|--------|-------------|------------|----------------------|
-| [WebArena](https://webarena.dev) | Synthetic web apps | Self-hosted replicas | 812 | Live consumer sites, not admin UIs on hosted replicas |
-| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants | Closed-book text + tools | 466 | Browser-centric; end-to-end task execution |
-| [SWE-bench](https://www.swebench.com) | Software engineering | GitHub repos | 2,294 | Non-code; everyday consumer workflows |
-| [BrowserGym](https://github.com/ServiceNow/BrowserGym) | Web agents | Headless sandbox | — | Cloud-parity; records real user journeys |
-| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web) | Web navigation | Static traces | 2,350 | Dynamic live websites, not replayed traces |
+| Benchmark                                                   | Domain               | Environment              | Task count | ClawBench difference                                  |
+| ----------------------------------------------------------- | -------------------- | ------------------------ | ---------- | ----------------------------------------------------- |
+| [WebArena](https://webarena.dev)                            | Synthetic web apps   | Self-hosted replicas     | 812        | Live consumer sites, not admin UIs on hosted replicas |
+| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants   | Closed-book text + tools | 466        | Browser-centric; end-to-end task execution            |
+| [SWE-bench](https://www.swebench.com)                       | Software engineering | GitHub repos             | 2,294      | Non-code; everyday consumer workflows                 |
+| [BrowserGym](https://github.com/ServiceNow/BrowserGym)      | Web agents           | Headless sandbox         | —          | Cloud-parity; records real user journeys              |
+| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web)       | Web navigation       | Static traces            | 2,350      | Dynamic live websites, not replayed traces            |
 
 ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recording**. If you want a controlled sandbox or replayed traces, the projects above are excellent. If you want to know whether your agent can actually order food or book a flight *today*, this is the benchmark for that.
 
@@ -471,13 +483,13 @@ See [eval/README.md](eval/README.md) for the full evaluation guide and Claude Co
 
 Each session records five layers of synchronized data under `/data/`:
 
-| Layer | File | Description |
-|-------|------|-------------|
-| Session replay | `recording.mp4` | Full session video (H.264, 15fps) |
-| Action screenshots | `screenshots/*.png` | Timestamped PNG per browser action |
-| Browser actions | `actions.jsonl` | Every DOM event (click, keydown, input, pageLoad, scroll, etc.) |
-| HTTP traffic | `requests.jsonl` | Every HTTP request with headers, body, and query params |
-| Agent messages | `agent-messages.jsonl` | Full agent conversation transcript (thinking, text, tool calls) |
+| Layer              | File                   | Description                                                     |
+| ------------------ | ---------------------- | --------------------------------------------------------------- |
+| Session replay     | `recording.mp4`        | Full session video (H.264, 15fps)                               |
+| Action screenshots | `screenshots/*.png`    | Timestamped PNG per browser action                              |
+| Browser actions    | `actions.jsonl`        | Every DOM event (click, keydown, input, pageLoad, scroll, etc.) |
+| HTTP traffic       | `requests.jsonl`       | Every HTTP request with headers, body, and query params         |
+| Agent messages     | `agent-messages.jsonl` | Full agent conversation transcript (thinking, text, tool calls) |
 
 The interceptor result is saved to `interception.json`.
 
