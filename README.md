@@ -40,6 +40,17 @@
   <a href="https://deepwiki.com/reacher-z/ClawBench"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
 </p>
 
+</div>
+
+## 📣 News
+
+- [2026.04.18] 🌐 Added support for the **browser-use** harness
+- [2026.04.17] 🚀 Added support for the **Codex** harness
+- [2026.04.16] 🦾 Added support for the **Claude Code** harness
+- [2026.04.14] 🛠️ Added support for the **OpenCode** harness
+
+<div align="center">
+
 <p align="center">
   <b>New:</b> Check out our sister project <a href="https://github.com/reacher-z/HarnessBench"><b>HarnessBench</b></a> &mdash;
   fixes the base model, varies the harness. Same scoring pipeline, orthogonal axis.
@@ -72,6 +83,8 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 </div>
 
 ## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
+
+- **[2026.04.18]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **browser-use** harness.
 
 - **[2026.04.17]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;Added support for the **Codex** harness.
 - **[2026.04.16]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **Claude Code** harness.
@@ -207,7 +220,7 @@ clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
-Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), or `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex) (all three driven via the [Playwright MCP server](https://github.com/microsoft/playwright-mcp)).
+Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex) (all three driven via the [Playwright MCP server](https://github.com/microsoft/playwright-mcp)), or `--harness browser-use` to use [browser-use](https://github.com/browser-use/browser-use) (Python framework, routed via LiteLLM).
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
@@ -341,36 +354,36 @@ All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidenc
 
 </div>
 
-| Rank | Model | Overall | Daily | Finance | Work | Dev | Academic | Travel | Social | Pets |
-|:----:|-------|:-------:|:-----:|:-------:|:----:|:---:|:--------:|:------:|:------:|:----:|
-| 1 | **Claude Sonnet 4.6** | **33.3** | 44.2 | **50.0** | 19.0 | 11.1 | **50.0** | 23.1 | **38.9** | **18.2** |
-| 2 | GLM-5 | 24.2 | **30.8** | 16.7 | **38.1** | 16.7 | 28.6 | 0.0 | 16.7 | **18.2** |
-| 3 | Gemini 3 Flash | 19.0 | 15.4 | 33.3 | 23.8 | **22.2** | 28.6 | **30.8** | 11.1 | 0.0 |
-| 4 | Claude Haiku 4.5 | 18.3 | 15.4 | 22.2 | 19.0 | **27.8** | 21.4 | 7.7 | 16.7 | **18.2** |
-| 5 | GPT-5.4 | 6.5 | 9.6 | 0.0 | 0.0 | 11.1 | 7.1 | 7.7 | 0.0 | 9.1 |
-| 6 | Gemini 3.1 Flash Lite | 3.3 | 1.9 | 0.0 | 0.0 | 5.6 | 14.3 | 0.0 | 0.0 | 9.1 |
+| Rank  | Model                 | Overall  |  Daily   | Finance  |   Work   |   Dev    | Academic |  Travel  |  Social  |   Pets   |
+| :---: | --------------------- | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
+|   1   | **Claude Sonnet 4.6** | **33.3** |   44.2   | **50.0** |   19.0   |   11.1   | **50.0** |   23.1   | **38.9** | **18.2** |
+|   2   | GLM-5                 |   24.2   | **30.8** |   16.7   | **38.1** |   16.7   |   28.6   |   0.0    |   16.7   | **18.2** |
+|   3   | Gemini 3 Flash        |   19.0   |   15.4   |   33.3   |   23.8   | **22.2** |   28.6   | **30.8** |   11.1   |   0.0    |
+|   4   | Claude Haiku 4.5      |   18.3   |   15.4   |   22.2   |   19.0   | **27.8** |   21.4   |   7.7    |   16.7   | **18.2** |
+|   5   | GPT-5.4               |   6.5    |   9.6    |   0.0    |   0.0    |   11.1   |   7.1    |   7.7    |   0.0    |   9.1    |
+|   6   | Gemini 3.1 Flash Lite |   3.3    |   1.9    |   0.0    |   0.0    |   5.6    |   14.3   |   0.0    |   0.0    |   9.1    |
 
 <details>
 <summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
 
-| Category | Tasks | Example Platforms |
-|----------|:-----:|-------------------|
-| Daily Life | 21 | Uber Eats, DoorDash, Instacart, Zillow, Craigslist |
-| Entertainment & Hobbies | 15 | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll |
-| Creation & Initialization | 13 | Squarespace, Wix, Webflow, Ghost, Substack |
-| Rating & Voting | 10 | Trustpilot, G2, Goodreads, RateMyProfessors |
-| Travel | 9 | Booking.com, Expedia, Airbnb, TripAdvisor |
-| Education & Learning | 9 | Coursera, Udemy, Khan Academy, Duolingo |
-| Office & Secretary | 9 | Google Calendar, Slack, Notion, Trello |
-| Beauty & Personal Care | 9 | Sephora, Ulta, Glossier |
-| Job Search & HR | 8 | LinkedIn, Greenhouse, Lever, Workday |
-| Pet & Animal Care | 8 | Chewy, Petco, Rover |
-| Personal Management | 6 | Mint, YNAB, Todoist |
-| Shopping & Commerce | 6 | Amazon, eBay, Etsy, Target |
-| Nonprofit & Charity | 6 | GoFundMe, DonorsChoose |
-| Academia & Research | 5 | Google Scholar, Semantic Scholar, OpenReview |
-| Finance & Investment | 4 | Robinhood, Fidelity, Coinbase |
-| Others | 15 | Automation, Dev & Tech, Government, Home Services, Automotive |
+| Category                  | Tasks | Example Platforms                                             |
+| ------------------------- | :---: | ------------------------------------------------------------- |
+| Daily Life                |  21   | Uber Eats, DoorDash, Instacart, Zillow, Craigslist            |
+| Entertainment & Hobbies   |  15   | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll              |
+| Creation & Initialization |  13   | Squarespace, Wix, Webflow, Ghost, Substack                    |
+| Rating & Voting           |  10   | Trustpilot, G2, Goodreads, RateMyProfessors                   |
+| Travel                    |   9   | Booking.com, Expedia, Airbnb, TripAdvisor                     |
+| Education & Learning      |   9   | Coursera, Udemy, Khan Academy, Duolingo                       |
+| Office & Secretary        |   9   | Google Calendar, Slack, Notion, Trello                        |
+| Beauty & Personal Care    |   9   | Sephora, Ulta, Glossier                                       |
+| Job Search & HR           |   8   | LinkedIn, Greenhouse, Lever, Workday                          |
+| Pet & Animal Care         |   8   | Chewy, Petco, Rover                                           |
+| Personal Management       |   6   | Mint, YNAB, Todoist                                           |
+| Shopping & Commerce       |   6   | Amazon, eBay, Etsy, Target                                    |
+| Nonprofit & Charity       |   6   | GoFundMe, DonorsChoose                                        |
+| Academia & Research       |   5   | Google Scholar, Semantic Scholar, OpenReview                  |
+| Finance & Investment      |   4   | Robinhood, Fidelity, Coinbase                                 |
+| Others                    |  15   | Automation, Dev & Tech, Government, Home Services, Automotive |
 
 </details>
 
@@ -378,13 +391,13 @@ All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidenc
 
 ## How ClawBench compares
 
-| Benchmark | Domain | Environment | Task count | ClawBench difference |
-|-----------|--------|-------------|------------|----------------------|
-| [WebArena](https://webarena.dev) | Synthetic web apps | Self-hosted replicas | 812 | Live consumer sites, not admin UIs on hosted replicas |
-| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants | Closed-book text + tools | 466 | Browser-centric; end-to-end task execution |
-| [SWE-bench](https://www.swebench.com) | Software engineering | GitHub repos | 2,294 | Non-code; everyday consumer workflows |
-| [BrowserGym](https://github.com/ServiceNow/BrowserGym) | Web agents | Headless sandbox | — | Cloud-parity; records real user journeys |
-| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web) | Web navigation | Static traces | 2,350 | Dynamic live websites, not replayed traces |
+| Benchmark                                                   | Domain               | Environment              | Task count | ClawBench difference                                  |
+| ----------------------------------------------------------- | -------------------- | ------------------------ | ---------- | ----------------------------------------------------- |
+| [WebArena](https://webarena.dev)                            | Synthetic web apps   | Self-hosted replicas     | 812        | Live consumer sites, not admin UIs on hosted replicas |
+| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants   | Closed-book text + tools | 466        | Browser-centric; end-to-end task execution            |
+| [SWE-bench](https://www.swebench.com)                       | Software engineering | GitHub repos             | 2,294      | Non-code; everyday consumer workflows                 |
+| [BrowserGym](https://github.com/ServiceNow/BrowserGym)      | Web agents           | Headless sandbox         | —          | Cloud-parity; records real user journeys              |
+| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web)       | Web navigation       | Static traces            | 2,350      | Dynamic live websites, not replayed traces            |
 
 ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recording**. If you want a controlled sandbox or replayed traces, the projects above are excellent. If you want to know whether your agent can actually order food or book a flight *today*, this is the benchmark for that.
 
@@ -471,13 +484,13 @@ See [eval/README.md](eval/README.md) for the full evaluation guide and Claude Co
 
 Each session records five layers of synchronized data under `/data/`:
 
-| Layer | File | Description |
-|-------|------|-------------|
-| Session replay | `recording.mp4` | Full session video (H.264, 15fps) |
-| Action screenshots | `screenshots/*.png` | Timestamped PNG per browser action |
-| Browser actions | `actions.jsonl` | Every DOM event (click, keydown, input, pageLoad, scroll, etc.) |
-| HTTP traffic | `requests.jsonl` | Every HTTP request with headers, body, and query params |
-| Agent messages | `agent-messages.jsonl` | Full agent conversation transcript (thinking, text, tool calls) |
+| Layer              | File                   | Description                                                     |
+| ------------------ | ---------------------- | --------------------------------------------------------------- |
+| Session replay     | `recording.mp4`        | Full session video (H.264, 15fps)                               |
+| Action screenshots | `screenshots/*.png`    | Timestamped PNG per browser action                              |
+| Browser actions    | `actions.jsonl`        | Every DOM event (click, keydown, input, pageLoad, scroll, etc.) |
+| HTTP traffic       | `requests.jsonl`       | Every HTTP request with headers, body, and query params         |
+| Agent messages     | `agent-messages.jsonl` | Full agent conversation transcript (thinking, text, tool calls) |
 
 The interceptor result is saved to `interception.json`.
 
@@ -716,4 +729,4 @@ Open to contributions — new test cases, bug fixes, or evaluation submissions f
 
 Apache 2.0 -- see [LICENSE](LICENSE).
 
-Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and [OpenAI Codex CLI](https://github.com/openai/codex) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, and codex harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code and codex harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).
+Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenAI Codex CLI](https://github.com/openai/codex), and [browser-use](https://github.com/browser-use/browser-use) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, and codex harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code, codex, and browser-use harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).

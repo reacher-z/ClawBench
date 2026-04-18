@@ -35,7 +35,7 @@ from clawbench.harnesses import discover_harnesses as _discover_harnesses
 # import time (built-ins + any third-party ``clawbench.harnesses`` entry
 # points). Built-in harnesses always come first so ``DEFAULT_HARNESS``
 # stays stable.
-_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "codex")
+_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "codex", "browser-use")
 
 
 def _compute_harnesses() -> tuple[str, ...]:
@@ -764,6 +764,7 @@ def ensure_interception(output_dir: Path):
         "opencode_failed": "Session stopped: opencode process died on startup.",
         "claude_code_failed": "Session stopped: Claude Code process died on startup.",
         "codex_failed": "Session stopped: Codex CLI process died on startup.",
+        "browser_use_failed": "Session stopped: browser-use process died on startup.",
         "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }

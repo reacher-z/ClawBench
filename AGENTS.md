@@ -4,7 +4,7 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, or `codex`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `codex`, or `browser-use`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
@@ -16,15 +16,19 @@ ClawBench/
   Dockerfile.opencode             # Layer that adds opencode + @playwright/mcp on top of base
   Dockerfile.claude-code          # Layer that adds Claude Code + @playwright/mcp + LiteLLM on top of base
   Dockerfile.codex                # Layer that adds @openai/codex@0.120 + @playwright/mcp + LiteLLM on top of base
+  Dockerfile.browser-use          # Layer that adds browser-use Python framework + LiteLLM on top of base
   entrypoint.sh                   # Shared infra (Xvfb, Chrome, noVNC, human mode); execs /run-harness.sh in agent mode
   setup-openclaw.sh               # Generates ~/.openclaw/openclaw.json from env vars (called from run-openclaw.sh)
   setup-opencode.sh               # Generates ~/.config/opencode/opencode.json from env vars (called from run-opencode.sh)
   setup-claude-code.sh            # Configures API keys + LiteLLM proxy from env vars (called from run-claude-code.sh)
   setup-codex.sh                  # Generates ~/.codex/config.toml (wire_api=responses + playwright MCP) + /tmp/litellm-config.yaml from env vars
+  setup-browser-use.sh            # Generates /tmp/browser-use-env.sh + /tmp/litellm-config.yaml (routes via LiteLLM)
   run-openclaw.sh                 # Per-harness agent runner; copied into clawbench-openclaw image as /run-harness.sh
   run-opencode.sh                 # Per-harness agent runner; copied into clawbench-opencode image as /run-harness.sh
   run-claude-code.sh              # Per-harness agent runner; copied into clawbench-claude-code image as /run-harness.sh
   run-codex.sh                    # Per-harness agent runner; copied into clawbench-codex image as /run-harness.sh
+  run-browser-use.sh              # Per-harness agent runner; copied into clawbench-browser-use image as /run-harness.sh
+  run-browser-use-agent.py        # Python entry script invoked by run-browser-use.sh — always uses ChatOpenAI pointed at LiteLLM
   .env.example                    # Template for PurelyMail credentials
   models/
     models.yaml                   # Model API configs (gitignored -- copy from example)
@@ -124,7 +128,9 @@ test-output/<model>/<harness>-<case>-<model>-<timestamp>/
                             #   claude-code → stream-json events with `system`/`assistant`/`user`/`result` types;
                             #   codex → full session rollout: timestamped `session_meta`/
                             #   `turn_context`/`event_msg`/`response_item` entries with reasoning,
-                            #   function_call, and function_call_output items interleaved)
+                            #   function_call, and function_call_output items interleaved;
+                            #   browser-use → one `AgentHistory` item per step with `model_output.action`,
+                            #   `result`, `state`, `metadata` fields)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result
