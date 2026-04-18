@@ -45,7 +45,6 @@
 ## 📣 News
 
 - [2026.04.18] 🌐 Added support for the **browser-use** harness
-- [2026.04.18] 🌐 Added support for the **browser-use** harness
 - [2026.04.17] 🚀 Added support for the **Codex** harness
 - [2026.04.16] 🦾 Added support for the **Claude Code** harness
 - [2026.04.14] 🛠️ Added support for the **OpenCode** harness
@@ -84,6 +83,8 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 </div>
 
 ## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
+
+- **[2026.04.18]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **browser-use** harness.
 
 - **[2026.04.17]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;Added support for the **Codex** harness.
 - **[2026.04.16]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **Claude Code** harness.
