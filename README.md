@@ -40,16 +40,6 @@
   <a href="https://deepwiki.com/reacher-z/ClawBench"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
 </p>
 
-</div>
-
-## 📣 News
-
-- [2026.04.17] 🚀 Added support for the **Codex** harness
-- [2026.04.16] 🦾 Added support for the **Claude Code** harness
-- [2026.04.14] 🛠️ Added support for the **OpenCode** harness
-
-<div align="center">
-
 <p align="center">
   <b>New:</b> Check out our sister project <a href="https://github.com/reacher-z/HarnessBench"><b>HarnessBench</b></a> &mdash;
   fixes the base model, varies the harness. Same scoring pipeline, orthogonal axis.
