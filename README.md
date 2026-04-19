@@ -42,13 +42,6 @@
 
 </div>
 
-## 📣 News
-
-- [2026.04.18] 🌐 Added support for the **browser-use** harness
-- [2026.04.17] 🚀 Added support for the **Codex** harness
-- [2026.04.16] 🦾 Added support for the **Claude Code** harness
-- [2026.04.14] 🛠️ Added support for the **OpenCode** harness
-
 <div align="center">
 
 <p align="center">
@@ -84,8 +77,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 ## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
 
-- **[2026.04.18]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **browser-use** harness.
-
+- **[2026.04.18]** <img src="static/icons/globe.svg" width="14" height="14"> &nbsp;Added support for the **browser-use** harness.
 - **[2026.04.17]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;Added support for the **Codex** harness.
 - **[2026.04.16]** <img src="static/icons/bolt.svg" width="14" height="14"> &nbsp;Added support for the **Claude Code** harness.
 - **[2026.04.16]** Featured in **5 curated awesome-lists**: [awesome-harness-engineering](https://github.com/walkinglabs/awesome-harness-engineering), [Awesome-AI-Agents](https://github.com/Jenqyang/Awesome-AI-Agents), [awesome-computer-use](https://github.com/ranpox/awesome-computer-use), [Awesome-GUI-Agents](https://github.com/ZJU-REAL/Awesome-GUI-Agents), and [LLM-Agent-Benchmark-List](https://github.com/zhangxjohn/LLM-Agent-Benchmark-List).
