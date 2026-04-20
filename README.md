@@ -22,6 +22,9 @@
 [![Contributors](https://img.shields.io/github/contributors/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/contributors)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/commit-activity)
 [![License](https://img.shields.io/github/license/reacher-z/ClawBench?style=flat-square&color=A42E2B)](https://github.com/reacher-z/ClawBench/blob/main/LICENSE)
+[![SOTA](https://img.shields.io/badge/SOTA-33.3%25-DC2626?style=flat-square&logo=target&logoColor=white)](#-results)
+[![Tasks](https://img.shields.io/badge/Tasks-153-4F46E5?style=flat-square)](#-results)
+[![Live sites](https://img.shields.io/badge/Live%20sites-144-059669?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
 
 <p align="center"><sub><i>Featured in</i></sub></p>
 <p align="center">
@@ -59,11 +62,9 @@ uv tool install clawbench-eval && clawbench
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
-**ClawBench is an open-source benchmark that evaluates AI browser agents on 153 everyday online tasks — booking travel, ordering food, applying for jobs, managing email — across 144 live websites. It measures end-to-end task success with a 5-layer recording pipeline and a DOM-match + LLM judge. Top score to date: 33.3%.**
+**ClawBench evaluates AI browser agents on 153 everyday online tasks — ordering food, booking travel, applying for jobs, managing email — across 144 live websites, with end-to-end success measured by a 5-layer recording pipeline and a DOM-match + LLM judge.**
 
-We asked frontier AI agents to do what people do every day --<br/>
-order food, book travel, apply for jobs, write reviews, manage projects.<br/>
-**Even the best agent only completes about 1 in 3.**
+**Top score to date: 33.3%. Even the best frontier agent only completes about 1 in 3.**
 
 <sub><i>Built by ZJU-REAL &nbsp;·&nbsp; Sister project: <a href="https://github.com/reacher-z/HarnessBench">HarnessBench</a> &nbsp;·&nbsp; Runs on any Chrome.</i></sub>
 
@@ -117,13 +118,71 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 <br/>
 
-# <img src="static/icons/robot.svg" width="28" height="28"> LLM Quick Start
+## <img src="static/icons/chart-bar.svg" width="28" height="28"> Results
+
+<div align="center">
+
+**Success rate (%) of 6 frontier AI agents on ClawBench**
+
+</div>
+
+| Rank  | Model                 | Overall  |  Daily   | Finance  |   Work   |   Dev    | Academic |  Travel  |  Social  |   Pets   |
+| :---: | --------------------- | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
+|   1   | **Claude Sonnet 4.6** | **33.3** |   44.2   | **50.0** |   19.0   |   11.1   | **50.0** |   23.1   | **38.9** | **18.2** |
+|   2   | GLM-5                 |   24.2   | **30.8** |   16.7   | **38.1** |   16.7   |   28.6   |   0.0    |   16.7   | **18.2** |
+|   3   | Gemini 3 Flash        |   19.0   |   15.4   |   33.3   |   23.8   | **22.2** |   28.6   | **30.8** |   11.1   |   0.0    |
+|   4   | Claude Haiku 4.5      |   18.3   |   15.4   |   22.2   |   19.0   | **27.8** |   21.4   |   7.7    |   16.7   | **18.2** |
+|   5   | GPT-5.4               |   6.5    |   9.6    |   0.0    |   0.0    |   11.1   |   7.1    |   7.7    |   0.0    |   9.1    |
+|   6   | Gemini 3.1 Flash Lite |   3.3    |   1.9    |   0.0    |   0.0    |   5.6    |   14.3   |   0.0    |   0.0    |   9.1    |
+
+<details>
+<summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
+
+| Category                  | Tasks | Example Platforms                                             |
+| ------------------------- | :---: | ------------------------------------------------------------- |
+| Daily Life                |  21   | Uber Eats, DoorDash, Instacart, Zillow, Craigslist            |
+| Entertainment & Hobbies   |  15   | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll              |
+| Creation & Initialization |  13   | Squarespace, Wix, Webflow, Ghost, Substack                    |
+| Rating & Voting           |  10   | Trustpilot, G2, Goodreads, RateMyProfessors                   |
+| Travel                    |   9   | Booking.com, Expedia, Airbnb, TripAdvisor                     |
+| Education & Learning      |   9   | Coursera, Udemy, Khan Academy, Duolingo                       |
+| Office & Secretary        |   9   | Google Calendar, Slack, Notion, Trello                        |
+| Beauty & Personal Care    |   9   | Sephora, Ulta, Glossier                                       |
+| Job Search & HR           |   8   | LinkedIn, Greenhouse, Lever, Workday                          |
+| Pet & Animal Care         |   8   | Chewy, Petco, Rover                                           |
+| Personal Management       |   6   | Mint, YNAB, Todoist                                           |
+| Shopping & Commerce       |   6   | Amazon, eBay, Etsy, Target                                    |
+| Nonprofit & Charity       |   6   | GoFundMe, DonorsChoose                                        |
+| Academia & Research       |   5   | Google Scholar, Semantic Scholar, OpenReview                  |
+| Finance & Investment      |   4   | Robinhood, Fidelity, Coinbase                                 |
+| Others                    |  15   | Automation, Dev & Tech, Government, Home Services, Automotive |
+
+</details>
+
+<br/>
+
+## How ClawBench compares
+
+| Benchmark                                                   | Domain               | Environment              | Task count | ClawBench difference                                  |
+| ----------------------------------------------------------- | -------------------- | ------------------------ | ---------- | ----------------------------------------------------- |
+| [WebArena](https://webarena.dev)                            | Synthetic web apps   | Self-hosted replicas     | 812        | Live consumer sites, not admin UIs on hosted replicas |
+| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants   | Closed-book text + tools | 466        | Browser-centric; end-to-end task execution            |
+| [SWE-bench](https://www.swebench.com)                       | Software engineering | GitHub repos             | 2,294      | Non-code; everyday consumer workflows                 |
+| [BrowserGym](https://github.com/ServiceNow/BrowserGym)      | Web agents           | Headless sandbox         | —          | Cloud-parity; records real user journeys              |
+| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web)       | Web navigation       | Static traces            | 2,350      | Dynamic live websites, not replayed traces            |
+
+ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recording**. If you want a controlled sandbox or replayed traces, the projects above are excellent. If you want to know whether your agent can actually order food or book a flight *today*, this is the benchmark for that.
+
+<br/>
+
+
+## <img src="static/icons/robot.svg" width="28" height="28"> LLM Quick Start
 
 Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AGENTS.md) and prompt away.
 
 <br/>
 
-# <img src="static/icons/person.svg" width="28" height="28"> Human Quick Start
+## <img src="static/icons/person.svg" width="28" height="28"> Human Quick Start
 
 Pick either path — both land you at the same interactive TUI.
 
@@ -200,7 +259,7 @@ clawbench configure                # opens models.yaml in $EDITOR
 **2. Run your first task** (pick one):
 
 > [!TIP]
-> **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
+> **(a) Interactive TUI** &nbsp;— guided model + test-case selection (recommended):
 > ```bash
 > clawbench
 > ```
@@ -232,11 +291,9 @@ git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
 cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
 # `.env` (PurelyMail creds for disposable-email signups) is already committed
 # and works out of the box. Edit it only to override defaults or add HF_TOKEN.
-./run.sh                                           # interactive TUI
-uv run claw-bench run \
-  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
-uv run claw-bench run \
-  test-cases/001-daily-life-food-uber-eats --human             # human mode
+./run.sh                                                   # interactive TUI (repo checkout)
+clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
+clawbench run 001-daily-life-food-uber-eats --human             # human mode
 ```
 
 This path gives you live-reload on ``src/clawbench/``, ``chrome-extension/``, and ``test-cases/`` — useful when iterating on the harness itself. For everything else, the PyPI install above is faster.
@@ -245,7 +302,7 @@ This path gives you live-reload on ``src/clawbench/``, ``chrome-extension/``, an
 
 <br/>
 
-# <img src="static/icons/chart-bar.svg" width="28" height="28"> ClawBench-Lite
+## <img src="static/icons/chart-bar.svg" width="28" height="28"> ClawBench-Lite
 
 **New here? Run this first.** [`test-cases/lite.json`](test-cases/lite.json) is a **20-task curated subset** of the full 153, selected for household-name sites, real-world relevance, difficulty, and category diversity. It matches the 20-tasks-per-source convention of [browser-use/benchmark](https://github.com/browser-use/benchmark) and gives you a credible signal at a fraction of the full-benchmark cost.
 
@@ -255,7 +312,7 @@ See [`test-cases/lite.schema.json`](test-cases/lite.schema.json) for the manifes
 
 <br/>
 
-# <img src="static/icons/video.svg" width="28" height="28"> Tutorial
+## <img src="static/icons/video.svg" width="28" height="28"> Tutorial
 
 <div align="center">
 
@@ -269,7 +326,7 @@ See [`test-cases/lite.schema.json`](test-cases/lite.schema.json) for the manifes
 
 <br/>
 
-# <img src="static/icons/play.svg" width="28" height="28"> Demos
+## <img src="static/icons/play.svg" width="28" height="28"> Demos
 
 <!-- TODO: Replace with actual demo GIFs/recordings -->
 
@@ -296,7 +353,7 @@ https://github.com/user-attachments/assets/placeholder-greenhouse
 
 <br/>
 
-# <img src="static/icons/circle-question.svg" width="28" height="28"> Example Walkthrough
+## <img src="static/icons/circle-question.svg" width="28" height="28"> Example Walkthrough
 
 Curious what one task actually looks like, start to finish? Here's task **001** end to end.
 
@@ -338,63 +395,6 @@ All four must hold for a **PASS**. Miss any one and it's a **FAIL** with evidenc
 
 <br/>
 
-# <img src="static/icons/chart-bar.svg" width="28" height="28"> Results
-
-<div align="center">
-
-**Success rate (%) of 6 frontier AI agents on ClawBench**
-
-</div>
-
-| Rank  | Model                 | Overall  |  Daily   | Finance  |   Work   |   Dev    | Academic |  Travel  |  Social  |   Pets   |
-| :---: | --------------------- | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
-|   1   | **Claude Sonnet 4.6** | **33.3** |   44.2   | **50.0** |   19.0   |   11.1   | **50.0** |   23.1   | **38.9** | **18.2** |
-|   2   | GLM-5                 |   24.2   | **30.8** |   16.7   | **38.1** |   16.7   |   28.6   |   0.0    |   16.7   | **18.2** |
-|   3   | Gemini 3 Flash        |   19.0   |   15.4   |   33.3   |   23.8   | **22.2** |   28.6   | **30.8** |   11.1   |   0.0    |
-|   4   | Claude Haiku 4.5      |   18.3   |   15.4   |   22.2   |   19.0   | **27.8** |   21.4   |   7.7    |   16.7   | **18.2** |
-|   5   | GPT-5.4               |   6.5    |   9.6    |   0.0    |   0.0    |   11.1   |   7.1    |   7.7    |   0.0    |   9.1    |
-|   6   | Gemini 3.1 Flash Lite |   3.3    |   1.9    |   0.0    |   0.0    |   5.6    |   14.3   |   0.0    |   0.0    |   9.1    |
-
-<details>
-<summary><b>Task Categories (15 categories, 153 tasks)</b></summary>
-
-| Category                  | Tasks | Example Platforms                                             |
-| ------------------------- | :---: | ------------------------------------------------------------- |
-| Daily Life                |  21   | Uber Eats, DoorDash, Instacart, Zillow, Craigslist            |
-| Entertainment & Hobbies   |  15   | Ticketmaster, AMC Theatres, Topgolf, Crunchyroll              |
-| Creation & Initialization |  13   | Squarespace, Wix, Webflow, Ghost, Substack                    |
-| Rating & Voting           |  10   | Trustpilot, G2, Goodreads, RateMyProfessors                   |
-| Travel                    |   9   | Booking.com, Expedia, Airbnb, TripAdvisor                     |
-| Education & Learning      |   9   | Coursera, Udemy, Khan Academy, Duolingo                       |
-| Office & Secretary        |   9   | Google Calendar, Slack, Notion, Trello                        |
-| Beauty & Personal Care    |   9   | Sephora, Ulta, Glossier                                       |
-| Job Search & HR           |   8   | LinkedIn, Greenhouse, Lever, Workday                          |
-| Pet & Animal Care         |   8   | Chewy, Petco, Rover                                           |
-| Personal Management       |   6   | Mint, YNAB, Todoist                                           |
-| Shopping & Commerce       |   6   | Amazon, eBay, Etsy, Target                                    |
-| Nonprofit & Charity       |   6   | GoFundMe, DonorsChoose                                        |
-| Academia & Research       |   5   | Google Scholar, Semantic Scholar, OpenReview                  |
-| Finance & Investment      |   4   | Robinhood, Fidelity, Coinbase                                 |
-| Others                    |  15   | Automation, Dev & Tech, Government, Home Services, Automotive |
-
-</details>
-
-<br/>
-
-## How ClawBench compares
-
-| Benchmark                                                   | Domain               | Environment              | Task count | ClawBench difference                                  |
-| ----------------------------------------------------------- | -------------------- | ------------------------ | ---------- | ----------------------------------------------------- |
-| [WebArena](https://webarena.dev)                            | Synthetic web apps   | Self-hosted replicas     | 812        | Live consumer sites, not admin UIs on hosted replicas |
-| [GAIA](https://huggingface.co/datasets/gaia-benchmark/GAIA) | General assistants   | Closed-book text + tools | 466        | Browser-centric; end-to-end task execution            |
-| [SWE-bench](https://www.swebench.com)                       | Software engineering | GitHub repos             | 2,294      | Non-code; everyday consumer workflows                 |
-| [BrowserGym](https://github.com/ServiceNow/BrowserGym)      | Web agents           | Headless sandbox         | —          | Cloud-parity; records real user journeys              |
-| [Mind2Web](https://github.com/OSU-NLP-Group/Mind2Web)       | Web navigation       | Static traces            | 2,350      | Dynamic live websites, not replayed traces            |
-
-ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recording**. If you want a controlled sandbox or replayed traces, the projects above are excellent. If you want to know whether your agent can actually order food or book a flight *today*, this is the benchmark for that.
-
-<br/>
-
 ## Architecture
 
 <details>
@@ -431,27 +431,29 @@ ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recordin
 
 <br/>
 
-# <img src="static/icons/terminal.svg" width="28" height="28"> CLI
+## <img src="static/icons/terminal.svg" width="28" height="28"> CLI
+
+`clawbench` is the canonical command (PyPI install). In a repo checkout, `./run.sh` is a thin wrapper around the same entry point.
 
 ```bash
-# Interactive TUI (recommended):
-./run.sh
+# Interactive TUI (recommended)
+clawbench
 
-# Single run:
-uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+# Single run
+clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 
-# Human mode (you control the browser via noVNC):
-uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats --human
+# Human mode (you drive the browser via noVNC)
+clawbench run 001-daily-life-food-uber-eats --human
 
-# Batch (all models x cases 1-50, 3 concurrent):
-uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50 --max-concurrent 3
+# Batch (all models × cases 1–50, 3 concurrent)
+clawbench batch --all-models --case-range 1-50 --max-concurrent 3
 ```
 
-See [test-driver/README.md](test-driver/README.md) for full CLI documentation, batch runner flags, test case format, and output structure.
+See [test-driver/README.md](test-driver/README.md) for the full subcommand reference, batch flags, test-case format, and output structure.
 
 <br/>
 
-# <img src="static/icons/chart-bar.svg" width="28" height="28"> Evaluation
+## <img src="static/icons/chart-bar.svg" width="28" height="28"> Evaluation
 
 Evaluation is a **post-session** step -- first run agents to collect trajectories, then evaluate them against human reference runs.
 
@@ -469,7 +471,49 @@ See [eval/README.md](eval/README.md) for the full evaluation guide and Claude Co
 
 <br/>
 
-# <img src="static/icons/circle-question.svg" width="28" height="28"> FAQ
+## <img src="static/icons/circle-question.svg" width="28" height="28"> FAQ
+
+<details>
+<summary><b>What is ClawBench?</b></summary>
+
+An open-source benchmark for AI browser agents — the systems (GPT-based, Claude-based, or open) that drive a real web browser to complete a user's task. It measures whether the agent actually finishes 153 everyday online tasks across 144 live websites, not whether it produces the right-looking text.
+
+</details>
+
+<details>
+<summary><b>What kinds of tasks does ClawBench cover?</b></summary>
+
+Fifteen life categories: food delivery, travel booking, job applications, shopping, housing search, email and calendar management, academic research, software development, learning platforms, and more. Every task is something a normal person might do in a normal week, on a real website.
+
+</details>
+
+<details>
+<summary><b>What's the current top score?</b></summary>
+
+**33.3%** — roughly one task in three — from the strongest frontier model we evaluated. The majority of tasks still defeat every model we've tested; the headroom is real, and the benchmark is not saturated.
+
+</details>
+
+<details>
+<summary><b>How is a task judged PASS / FAIL?</b></summary>
+
+Each task runs in an isolated browser container with a 5-layer recording (video, screenshots, HTTP traffic, browser actions, agent messages). A rubric of deterministic DOM checks covers the verifiable steps; an LLM judge grades the remaining subjective criteria against the recording. A task passes only when all rubric items are satisfied end-to-end.
+
+</details>
+
+<details>
+<summary><b>How do I reproduce a published score?</b></summary>
+
+`uv tool install clawbench-eval && clawbench` installs the harness and launches an interactive TUI that downloads the task set from Hugging Face, builds the container image, and runs any subset of the 153 tasks against your model of choice. No manual dataset setup, no API keys to paste into config files.
+
+</details>
+
+<details>
+<summary><b>Is ClawBench safe to run against live websites?</b></summary>
+
+Yes — the runner uses a hardened container with a request interceptor that blocks purchases, account creation, outbound email sends, and similar irreversible actions by default. Tasks that need to *simulate* those actions (e.g., "add to cart and checkout") terminate at the last reversible step. You can relax the interceptor per-task if your research requires it.
+
+</details>
 
 <details>
 <summary><b>What data does each run produce?</b></summary>
@@ -493,7 +537,7 @@ The interceptor result is saved to `interception.json`.
 
 The interceptor blocks critical, irreversible HTTP requests (checkout, form submit, email send) to prevent real-world side effects. It connects to Chrome via CDP's `Fetch` domain and matches requests against the eval schema (`url_pattern` regex + `method` + optional `body`/`params`). When triggered, it saves the blocked request to `interception.json`, kills the agent, and stops recording.
 
-The interceptor does **not** validate task completion -- evaluation is handled separately by evaluators post-session.
+The interceptor does **not** validate task completion — evaluation is handled separately, post-session.
 
 For tasks behind payment walls (agent has no valid credit card), the eval schema uses a placeholder pattern that never matches, so the session runs until timeout.
 
@@ -509,13 +553,6 @@ Source templates: `shared/alex_green_personal_info.json` (profile) and `test-dri
 </details>
 
 <details>
-<summary><b>Can I use Podman instead of Docker?</b></summary>
-
-Yes. Set `export CONTAINER_ENGINE=podman`. The framework auto-detects whichever is available. Podman works without root privileges.
-
-</details>
-
-<details>
 <summary><b>What tools can the agent use?</b></summary>
 
 All supported harnesses are sandboxed identically: the agent can only use the browser tool and a restricted set of read-only shell commands (`ls`, `cat`, `find`, `grep`, `head`, `tail`, `jq`, `wc`, etc.). Commands that could bypass the browser (`curl`, `python`, `node`, `wget`) are blocked, as are file `edit`/`write` and `webfetch`. The agent instruction also explicitly requires browser-only task completion.
@@ -523,9 +560,25 @@ All supported harnesses are sandboxed identically: the agent can only use the br
 </details>
 
 <details>
-<summary><b>How do I add a new test case?</b></summary>
+<summary><b>Can I use Podman instead of Docker?</b></summary>
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). In short: create a directory under `test-cases/` with a `task.json` conforming to `test-cases/task.schema.json`, define the eval schema, test with human mode, and submit a PR.
+Yes. Set `export CONTAINER_ENGINE=podman`. The framework auto-detects whichever is available. Podman works without root privileges.
+
+</details>
+
+<details>
+<summary><b>Can I contribute new test cases or harnesses?</b></summary>
+
+Yes. Tasks live in [`test-cases/`](test-cases/) at the repo root; each task is a directory with a `task.json` conforming to [`test-cases/task.schema.json`](test-cases/task.schema.json). See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow (define the eval schema, verify with human mode, open a PR).
+
+Harnesses (the glue between a model and the browser) plug in as Python entry points — see the sister project [HarnessBench](https://github.com/reacher-z/HarnessBench) for the harness-side scaffold.
+
+</details>
+
+<details>
+<summary><b>How does ClawBench relate to HarnessBench?</b></summary>
+
+Same scoring pipeline, orthogonal axis. ClawBench fixes the harness and varies the model; HarnessBench fixes the model and varies the harness. They share the 153-task corpus, the 5-layer recording, and the DOM + LLM judge — so numbers are directly comparable.
 
 </details>
 
@@ -575,32 +628,6 @@ Come hang out with researchers, builders, and contributors working on real-world
 </table>
 
 See [docs/community.md](docs/community.md) for channel layout, house rules, and 微信群 加入方式.
-
-## Frequently Asked Questions
-
-**What is ClawBench?**
-ClawBench is an open-source benchmark for AI browser agents — the systems (GPT-based, Claude-based, or open) that drive a real web browser to complete a user's task. It measures whether the agent actually finishes 153 everyday online tasks across 144 live websites, not whether it produces the right-looking text.
-
-**What kinds of tasks does ClawBench cover?**
-Fifteen life categories: food delivery, travel booking, job applications, shopping, housing search, email and calendar management, academic research, software development, learning platforms, and more. Every task is something a normal person might do in a normal week, on a real website.
-
-**How is a task judged successful?**
-Each task runs in an isolated browser container with a 5-layer recording (DOM, network, screenshots, action trace, console). A rubric of deterministic DOM checks covers the verifiable steps; an LLM judge grades the remaining subjective criteria against the recording. Scores are the fraction of rubric items the agent satisfied end-to-end.
-
-**What's the current top score?**
-33.3% — roughly one task in three — from the strongest frontier model we evaluated. The majority of tasks still defeat every model we've tested; the headroom is real, and the benchmark is not saturated.
-
-**How do I reproduce a published score?**
-`uv tool install clawbench-eval && clawbench` installs the harness and launches an interactive TUI that will download the task set from Hugging Face, build the container image, and run any subset of the 153 tasks against your model of choice. No manual dataset setup and no API keys to paste into config files.
-
-**Is ClawBench safe to run against live websites?**
-The runner uses a hardened container with a request interceptor that blocks purchases, account creation, outbound email sends, and similar irreversible actions by default. Tasks that need to *simulate* those actions (e.g., "add to cart and checkout") terminate at the last reversible step. You can relax the interceptor per-task if your research requires it.
-
-**Can I contribute new tasks or harnesses?**
-Yes. Tasks live in `src/clawbench/data/test-cases/` as a YAML spec plus a rubric; see `docs/contributing/adding-a-task.md`. Harnesses (the glue between a model and the browser) plug in as Python entry points — see the sister project [HarnessBench](https://github.com/reacher-z/HarnessBench) for the harness-side scaffold.
-
-**How does ClawBench relate to HarnessBench?**
-Same scoring pipeline, orthogonal axis. ClawBench fixes the harness and varies the model; HarnessBench fixes the model and varies the harness. They share the 153-task corpus, the 5-layer recording, and the DOM + LLM judge — so numbers are directly comparable.
 
 ## Citation
 
@@ -699,8 +726,6 @@ continued dataset curation.
 </a>
 </p>
 
-Open to contributions — new test cases, bug fixes, or evaluation submissions for a model we haven't scored yet. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
 <p align="center">
 <a href="https://github.com/reacher-z/ClawBench/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=reacher-z/ClawBench" alt="Contributors">
@@ -719,6 +744,19 @@ Open to contributions — new test cases, bug fixes, or evaluation submissions f
 
 ## License & Acknowledgments
 
-Apache 2.0 -- see [LICENSE](LICENSE).
+Apache 2.0 — see [LICENSE](LICENSE).
 
-Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenAI Codex CLI](https://github.com/openai/codex), and [browser-use](https://github.com/browser-use/browser-use) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, and codex harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code, codex, and browser-use harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).
+**Selectable harnesses:**
+
+- [OpenClaw](https://github.com/openclaw/openclaw)
+- [opencode](https://opencode.ai)
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+- [OpenAI Codex CLI](https://github.com/openai/codex)
+- [browser-use](https://github.com/browser-use/browser-use)
+
+**Infrastructure:**
+
+- [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) — browser-control bridge for the `opencode`, `claude-code`, and `codex` harnesses
+- [LiteLLM](https://github.com/BerriAI/litellm) — API-translation proxy for the `claude-code`, `codex`, and `browser-use` harnesses
+- [noVNC](https://github.com/novnc/noVNC) (MPL 2.0) — in-browser VNC client for human mode
+- [websockify](https://github.com/novnc/websockify) (LGPL 3.0) — WebSocket ↔ TCP bridge for noVNC
