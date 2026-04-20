@@ -17,11 +17,9 @@
 [![Codespaces](https://img.shields.io/badge/Codespaces-Open-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
 [![PyPI downloads](https://img.shields.io/pypi/dm/clawbench-eval?style=flat-square&logo=pypi&logoColor=white&color=3775A9&label=PyPI%20downloads)](https://pypi.org/project/clawbench-eval/)
-[![PyPI version](https://img.shields.io/pypi/v/clawbench-eval?style=flat-square&logo=pypi&logoColor=white&color=3775A9)](https://pypi.org/project/clawbench-eval/)
 [![Last commit](https://img.shields.io/github/last-commit/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/contributors)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/commit-activity)
-[![License](https://img.shields.io/github/license/reacher-z/ClawBench?style=flat-square&color=A42E2B)](https://github.com/reacher-z/ClawBench/blob/main/LICENSE)
 [![SOTA](https://img.shields.io/badge/SOTA-33.3%25-DC2626?style=flat-square&logo=target&logoColor=white)](#-results)
 [![Tasks](https://img.shields.io/badge/Tasks-153-4F46E5?style=flat-square)](#-results)
 [![Live sites](https://img.shields.io/badge/Live%20sites-144-059669?style=flat-square&logo=googlechrome&logoColor=white)](https://claw-bench.com)
