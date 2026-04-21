@@ -27,7 +27,7 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-HARNESSES = ("openclaw", "opencode", "claude-code", "codex", "browser-use")
+HARNESSES = ("openclaw", "opencode", "claude-code", "codex", "browser-use", "claw-code")
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -44,6 +44,7 @@ _HARNESS_DOCKERFILES: dict[str, str] = {
     "claude-code": "Dockerfile.claude-code",
     "codex": "Dockerfile.codex",
     "browser-use": "Dockerfile.browser-use",
+    "claw-code": "Dockerfile.claw-code",
 }
 
 # Kept for back-compat with old callers / scripts that imported IMAGE.
