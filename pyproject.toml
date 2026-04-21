@@ -71,6 +71,7 @@ opencode     = "clawbench.harnesses.opencode.spec:spec"
 claude-code  = "clawbench.harnesses.claude_code.spec:spec"
 codex        = "clawbench.harnesses.codex.spec:spec"
 browser-use  = "clawbench.harnesses.browser_use.spec:spec"
+claw-code    = "clawbench.harnesses.claw_code.spec:spec"
 
 [project.urls]
 Homepage = "https://claw-bench.com"

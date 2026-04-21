@@ -4,7 +4,7 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `codex`, or `browser-use`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `codex`, `browser-use`, or `claw-code`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
@@ -17,18 +17,22 @@ ClawBench/
   Dockerfile.claude-code          # Layer that adds Claude Code + @playwright/mcp + LiteLLM on top of base
   Dockerfile.codex                # Layer that adds @openai/codex@0.120 + @playwright/mcp + LiteLLM on top of base
   Dockerfile.browser-use          # Layer that adds browser-use Python framework + LiteLLM on top of base
+  Dockerfile.claw-code            # Layer that builds ultraworkers/claw-code (Rust) + @playwright/mcp + LiteLLM on top of base
   entrypoint.sh                   # Shared infra (Xvfb, Chrome, noVNC, human mode); execs /run-harness.sh in agent mode
   setup-openclaw.sh               # Generates ~/.openclaw/openclaw.json from env vars (called from run-openclaw.sh)
   setup-opencode.sh               # Generates ~/.config/opencode/opencode.json from env vars (called from run-opencode.sh)
   setup-claude-code.sh            # Configures API keys + LiteLLM proxy from env vars (called from run-claude-code.sh)
   setup-codex.sh                  # Generates ~/.codex/config.toml (wire_api=responses + playwright MCP) + /tmp/litellm-config.yaml from env vars
   setup-browser-use.sh            # Generates /tmp/browser-use-env.sh + /tmp/litellm-config.yaml (routes via LiteLLM)
+  setup-claw-code.sh              # Generates /tmp/claw-code-env.sh + /tmp/litellm-config.yaml + /tmp/claw-settings.json (MCP + tool deny list)
   run-openclaw.sh                 # Per-harness agent runner; copied into clawbench-openclaw image as /run-harness.sh
   run-opencode.sh                 # Per-harness agent runner; copied into clawbench-opencode image as /run-harness.sh
   run-claude-code.sh              # Per-harness agent runner; copied into clawbench-claude-code image as /run-harness.sh
   run-codex.sh                    # Per-harness agent runner; copied into clawbench-codex image as /run-harness.sh
   run-browser-use.sh              # Per-harness agent runner; copied into clawbench-browser-use image as /run-harness.sh
   run-browser-use-agent.py        # Python entry script invoked by run-browser-use.sh — always uses ChatOpenAI pointed at LiteLLM
+  run-claw-code.sh                # Per-harness agent runner; copied into clawbench-claw-code image as /run-harness.sh
+  claw-code-ndjson.patch.py       # Patches upstream claw to use newline-delimited JSON on MCP stdio (spec-compliant; upstream uses LSP framing)
   .env.example                    # Template for PurelyMail credentials
   models/
     models.yaml                   # Model API configs (gitignored -- copy from example)
