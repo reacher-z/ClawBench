@@ -35,7 +35,7 @@ from clawbench.harnesses import discover_harnesses as _discover_harnesses
 # import time (built-ins + any third-party ``clawbench.harnesses`` entry
 # points). Built-in harnesses always come first so ``DEFAULT_HARNESS``
 # stays stable.
-_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "codex", "browser-use", "claw-code")
+_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code")
 
 
 def _compute_harnesses() -> tuple[str, ...]:

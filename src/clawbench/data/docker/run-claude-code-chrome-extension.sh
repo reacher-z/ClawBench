@@ -1,0 +1,1 @@
+../../../../run-claude-code-chrome-extension.sh

@@ -66,12 +66,13 @@ claw-bench = "clawbench.cli:main"
 # (e.g. HarnessBench: https://github.com/reacher-z/HarnessBench) use.
 # See ``clawbench.harnesses.discover_harnesses``.
 [project.entry-points."clawbench.harnesses"]
-openclaw     = "clawbench.harnesses.openclaw.spec:spec"
-opencode     = "clawbench.harnesses.opencode.spec:spec"
-claude-code  = "clawbench.harnesses.claude_code.spec:spec"
-codex        = "clawbench.harnesses.codex.spec:spec"
-browser-use  = "clawbench.harnesses.browser_use.spec:spec"
-claw-code    = "clawbench.harnesses.claw_code.spec:spec"
+openclaw                      = "clawbench.harnesses.openclaw.spec:spec"
+opencode                      = "clawbench.harnesses.opencode.spec:spec"
+claude-code                   = "clawbench.harnesses.claude_code.spec:spec"
+claude-code-chrome-extension  = "clawbench.harnesses.claude_code_chrome_extension.spec:spec"
+codex                         = "clawbench.harnesses.codex.spec:spec"
+browser-use                   = "clawbench.harnesses.browser_use.spec:spec"
+claw-code                     = "clawbench.harnesses.claw_code.spec:spec"
 
 [project.urls]
 Homepage = "https://claw-bench.com"
