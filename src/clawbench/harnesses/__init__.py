@@ -54,6 +54,7 @@ def _builtin_specs() -> dict[str, HarnessSpec]:
     from clawbench.harnesses.openclaw import spec as openclaw_spec
     from clawbench.harnesses.opencode import spec as opencode_spec
     from clawbench.harnesses.claude_code import spec as claude_code_spec
+    from clawbench.harnesses.claude_code_chrome_extension import spec as claude_code_chrome_ext_spec
     from clawbench.harnesses.codex import spec as codex_spec
     from clawbench.harnesses.browser_use import spec as browser_use_spec
     from clawbench.harnesses.claw_code import spec as claw_code_spec
@@ -62,6 +63,7 @@ def _builtin_specs() -> dict[str, HarnessSpec]:
         openclaw_spec.name: openclaw_spec,
         opencode_spec.name: opencode_spec,
         claude_code_spec.name: claude_code_spec,
+        claude_code_chrome_ext_spec.name: claude_code_chrome_ext_spec,
         codex_spec.name: codex_spec,
         browser_use_spec.name: browser_use_spec,
         claw_code_spec.name: claw_code_spec,

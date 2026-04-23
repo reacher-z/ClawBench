@@ -147,7 +147,17 @@ cat > /tmp/chrome-profile/'Local State' <<'LOCALSTATE'
 }
 LOCALSTATE
 
-chromium \
+# Browser binary: default chromium (every harness but claude-code-chrome-extension).
+# Harness layers can override via `ENV BROWSER_BINARY=google-chrome-stable` when
+# they need a Chrome-family browser that supports features Chromium lacks (e.g.
+# the Claude in Chrome extension's native-messaging handshake).
+BROWSER="${BROWSER_BINARY:-chromium}"
+
+# Extensions: always load the ClawBench recorder. A harness layer can append
+# additional unpacked extensions (comma-separated paths) via EXTRA_LOAD_EXTENSIONS.
+LOAD_EXTS="/app/chrome-extension${EXTRA_LOAD_EXTENSIONS:+,$EXTRA_LOAD_EXTENSIONS}"
+
+"$BROWSER" \
   --window-size=1920,1080 \
   --window-position=0,0 \
   --no-first-run \
@@ -162,13 +172,13 @@ chromium \
   --password-store=basic \
   --use-mock-keychain \
   --disable-sync \
-  --disable-features=PasswordLeakDetection,PasswordManager \
+  --disable-features=PasswordLeakDetection,PasswordManager,DisableLoadExtensionCommandLineSwitch \
   --user-data-dir=/tmp/chrome-profile \
   --remote-debugging-port=9222 \
   --remote-debugging-address=127.0.0.1 \
   --remote-allow-origins=* \
-  --load-extension=/app/chrome-extension \
-  --disable-extensions-except=/app/chrome-extension \
+  --load-extension="$LOAD_EXTS" \
+  --disable-extensions-except="$LOAD_EXTS" \
   about:blank &
 
 # Forward CDP port to all interfaces

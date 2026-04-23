@@ -439,7 +439,7 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
     harness = questionary.select(
         "Harness:",
-        choices=["openclaw", "opencode", "claude-code", "codex", "browser-use", "claw-code"],
+        choices=["openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code"],
         default="openclaw",
         style=STYLE,
     ).ask()
@@ -505,7 +505,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
     harness = questionary.select(
         "Harness:",
-        choices=["openclaw", "opencode", "claude-code", "codex", "browser-use", "claw-code"],
+        choices=["openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code"],
         default="openclaw",
         style=STYLE,
     ).ask()
