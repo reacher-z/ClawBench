@@ -66,7 +66,7 @@ def shared_dir() -> Path:
 
 
 def docker_build_dir() -> Path:
-    """Directory containing Dockerfile + entrypoint.sh + setup-openclaw.sh."""
+    """Directory containing Dockerfiles, entrypoint.sh, and harness scripts."""
     return bundled_data_dir() / "docker"
 
 

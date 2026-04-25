@@ -35,7 +35,7 @@ from clawbench.harnesses import discover_harnesses as _discover_harnesses
 # import time (built-ins + any third-party ``clawbench.harnesses`` entry
 # points). Built-in harnesses always come first so ``DEFAULT_HARNESS``
 # stays stable.
-_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code")
+_BUILTIN_HARNESS_ORDER = ("openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code", "hermes")
 
 
 def _compute_harnesses() -> tuple[str, ...]:
@@ -531,9 +531,10 @@ def docker_build(harness: str = DEFAULT_HARNESS) -> None:
     (e.g. a lockfile mismatch), we automatically retry once with
     ``--no-cache`` so the user doesn't have to debug it manually.
     """
-    if harness not in _HARNESS_BUILD_FILES:
+    specs = _discover_harnesses()
+    if harness not in specs:
         raise ValueError(
-            f"Unknown harness {harness!r}; expected one of {list(_HARNESS_BUILD_FILES)}"
+            f"Unknown harness {harness!r}; expected one of {list(specs)}"
         )
     target_image = harness_image(harness)
     first_build = not _image_exists(target_image)
@@ -553,7 +554,7 @@ def docker_build(harness: str = DEFAULT_HARNESS) -> None:
         ctx = Path(td)
         _prepare_build_context(ctx, harness)
         _build_one(ctx, "Dockerfile.base", BASE_IMAGE)
-        harness_dockerfile = _HARNESS_BUILD_FILES[harness][0]
+        harness_dockerfile = _harness_build_files(harness)[0]
         _build_one(ctx, harness_dockerfile, target_image)
 
     console.print(f"[green]✓[/] Container image ready ({target_image})")
@@ -765,6 +766,7 @@ def ensure_interception(output_dir: Path):
         "claude_code_failed": "Session stopped: Claude Code process died on startup.",
         "codex_failed": "Session stopped: Codex CLI process died on startup.",
         "browser_use_failed": "Session stopped: browser-use process died on startup.",
+        "hermes_failed": "Session stopped: Hermes Agent process died on startup.",
         "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }

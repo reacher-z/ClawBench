@@ -4,7 +4,7 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `codex`, `browser-use`, or `claw-code`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `claude-code-chrome-extension`, `codex`, `browser-use`, `claw-code`, or `hermes`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
@@ -18,6 +18,7 @@ ClawBench/
   Dockerfile.codex                # Layer that adds @openai/codex@0.120 + @playwright/mcp + LiteLLM on top of base
   Dockerfile.browser-use          # Layer that adds browser-use Python framework + LiteLLM on top of base
   Dockerfile.claw-code            # Layer that builds ultraworkers/claw-code (Rust) + @playwright/mcp + LiteLLM on top of base
+  Dockerfile.hermes               # Layer that adds Hermes Agent + agent-browser on top of base
   entrypoint.sh                   # Shared infra (Xvfb, Chrome, noVNC, human mode); execs /run-harness.sh in agent mode
   setup-openclaw.sh               # Generates ~/.openclaw/openclaw.json from env vars (called from run-openclaw.sh)
   setup-opencode.sh               # Generates ~/.config/opencode/opencode.json from env vars (called from run-opencode.sh)
@@ -25,6 +26,7 @@ ClawBench/
   setup-codex.sh                  # Generates ~/.codex/config.toml (wire_api=responses + playwright MCP) + /tmp/litellm-config.yaml from env vars
   setup-browser-use.sh            # Generates /tmp/browser-use-env.sh + /tmp/litellm-config.yaml (routes via LiteLLM)
   setup-claw-code.sh              # Generates /tmp/claw-code-env.sh + /tmp/litellm-config.yaml + /tmp/claw-settings.json (MCP + tool deny list)
+  setup-hermes.sh                 # Generates ~/.hermes/config.yaml + ~/.hermes/.env (native CDP browser tools)
   run-openclaw.sh                 # Per-harness agent runner; copied into clawbench-openclaw image as /run-harness.sh
   run-opencode.sh                 # Per-harness agent runner; copied into clawbench-opencode image as /run-harness.sh
   run-claude-code.sh              # Per-harness agent runner; copied into clawbench-claude-code image as /run-harness.sh
@@ -32,6 +34,7 @@ ClawBench/
   run-browser-use.sh              # Per-harness agent runner; copied into clawbench-browser-use image as /run-harness.sh
   run-browser-use-agent.py        # Python entry script invoked by run-browser-use.sh — always uses ChatOpenAI pointed at LiteLLM
   run-claw-code.sh                # Per-harness agent runner; copied into clawbench-claw-code image as /run-harness.sh
+  run-hermes.sh                   # Per-harness agent runner; copied into clawbench-hermes image as /run-harness.sh
   claw-code-ndjson.patch.py       # Patches upstream claw to use newline-delimited JSON on MCP stdio (spec-compliant; upstream uses LSP framing)
   .env.example                    # Template for PurelyMail credentials
   models/
@@ -134,7 +137,9 @@ test-output/<model>/<harness>-<case>-<model>-<timestamp>/
                             #   `turn_context`/`event_msg`/`response_item` entries with reasoning,
                             #   function_call, and function_call_output items interleaved;
                             #   browser-use → one `AgentHistory` item per step with `model_output.action`,
-                            #   `result`, `state`, `metadata` fields)
+                            #   `result`, `state`, `metadata` fields;
+                            #   hermes → `session_meta` + one `message` row per Hermes message,
+                            #   preserving reasoning/tool_calls/tool result fields)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result

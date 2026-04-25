@@ -27,7 +27,7 @@ from generate_resume_pdf import generate_resume_pdf
 from hf_upload import hf_upload_enabled, upload_run
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-HARNESSES = ("openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code")
+HARNESSES = ("openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code", "hermes")
 DEFAULT_HARNESS = "openclaw"
 BASE_IMAGE = "clawbench-base"
 
@@ -46,6 +46,7 @@ _HARNESS_DOCKERFILES: dict[str, str] = {
     "codex": "Dockerfile.codex",
     "browser-use": "Dockerfile.browser-use",
     "claw-code": "Dockerfile.claw-code",
+    "hermes": "Dockerfile.hermes",
 }
 
 # Kept for back-compat with old callers / scripts that imported IMAGE.
@@ -671,6 +672,7 @@ def ensure_interception(output_dir: Path):
         "claude_code_failed": "Session stopped: Claude Code process died on startup.",
         "codex_failed": "Session stopped: Codex CLI process died on startup.",
         "browser_use_failed": "Session stopped: browser-use process died on startup.",
+        "hermes_failed": "Session stopped: Hermes Agent process died on startup.",
         "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
     }

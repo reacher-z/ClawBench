@@ -77,6 +77,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 
 ## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
 
+- **[2026.04.25]**<img src="static/icons/globe.svg" width="14" height="14"> Added support for the **hermes** harness.
 - **[2026.04.22]**<img src="static/icons/rocket.svg" width="14" height="14"> Added support for the **claude-code-chrome-extension** harness — Claude Code CLI + [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension.
 - **[2026.04.20]**<img src="static/icons/screwdriver-wrench.svg" width="14" height="14"> Added support for the **claw-code** harness.
 - **[2026.04.18]** <img src="static/icons/globe.svg" width="14" height="14"> &nbsp;Added support for the **browser-use** harness.
@@ -197,7 +198,7 @@ clawbench configure                # opens models.yaml in $EDITOR
 ```
 
 > [!NOTE]
-> **First run builds a container image** (chromium + ffmpeg + noVNC + Node + openclaw, roughly **2 GB** download, **5–10 min** on a decent connection). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
+> **First run builds a container image** (chromium + ffmpeg + noVNC + Node + selected agent harness, roughly **2 GB** download, **5–10 min** on a decent connection). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
 
 **2. Run your first task** (pick one):
 
@@ -214,7 +215,7 @@ clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
-Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), `--harness claude-code-chrome-extension` to use Claude Code + the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension (Microsoft Edge + local bridge, bypass stack so any LiteLLM-routed provider works), `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex), `--harness claw-code` to use [claw-code](https://github.com/ultraworkers/claw-code) (Rust CLI — the four CLI harnesses drive browsers via the [Playwright MCP server](https://github.com/microsoft/playwright-mcp) or — for the Chrome-extension harness — the Anthropic `claude-in-chrome` MCP), or `--harness browser-use` to use [browser-use](https://github.com/browser-use/browser-use) (Python framework, routed via LiteLLM).
+Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), `--harness claude-code-chrome-extension` to use Claude Code + the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension (Microsoft Edge + local bridge, bypass stack so any LiteLLM-routed provider works), `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex), `--harness claw-code` to use [claw-code](https://github.com/ultraworkers/claw-code), `--harness browser-use` to use [browser-use](https://github.com/browser-use/browser-use) (Python framework, routed via LiteLLM), or `--harness hermes` to use [Hermes Agent](https://github.com/NousResearch/hermes-agent) with native browser tools attached to ClawBench Chrome via CDP.
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
@@ -520,7 +521,7 @@ Yes. Set `export CONTAINER_ENGINE=podman`. The framework auto-detects whichever 
 <details>
 <summary><b>What tools can the agent use?</b></summary>
 
-All supported harnesses are sandboxed identically: the agent can only use the browser tool and a restricted set of read-only shell commands (`ls`, `cat`, `find`, `grep`, `head`, `tail`, `jq`, `wc`, etc.). Commands that could bypass the browser (`curl`, `python`, `node`, `wget`) are blocked, as are file `edit`/`write` and `webfetch`. The agent instruction also explicitly requires browser-only task completion.
+All supported harnesses run inside the same container recording and interception environment. CLI/MCP harnesses expose the browser tool plus a restricted set of read-only shell commands (`ls`, `cat`, `find`, `grep`, `head`, `tail`, `jq`, `wc`, etc.); commands that could bypass the browser (`curl`, `python`, `node`, `wget`) are blocked. Hermes uses native browser/file tools attached to the same ClawBench Chrome CDP endpoint. The agent instruction also explicitly requires browser-only task completion.
 
 </details>
 
@@ -723,4 +724,4 @@ Open to contributions — new test cases, bug fixes, or evaluation submissions f
 
 Apache 2.0 -- see [LICENSE](LICENSE).
 
-Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension, [OpenAI Codex CLI](https://github.com/openai/codex), [browser-use](https://github.com/browser-use/browser-use), and [claw-code](https://github.com/ultraworkers/claw-code) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, codex, and claw-code harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code, claude-code-chrome-extension, codex, browser-use, and claw-code harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).
+Built with [OpenClaw](https://github.com/openclaw/openclaw), [opencode](https://opencode.ai), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension, [OpenAI Codex CLI](https://github.com/openai/codex), [browser-use](https://github.com/browser-use/browser-use), [claw-code](https://github.com/ultraworkers/claw-code), and [Hermes Agent](https://github.com/NousResearch/hermes-agent) (selectable harnesses), [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) (browser control bridge for the opencode, claude-code, codex, and claw-code harnesses), [LiteLLM](https://github.com/BerriAI/litellm) (API translation proxy for the claude-code, claude-code-chrome-extension, codex, browser-use, and claw-code harnesses), [noVNC](https://github.com/novnc/noVNC) (MPL 2.0), and [websockify](https://github.com/novnc/websockify) (LGPL 3.0).
