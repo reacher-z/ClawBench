@@ -1,0 +1,11 @@
+FROM clawbench-base
+
+# ClawBench supplies Chromium, so skip any browser downloads and attach to the existing CDP instance instead.
+ARG HERMES_REF=bf196a3fc0fd1f79353369e8732051db275c6276
+RUN pip install --no-cache-dir \
+    "hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git@${HERMES_REF}"
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g agent-browser@0.26.0
+
+COPY setup-hermes.sh /setup-hermes.sh
+COPY run-hermes.sh /run-harness.sh
+RUN chmod +x /setup-hermes.sh /run-harness.sh

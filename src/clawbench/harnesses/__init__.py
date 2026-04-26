@@ -9,8 +9,8 @@ Third-party packages register additional harnesses under the
 The exported ``spec`` must be a :class:`HarnessSpec` instance. This module
 merges built-in harnesses with any discovered entry points and returns a
 ``dict[name, HarnessSpec]``. The built-ins always win on name conflict so
-a third-party plugin cannot accidentally (or maliciously) shadow
-``openclaw`` / ``opencode`` / ``claude-code``.
+a third-party plugin cannot accidentally (or maliciously) shadow a bundled
+harness such as ``openclaw``, ``opencode``, ``claude-code``, or ``hermes``.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ class HarnessSpec:
 
 
 def _builtin_specs() -> dict[str, HarnessSpec]:
-    """Return the three harnesses shipped with ClawBench itself."""
+    """Return the harnesses shipped with ClawBench itself."""
     from clawbench.harnesses.openclaw import spec as openclaw_spec
     from clawbench.harnesses.opencode import spec as opencode_spec
     from clawbench.harnesses.claude_code import spec as claude_code_spec
@@ -58,6 +58,7 @@ def _builtin_specs() -> dict[str, HarnessSpec]:
     from clawbench.harnesses.codex import spec as codex_spec
     from clawbench.harnesses.browser_use import spec as browser_use_spec
     from clawbench.harnesses.claw_code import spec as claw_code_spec
+    from clawbench.harnesses.hermes import spec as hermes_spec
 
     return {
         openclaw_spec.name: openclaw_spec,
@@ -67,6 +68,7 @@ def _builtin_specs() -> dict[str, HarnessSpec]:
         codex_spec.name: codex_spec,
         browser_use_spec.name: browser_use_spec,
         claw_code_spec.name: claw_code_spec,
+        hermes_spec.name: hermes_spec,
     }
 
 

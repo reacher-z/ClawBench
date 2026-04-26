@@ -73,6 +73,7 @@ claude-code-chrome-extension  = "clawbench.harnesses.claude_code_chrome_extensio
 codex                         = "clawbench.harnesses.codex.spec:spec"
 browser-use                   = "clawbench.harnesses.browser_use.spec:spec"
 claw-code                     = "clawbench.harnesses.claw_code.spec:spec"
+hermes                        = "clawbench.harnesses.hermes.spec:spec"
 
 [project.urls]
 Homepage = "https://claw-bench.com"

@@ -34,7 +34,8 @@ manual-but-realistic evaluation flow.
 - Sanity-checking task reachability from an end-user perspective.
 - Generating additional human or agent reference runs without our container.
 - Comparing Anthropic's first-party browser agent against the harnesses we
-  already ship (`openclaw`, `opencode`).
+  already ship (`openclaw`, `opencode`, `claude-code`, `codex`,
+  `browser-use`, `claw-code`, and `hermes`).
 
 ### What it is *not*
 
