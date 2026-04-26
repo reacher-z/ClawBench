@@ -17,7 +17,7 @@
   },
   "instruction": "On Coolors, generate a 5-color palette, lock one color and adjust it to #FF6B6B, then export the palette to PDF.",
   "eval_schema": {
-    "url_pattern": "coolors\\.co/ajax/export-palette",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

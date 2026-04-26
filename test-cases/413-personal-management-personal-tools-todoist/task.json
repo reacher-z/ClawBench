@@ -17,7 +17,7 @@
   },
   "instruction": "Create project \"Q2 Engineering Goals\" with 8 tasks, due dates, and priorities in Todoist",
   "eval_schema": {
-    "url_pattern": "app\\.todoist\\.com/api/v1/sync",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

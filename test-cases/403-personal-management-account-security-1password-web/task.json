@@ -17,8 +17,8 @@
   },
   "instruction": "Add 5 login entries to 1Password",
   "eval_schema": {
-    "url_pattern": "my\\.1password\\.com/api/v3/vault/[a-z0-9]+/\\d+/items",
-    "method": "PATCH"
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
+    "method": "POST"
   },
   "time_limit": 30,
   "extra_info": [

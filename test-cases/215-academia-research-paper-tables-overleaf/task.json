@@ -17,7 +17,7 @@
   },
   "instruction": "On Overleaf, create a new project and write a LaTeX booktabs table with 5 models x 4 metrics + Average + Delta row. The project must compile without errors and display the formatted table.",
   "eval_schema": {
-    "url_pattern": "overleaf\\.com/project/[a-f0-9]+/compile",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

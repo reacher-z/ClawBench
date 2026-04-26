@@ -17,7 +17,7 @@
   },
   "instruction": "Post a home cleaning project on Bark, fill in the service description, address, and required date, and submit the project",
   "eval_schema": {
-    "url_pattern": "api\\.bark\\.com/bark/pre",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

@@ -17,7 +17,7 @@
   },
   "instruction": "Sign up on BetterHelp, book a counseling session, and complete the initial questionnaire",
   "eval_schema": {
-    "url_pattern": "betterhelp\\.com/api/ai-quiz/submit-summary",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

@@ -17,7 +17,7 @@
   },
   "instruction": "On Insurify, enter basic personal information and auto insurance preferences to receive quotes from at least 3 insurance companies",
   "eval_schema": {
-    "url_pattern": "insurify\\.com/(?!cdn-cgi/)(?!.*static_user_pageview)(?!.*analytics)(?!.*tracking).*(quote|funnel|lead|insurance|compare|application)",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,

@@ -17,7 +17,7 @@
   },
   "instruction": "On FormSwift, search for a \"Power of Attorney\" template, fill in the principal's name, agent's name, and scope of authority, then download the completed document",
   "eval_schema": {
-    "url_pattern": "api\\.formswift\\.com/static/document/save/",
+    "url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__",
     "method": "POST"
   },
   "time_limit": 30,
