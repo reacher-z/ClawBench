@@ -1,1 +1,0 @@
-../../../../run-claw-code.sh
