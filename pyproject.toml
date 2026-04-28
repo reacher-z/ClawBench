@@ -51,6 +51,12 @@ dev = [
     "build>=1.2",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    # Steel browser-provider scripts (steel-cdp-shim.py,
+    # steel-collect-artifacts.py, tools/probe_steel_multiclient.py).
+    # Listed under dev so host-side tests + the multi-client probe can
+    # run outside a container.
+    "aiohttp>=3.9",
+    "steel-sdk>=0.17",
 ]
 
 [project.scripts]

@@ -454,6 +454,36 @@ See [test-driver/README.md](test-driver/README.md) for full CLI documentation, b
 
 <br/>
 
+## Cloud browser provider — Steel (optional)
+
+ClawBench's default browser provider is a per-case Docker container running local Chromium. For users who want to run ClawBench against a cloud-hosted browser pool (no local Chromium, no Xvfb/x11vnc gymnastics, scale `--max-concurrent` past local CPU limits), the `--browser=steel` flag routes the in-container CDP traffic to a [Steel](https://docs.steel.dev) cloud session via a small CDP proxy shim. **Local Docker mode remains the default and the canonical scoring path** — Steel is an alternative provider, not a replacement.
+
+```bash
+export STEEL_API_KEY=sk-steel-...
+
+# Single run against a Steel session
+clawbench run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6 --browser=steel
+
+# Batch — each parallel job creates its own Steel session
+clawbench batch --all-models --case-range 1-50 --max-concurrent 10 --browser=steel
+```
+
+What you get with `--browser=steel` that you don't with local mode:
+
+- `data/steel/session.json` — full Steel session record (`userAgent`, `dimensions`, `deviceConfig`, `region`, `stealthConfig`, `proxySource`, `creditsUsed`, `duration`, `eventCount`, `status`)
+- `data/steel/events.jsonl` — Steel's rrweb event stream (DOM mutations, input, network meta) — strictly richer than ClawBench's recorder-extension `actions.jsonl`
+- `data/steel/context.json` — post-run cookies / localStorage / IndexedDB snapshot (forensics for "did the agent actually log in?")
+- `data/steel/browser-version.json` — Chrome / V8 version captured via CDP `Browser.getVersion`
+- `run-meta.json` includes `steel_session_viewer_url` — one-click replay of any failed run
+
+Notes:
+- Each parallel batch job creates one Steel session. Steel concurrency caps apply per API key (5 on Hobby, 100 on Pro).
+- `claude-code-chrome-extension` harness is incompatible with `--browser=steel` (its bridge talks to the in-Chrome extension via Chrome native messaging, which can't span the cloud boundary).
+- `--human` mode requires the local browser; pair with `--browser=local`.
+- Eval scoring is unchanged — the existing `extension-server` CDP interceptor connects to `127.0.0.1:9222` exactly as today; the shim transparently forwards to `wss://connect.steel.dev`.
+
+<br/>
+
 # <img src="static/icons/chart-bar.svg" width="28" height="28"> Evaluation
 
 Evaluation is a **post-session** step -- first run agents to collect trajectories, then evaluate them against human reference runs.

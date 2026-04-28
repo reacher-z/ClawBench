@@ -4,4 +4,13 @@ version = "0.1.0"
 description = "ClawBench extension server"
 readme = "README.md"
 requires-python = "==3.12.*"
-dependencies = ["fastapi[standard]>=0.115", "websocket-client>=1.8"]
+dependencies = [
+    "fastapi[standard]>=0.115",
+    "websocket-client>=1.8",
+    # Used by ../steel-cdp-shim.py and ../steel-collect-artifacts.py when
+    # the container is launched with STEEL_API_KEY set. They share this
+    # venv (uv sync runs against this pyproject) so we keep their deps
+    # alongside the eval interceptor's.
+    "aiohttp>=3.9",
+    "steel-sdk>=0.17",
+]

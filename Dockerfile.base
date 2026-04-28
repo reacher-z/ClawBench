@@ -32,6 +32,11 @@ RUN cd extension-server && UV_PYTHON_PREFERENCE=only-system uv sync
 
 COPY chrome-extension/ ./chrome-extension/
 
+# Steel browser-provider scripts (no-ops unless STEEL_API_KEY is set at
+# container start). They share the extension-server venv created above.
+COPY steel-cdp-shim.py /app/steel-cdp-shim.py
+COPY steel-collect-artifacts.py /app/steel-collect-artifacts.py
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

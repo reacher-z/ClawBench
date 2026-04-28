@@ -4,6 +4,86 @@ set -e
 # Ensure /data exists for recording output and diagnostic logs
 mkdir -p /data
 
+# Steel browser-provider mode: front the eval-interceptor and harnesses with
+# a CDP shim that bridges to wss://connect.steel.dev. Skips Xvfb/Chromium/
+# socat/x11vnc/noVNC/ffmpeg — Steel renders cloud-side and provides rrweb +
+# HLS recording via its session API. We still start the extension-server
+# because its CDP handler does the eval interception (Fetch.enable on
+# Fetch.requestPaused → Fetch.failRequest), and CDP_URL still points at
+# 127.0.0.1:9222 — only now the shim is what's listening there.
+if [ -n "$STEEL_API_KEY" ]; then
+  export CLAWBENCH_STEEL_MODE=1
+  echo "============================================"
+  echo "Steel browser provider active (STEEL_API_KEY detected)"
+  echo "============================================"
+
+  cd /app/extension-server
+  uv run uvicorn server:app --host 0.0.0.0 --port 7878 &
+  sleep 1
+
+  # Start the shim; it creates the Steel session, writes initial artifacts,
+  # then serves /json/version + WS proxy on 127.0.0.1:9222.
+  uv run python /app/steel-cdp-shim.py &
+  SHIM_PID=$!
+  echo "Steel CDP shim started (pid $SHIM_PID); waiting for session..."
+
+  # Wait for the shim to be ready by polling /json/version (max 60s — Steel
+  # session create is normally <5s but allow headroom for cold starts).
+  for i in $(seq 1 60); do
+    if curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+      echo "Steel CDP shim ready"
+      break
+    fi
+    if ! kill -0 "$SHIM_PID" 2>/dev/null; then
+      echo "ERROR: steel-cdp-shim exited before becoming ready"
+      [ -z "$(cat /data/.stop-reason 2>/dev/null)" ] && \
+        echo "steel_shim_failed" > /data/.stop-reason
+      exit 1
+    fi
+    sleep 1
+  done
+
+  if ! curl -sf http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+    echo "ERROR: steel-cdp-shim did not become ready within 60s"
+    [ -z "$(cat /data/.stop-reason 2>/dev/null)" ] && \
+      echo "steel_shim_failed" > /data/.stop-reason
+    exit 1
+  fi
+
+  # Run the harness (or stay manual). Trap exit so we always release the
+  # Steel session and pull artifacts before the container goes away.
+  cleanup_steel() {
+    if kill -0 "$SHIM_PID" 2>/dev/null; then
+      kill -TERM "$SHIM_PID" 2>/dev/null || true
+      wait "$SHIM_PID" 2>/dev/null || true
+    fi
+    cd /app/extension-server
+    uv run python /app/steel-collect-artifacts.py || true
+  }
+  trap cleanup_steel EXIT
+
+  if [ -z "$INSTRUCTION" ]; then
+    echo "No INSTRUCTION set; staying live for manual CDP use against the shim."
+    wait "$SHIM_PID"
+    exit 0
+  fi
+
+  if [ ! -x /run-harness.sh ]; then
+    echo "ERROR: /run-harness.sh missing — image was built without a harness layer"
+    echo "missing_harness" > /data/.stop-reason
+    exit 1
+  fi
+  # Capture the harness exit status without `set -e` short-circuiting
+  # the trap-driven Steel cleanup below.
+  set +e
+  /run-harness.sh
+  HARNESS_EXIT=$?
+  set -e
+  exit $HARNESS_EXIT
+fi
+
+# --- Local Chromium / Docker mode (default) -------------------------------
+
 # Start virtual display
 Xvfb :99 -screen 0 1920x1080x24 &
 export DISPLAY=:99

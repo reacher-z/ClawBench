@@ -664,7 +664,8 @@ def docker_run(name: str, instruction: str, schema_path: Path,
                personal_info_dir: Path, model_cfg: dict,
                time_limit_s: int = 1800,
                host_port: int | None = None,
-               harness: str = DEFAULT_HARNESS) -> None:
+               harness: str = DEFAULT_HARNESS,
+               steel_api_key: str | None = None) -> None:
     env_flags = [
         ENGINE, "run", "-d", "--name", name,
         *_network_flags(),
@@ -679,8 +680,13 @@ def docker_run(name: str, instruction: str, schema_path: Path,
         "-v", f"{schema_path.resolve()}:/eval-schema.json:ro",
         "-v", f"{personal_info_dir.resolve()}:/my-info:ro",
     ]
-    # Expose noVNC so the user can watch the agent in real-time.
-    if host_port is not None:
+    # Steel browser-provider mode: pass the API key in so the in-container
+    # entrypoint runs the CDP shim instead of local Chromium. Skip the
+    # noVNC port mapping since there's no Xvfb/x11vnc to expose.
+    if steel_api_key:
+        env_flags += ["-e", f"STEEL_API_KEY={steel_api_key}"]
+    elif host_port is not None:
+        # Expose noVNC so the user can watch the agent in real-time.
         env_flags += ["-p", f"{host_port}:6080"]
     # host.docker.internal needs explicit mapping on Linux (not Docker Desktop)
     if "host.docker.internal" in model_cfg["base_url"]:
@@ -746,6 +752,40 @@ def docker_rm(name: str) -> None:
 
 # -- Results --
 
+def _load_steel_meta(output_dir: Path) -> dict:
+    """Pull the small subset of Steel session metadata we surface in run-meta.json.
+
+    The full Steel artifacts live under ``data/steel/`` (session.json,
+    events.jsonl, context.json, browser-version.json) — here we only lift
+    the IDs and viewer URLs so a quick scan of run-meta.json shows where
+    to replay a run.
+    """
+    session_path = output_dir / "data" / "steel" / "session.json"
+    if not session_path.exists():
+        return {}
+    try:
+        s = json.loads(session_path.read_text())
+    except json.JSONDecodeError:
+        return {}
+    out = {}
+    for src, dst in (
+        ("id", "steel_session_id"),
+        ("sessionViewerUrl", "steel_session_viewer_url"),
+        ("session_viewer_url", "steel_session_viewer_url"),
+        ("debugUrl", "steel_debug_url"),
+        ("debug_url", "steel_debug_url"),
+        ("status", "steel_status"),
+        ("creditsUsed", "steel_credits_used"),
+        ("credits_used", "steel_credits_used"),
+        ("eventCount", "steel_event_count"),
+        ("event_count", "steel_event_count"),
+    ):
+        val = s.get(src)
+        if val is not None and dst not in out:
+            out[dst] = val
+    return out
+
+
 def ensure_interception(output_dir: Path):
     """If the interceptor didn't produce interception.json, create one with the stop reason."""
     stop_reason_file = output_dir / "data" / ".stop-reason"
@@ -769,6 +809,8 @@ def ensure_interception(output_dir: Path):
         "hermes_failed": "Session stopped: Hermes Agent process died on startup.",
         "proxy_failed": "Session stopped: LiteLLM API translation proxy failed to start.",
         "missing_harness": "Session stopped: container image was built without a harness layer.",
+        "steel_session_create_failed": "Session stopped: Steel session creation failed (auth or tier limit).",
+        "steel_shim_failed": "Session stopped: steel-cdp-shim failed to become ready.",
     }
     description = descriptions.get(reason, f"Session stopped: {reason}.")
     schema_file = output_dir / "eval-schema.json"
@@ -837,10 +879,30 @@ def main(argv: list[str] | None = None) -> None:
                         help="Skip HuggingFace upload even if HF_TOKEN is configured")
     parser.add_argument("--harness", choices=HARNESSES, default=DEFAULT_HARNESS,
                         help=f"Coding-agent harness (default: {DEFAULT_HARNESS})")
+    parser.add_argument("--browser", choices=("local", "steel"), default="local",
+                        help="Browser provider: 'local' (Chromium-in-container, default) "
+                             "or 'steel' (cloud browser via $STEEL_API_KEY)")
     args = parser.parse_args(argv)
 
     if not args.human and args.model is None:
         parser.error("model is required for agent mode (or use --human)")
+
+    steel_api_key: str | None = None
+    if args.browser == "steel":
+        steel_api_key = os.environ.get("STEEL_API_KEY", "").strip()
+        if not steel_api_key:
+            parser.error("--browser=steel requires STEEL_API_KEY in the environment")
+        if args.harness == "claude-code-chrome-extension":
+            # The chrome-extension harness drives a host-loaded Claude
+            # extension via Chrome native messaging; that channel can't span
+            # the cloud-browser boundary. Bail with a clear message rather
+            # than producing a confusing failure mid-run.
+            parser.error(
+                "--harness=claude-code-chrome-extension is incompatible with --browser=steel "
+                "(native-messaging bridge requires harness + Chrome on the same host)"
+            )
+        if args.human:
+            parser.error("--browser=steel and --human are mutually exclusive (no noVNC in Steel mode)")
 
     # Load infrastructure config from env + ./.env + user secrets.env
     env = _load_runtime_env()
@@ -945,18 +1007,25 @@ def main(argv: list[str] | None = None) -> None:
         else:
             step("Starting container")
             assert model_cfg is not None
-            host_port = _pick_free_port(6080)
+            host_port = None if steel_api_key else _pick_free_port(6080)
             docker_run(container, instruction, schema_path,
                        personal_info_tmp, model_cfg,
                        time_limit_s=time_limit_s,
                        host_port=host_port,
-                       harness=args.harness)
+                       harness=args.harness,
+                       steel_api_key=steel_api_key)
 
-            vnc_url = f"http://localhost:{host_port}/vnc.html"
-            console.print(f"\n  noVNC: [link={vnc_url}]{vnc_url}[/link]")
-            if host_port != 6080:
-                console.print(f"  [dim](port 6080 was busy, auto-picked {host_port})[/dim]")
-            console.print(f"  Open the URL above to watch the agent in real-time.\n")
+            if steel_api_key:
+                console.print(
+                    "\n  [bold]Steel browser provider active.[/bold] "
+                    "Live view + replay URLs will appear in run-meta.json.\n"
+                )
+            else:
+                vnc_url = f"http://localhost:{host_port}/vnc.html"
+                console.print(f"\n  noVNC: [link={vnc_url}]{vnc_url}[/link]")
+                if host_port != 6080:
+                    console.print(f"  [dim](port 6080 was busy, auto-picked {host_port})[/dim]")
+                console.print(f"  Open the URL above to watch the agent in real-time.\n")
 
             step(f"Agent running (max {task['time_limit']}min)")
 
@@ -1008,7 +1077,10 @@ def main(argv: list[str] | None = None) -> None:
                 "time_limit_minutes": task["time_limit"],
                 "duration_seconds": round(duration),
                 "intercepted": intercepted,
+                "browser": args.browser,
             }
+        if steel_api_key:
+            meta.update(_load_steel_meta(output_dir))
         (output_dir / "run-meta.json").write_text(json.dumps(meta, indent=2))
 
         if do_upload:
