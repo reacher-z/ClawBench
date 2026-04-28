@@ -278,23 +278,28 @@ async def lifespan(app: FastAPI):
         match_body = eval_schema.get("body")
         match_params = eval_schema.get("params")
 
-    # Start screen recording of the Xvfb display
-    display = os.environ.get("DISPLAY", ":99")
-    ffmpeg_proc = subprocess.Popen(
-        [
-            "ffmpeg", "-y",
-            "-f", "x11grab",
-            "-video_size", "1920x1080",
-            "-framerate", "15",
-            "-i", display,
-            "-c:v", "libx264",
-            "-preset", "ultrafast",
-            "-crf", "28",
-            str(RECORDING_PATH),
-        ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    # Start screen recording of the Xvfb display.
+    # In Steel mode there is no Xvfb (the shim fronts a cloud browser);
+    # Steel's session API exposes rrweb events + HLS, so we skip ffmpeg.
+    if os.environ.get("CLAWBENCH_STEEL_MODE"):
+        ffmpeg_proc = None
+    else:
+        display = os.environ.get("DISPLAY", ":99")
+        ffmpeg_proc = subprocess.Popen(
+            [
+                "ffmpeg", "-y",
+                "-f", "x11grab",
+                "-video_size", "1920x1080",
+                "-framerate", "15",
+                "-i", display,
+                "-c:v", "libx264",
+                "-preset", "ultrafast",
+                "-crf", "28",
+                str(RECORDING_PATH),
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
     # Start CDP handler: always logs requests, optionally blocks by URL pattern + method + body/params
     threading.Thread(target=start_cdp_handler,

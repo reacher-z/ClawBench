@@ -206,6 +206,7 @@ async def run_job(
     batch_start: float,
     no_upload: bool = False,
     harness: str | None = None,
+    browser: str = "local",
 ) -> None:
     assert shutdown_event is not None
     try:
@@ -242,6 +243,8 @@ async def run_job(
                     cmd_parts.append("--no-upload")
                 if harness:
                     cmd_parts += ["--harness", harness]
+                if browser and browser != "local":
+                    cmd_parts += ["--browser", browser]
                 proc = await asyncio.create_subprocess_exec(
                     *cmd_parts,
                     stdout=asyncio.subprocess.PIPE,
@@ -558,7 +561,8 @@ async def async_main(args: argparse.Namespace) -> int:
     all_tasks = [
         asyncio.create_task(
             run_job(j, sem, throttle, base_output, log_dir, jobs, batch_start,
-                    no_upload=args.no_upload, harness=args.harness)
+                    no_upload=args.no_upload, harness=args.harness,
+                    browser=args.browser)
         )
         for j in jobs
     ]
@@ -618,7 +622,31 @@ def main(argv: list[str] | None = None) -> None:
     from clawbench.run import HARNESSES, DEFAULT_HARNESS
     p.add_argument("--harness", choices=HARNESSES, default=DEFAULT_HARNESS,
                    help=f"Coding-agent harness (default: {DEFAULT_HARNESS})")
+    p.add_argument("--browser", choices=("local", "steel"), default="local",
+                   help="Browser provider passed to each per-case run (default: local)")
     args = p.parse_args(argv)
+
+    if args.browser == "steel":
+        if not os.environ.get("STEEL_API_KEY", "").strip():
+            print("ERROR: --browser=steel requires STEEL_API_KEY in the environment")
+            sys.exit(1)
+        if args.harness == "claude-code-chrome-extension":
+            print("ERROR: --harness=claude-code-chrome-extension is incompatible with "
+                  "--browser=steel (native-messaging bridge cannot span the cloud boundary)")
+            sys.exit(1)
+        # Best-effort visibility into Steel concurrent-session caps. Each
+        # parallel job creates its own Steel session, so --max-concurrent
+        # is also the peak Steel session count.
+        try:
+            from steel import Steel  # type: ignore
+            client = Steel(steel_api_key=os.environ["STEEL_API_KEY"])
+            # Don't fail on this; some SDK versions may not expose .list.
+            sessions = list(client.sessions.list())
+            live = sum(1 for s in sessions if getattr(s, "status", "") == "live")
+            print(f"[batch] Steel: {live} live sessions before start; "
+                  f"--max-concurrent={args.max_concurrent} will add up to that many more")
+        except Exception:
+            pass
 
     rc = asyncio.run(async_main(args))
     sys.exit(rc)

@@ -115,6 +115,9 @@ def tui_cmd() -> None:
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload even if configured.")
 @click.option("--harness", type=_harness_choice(), default=None,
               help="Coding-agent harness (default: openclaw).")
+@click.option("--browser", type=click.Choice(["local", "steel"]), default=None,
+              help="Browser provider: 'local' (Chromium-in-container, default) or "
+                   "'steel' (cloud browser via $STEEL_API_KEY).")
 @click.pass_context
 def run_cmd(
     ctx: click.Context,
@@ -125,6 +128,7 @@ def run_cmd(
     no_build: bool,
     no_upload: bool,
     harness: str | None,
+    browser: str | None,
 ) -> None:
     """Run a single test case against a model (or in --human mode)."""
     from clawbench import run as _run
@@ -152,6 +156,8 @@ def run_cmd(
         argv.append("--no-upload")
     if harness:
         argv += ["--harness", harness]
+    if browser:
+        argv += ["--browser", browser]
     argv += list(ctx.args)
     _run.main(argv)
 
@@ -182,6 +188,8 @@ def run_cmd(
 @click.option("--no-upload", is_flag=True, help="Skip HuggingFace upload for all runs.")
 @click.option("--harness", type=_harness_choice(), default=None,
               help="Coding-agent harness (default: openclaw).")
+@click.option("--browser", type=click.Choice(["local", "steel"]), default=None,
+              help="Browser provider passed to each per-case run (default: local).")
 @click.pass_context
 def batch_cmd(
     ctx: click.Context,
@@ -196,6 +204,7 @@ def batch_cmd(
     dry_run: bool,
     no_upload: bool,
     harness: str | None,
+    browser: str | None,
 ) -> None:
     """Run a model x case cross-product concurrently."""
     from clawbench import batch as _batch
@@ -220,6 +229,8 @@ def batch_cmd(
         argv.append("--no-upload")
     if harness:
         argv += ["--harness", harness]
+    if browser:
+        argv += ["--browser", browser]
     argv += list(ctx.args)
     _batch.main(argv)
 
