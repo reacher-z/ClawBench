@@ -54,9 +54,6 @@ for cmd in ls cat find file jq cut uniq head tail tr wc grep sort sh bash; do
   [ -x "$(command -v "$cmd" 2>/dev/null)" ] && ln -sf "$(command -v "$cmd")" "$SAFE_BIN/$cmd"
 done
 ln -sf "$(command -v python3)" "$SAFE_BIN/python3"
-ln -sf "$(command -v node)"    "$SAFE_BIN/node"
-ln -sf "$(command -v npx)"     "$SAFE_BIN/npx"
-ln -sf "$(command -v npm)"     "$SAFE_BIN/npm"
 
 # Run the browser-use agent driver. The script writes its transcript
 # to /data/agent-messages.jsonl after every step. Stdout/stderr go to

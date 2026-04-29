@@ -447,10 +447,9 @@ def _build_one(dockerfile: Path, tag: str) -> None:
 def docker_build(harness: str = DEFAULT_HARNESS) -> None:
     """Build the base + harness images with a live progress spinner.
 
-    The first build pulls ~2GB (python base, chromium, ffmpeg, noVNC, Node,
-    plus the harness CLI) and takes several minutes; subsequent rebuilds
-    are near-instant when the layer cache is warm. We show a banner only
-    for the cold path.
+    The first build pulls the Python base, Chromium, ffmpeg, noVNC, and the
+    selected harness dependencies; subsequent rebuilds are near-instant when
+    the layer cache is warm. We show a banner only for the cold path.
 
     If a build fails with a pattern that suggests stale layer-cache
     (e.g. a lockfile mismatch), we automatically retry once with
@@ -467,7 +466,7 @@ def docker_build(harness: str = DEFAULT_HARNESS) -> None:
         console.print()
         console.print(Panel(
             "[bold]First-time container build.[/]\n"
-            f"This downloads ~2 GB (chromium, ffmpeg, noVNC, Node, {harness})\n"
+            f"This downloads Chromium, ffmpeg, noVNC, and {harness} dependencies\n"
             "and typically takes [bold]5–10 minutes[/] on a decent connection.\n"
             "[dim]Subsequent runs reuse the layer cache and finish in seconds.[/]",
             title=f"[bold]Building {target_image} image[/]",

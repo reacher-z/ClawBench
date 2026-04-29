@@ -481,8 +481,8 @@ async def async_main(args: argparse.Namespace) -> int:
         return 0
 
     # Build image once — reuse run.py's spinner/progress helper so first-time
-    # builds show a clear "~2GB, 5–10min" banner and live step counter instead
-    # of a wall of apt/npm output.
+    # builds show a clear banner and live step counter instead of a wall of
+    # apt/npm output.
     engine = detect_engine()
     # Ensure child run.py processes (and the imported helper below) use the
     # same engine as we just detected.
