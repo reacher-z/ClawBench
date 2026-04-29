@@ -194,7 +194,7 @@ $EDITOR .env
 ```
 
 > [!NOTE]
-> **First run builds a container image** (chromium + ffmpeg + noVNC + Node + selected agent harness, roughly **2 GB** download, **5–10 min** on a decent connection). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
+> **First run builds a container image** (Chromium + ffmpeg + noVNC + the selected agent harness dependencies). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
 
 **2. Run your first task** (pick one):
 

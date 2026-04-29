@@ -26,7 +26,14 @@ RUN cargo build --release -p rusty-claude-cli \
     && mkdir -p /out \
     && install -m 0755 target/release/claw /out/claw
 
+FROM node:24-slim AS node-runtime
+
 FROM clawbench-base
+
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 # Playwright MCP
 RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g \

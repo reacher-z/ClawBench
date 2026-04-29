@@ -1,4 +1,11 @@
+FROM --platform=linux/amd64 node:24-slim AS node-runtime
+
 FROM --platform=linux/amd64 clawbench-base:amd64
+
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 # --- Microsoft Edge ----------------------------------------------------------
 # The Claude in Chrome extension is officially supported on Google Chrome and
