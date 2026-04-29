@@ -30,7 +30,7 @@ body:
     id: python-version
     attributes:
       label: Python version
-      description: e.g. 3.12.4
+      description: e.g. 3.11.14
   - type: textarea
     id: error-output
     attributes:

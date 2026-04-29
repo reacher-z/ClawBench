@@ -1,1 +1,0 @@
-../../../../setup-hermes.sh

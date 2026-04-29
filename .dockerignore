@@ -1,3 +1,14 @@
-extension-server/.venv
-extension-server/__pycache__
-extension-server/.DS_Store
+build/
+dist/
+*.egg-info/
+**/.venv/
+**/__pycache__/
+*.pyc
+**.DS_Store
+.git/
+.github/
+.idea/
+.vscode/
+models/models.yaml
+test-output/
+test-output-*/

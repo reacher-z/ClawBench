@@ -1,3 +1,3 @@
 #!/bin/bash
 cd "$(dirname "$0")" || exit
-exec uv run --project test-driver test-driver/tui.py
+exec uv run --no-editable clawbench

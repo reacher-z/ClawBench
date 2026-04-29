@@ -16,8 +16,8 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/clawbench)
 [![Codespaces](https://img.shields.io/badge/Codespaces-Open-181717?style=flat-square&logo=github&logoColor=white)](https://codespaces.new/reacher-z/ClawBench?quickstart=1)
 
-[![PyPI downloads](https://img.shields.io/pypi/dm/clawbench-eval?style=flat-square&logo=pypi&logoColor=white&color=3775A9&label=PyPI%20downloads)](https://pypi.org/project/clawbench-eval/)
-[![PyPI version](https://img.shields.io/pypi/v/clawbench-eval?style=flat-square&logo=pypi&logoColor=white&color=3775A9)](https://pypi.org/project/clawbench-eval/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/clawbench?style=flat-square&logo=pypi&logoColor=white&color=3775A9&label=PyPI%20downloads)](https://pypi.org/project/clawbench/)
+[![PyPI version](https://img.shields.io/pypi/v/clawbench?style=flat-square&logo=pypi&logoColor=white&color=3775A9)](https://pypi.org/project/clawbench/)
 [![Last commit](https://img.shields.io/github/last-commit/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/contributors)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/reacher-z/ClawBench?style=flat-square&logo=github&logoColor=white)](https://github.com/reacher-z/ClawBench/graphs/commit-activity)
@@ -52,14 +52,14 @@
 <a href="#-human-quick-start"><img src="https://img.shields.io/badge/Run%20in%20one%20line%20of%20code-4F46E5?style=for-the-badge&labelColor=4F46E5&logoColor=white&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMjYzLjQtMjdMMjc4LjIgOS44IDMxNSAyNC42YzMgMS4yIDUgNC4yIDUgNy40cy0yIDYuMi01IDcuNEwyNzguMiA1NC4yIDI2My40IDkxYy0xLjIgMy00LjIgNS03LjQgNXMtNi4yLTItNy40LTVMMjMzLjggNTQuMiAxOTcgMzkuNGMtMy0xLjItNS00LjItNS03LjRzMi02LjIgNS03LjRMMjMzLjggOS44IDI0OC42LTI3YzEuMi0zIDQuMi01IDcuNC01czYuMiAyIDcuNCA1ek0xMTAuNyA0MS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN0w1OS44IDE2NC4yIDkuNyAxNDIuN0MzLjggMTQwLjIgMCAxMzQuNCAwIDEyOHMzLjgtMTIuMiA5LjctMTQuN0w1OS44IDkxLjggODEuMyA0MS43QzgzLjggMzUuOCA4OS42IDMyIDk2IDMyczEyLjIgMy44IDE0LjcgOS43ek00NjQgMzA0YzYuNCAwIDEyLjIgMy44IDE0LjcgOS43bDIxLjUgNTAuMSA1MC4xIDIxLjVjNS45IDIuNSA5LjcgOC4zIDkuNyAxNC43cy0zLjggMTIuMi05LjcgMTQuN2wtNTAuMSAyMS41LTIxLjUgNTAuMWMtMi41IDUuOS04LjMgOS43LTE0LjcgOS43cy0xMi4yLTMuOC0xNC43LTkuN2wtMjEuNS01MC4xLTUwLjEtMjEuNWMtNS45LTIuNS05LjctOC4zLTkuNy0xNC43czMuOC0xMi4yIDkuNy0xNC43bDUwLjEtMjEuNSAyMS41LTUwLjFjMi41LTUuOSA4LjMtOS43IDE0LjctOS43ek00NjAgMGMxMSAwIDIxLjYgNC40IDI5LjUgMTIuMmw0Mi4zIDQyLjNDNTM5LjYgNjIuNCA1NDQgNzMgNTQ0IDg0cy00LjQgMjEuNi0xMi4yIDI5LjVsLTg4LjIgODguMi0xMDEuMy0xMDEuMyA4OC4yLTg4LjJDNDM4LjQgNC40IDQ0OSAwIDQ2MCAwek00NC4yIDM5OC41TDMwOC40IDEzNC4zIDQwOS43IDIzNS42IDE0NS41IDQ5OS44QzEzNy42IDUwNy42IDEyNyA1MTIgMTE2IDUxMnMtMjEuNi00LjQtMjkuNS0xMi4yTDQ0LjIgNDU3LjVDMzYuNCA0NDkuNiAzMiA0MzkgMzIgNDI4czQuNC0yMS42IDEyLjItMjkuNXoiLz48L3N2Zz4=" alt="Run in one line of code"></a>
 
 ```bash
-uv tool install clawbench-eval && clawbench
+git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 ```
 
-<sub><i>Install → Run → Done. &nbsp; No API keys. &nbsp; No dataset download. &nbsp; No manual setup.</i></sub>
+<sub><i>Clone → configure → run. &nbsp; Root uv package. &nbsp; Docker-isolated harnesses.</i></sub>
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
-**ClawBench is an open-source benchmark that evaluates AI browser agents on 153 everyday online tasks — booking travel, ordering food, applying for jobs, managing email — across 144 live websites. It measures end-to-end task success with a 5-layer recording pipeline and a DOM-match + LLM judge. Top score to date: 33.3%.**
+**ClawBench is an open-source benchmark that evaluates AI browser agents on 153 everyday online tasks — booking travel, ordering food, applying for jobs, managing email — across 144 live websites. It measures end-to-end task success with a 5-layer recording pipeline and an agentic evaluator that compares each run against human references. Top score to date: 33.3%.**
 
 We asked frontier AI agents to do what people do every day --<br/>
 order food, book travel, apply for jobs, write reviews, manage projects.<br/>
@@ -128,15 +128,9 @@ Point your coding agent (Claude Code, Cursor, Copilot, etc.) at [`AGENTS.md`](AG
 
 # <img src="static/icons/person.svg" width="28" height="28"> Human Quick Start
 
-Pick either path — both land you at the same interactive TUI.
+Clone the repo and run the root `uv` package entrypoint:
 
 ```bash
-# Option A — PyPI install (recommended for most users)
-uv tool install clawbench-eval && clawbench
-```
-
-```bash
-# Option B — Clone the repo (for contributors / source hacking)
 git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 ```
 
@@ -192,9 +186,11 @@ podman machine start
 
 **1. Configure models** — one-time setup:
 ```bash
-clawbench configure                # opens models.yaml in $EDITOR
-# PurelyMail credentials for disposable-email signups ship with the wheel
-# and work out of the box. Override them via `clawbench configure --secrets`.
+cp models/models.example.yaml models/models.yaml
+$EDITOR models/models.yaml
+
+cp .env.example .env
+$EDITOR .env
 ```
 
 > [!NOTE]
@@ -205,25 +201,25 @@ clawbench configure                # opens models.yaml in $EDITOR
 > [!TIP]
 > **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
 > ```bash
-> clawbench
+> uv run --no-editable clawbench
 > ```
-> Needs an interactive terminal. For pipes / CI / non-TTY, use `clawbench run` or `clawbench batch` directly.
+> Needs an interactive terminal. For pipes / CI / non-TTY, use `uv run --no-editable clawbench-run` or `uv run --no-editable clawbench-batch` directly.
 
 **(b) Run one specific task against a specific model:**
 ```bash
-clawbench run 001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
-Results land in `./claw-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), `--harness claude-code-chrome-extension` to use Claude Code + the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension (Microsoft Edge + local bridge, bypass stack so any LiteLLM-routed provider works), `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex), `--harness claw-code` to use [claw-code](https://github.com/ultraworkers/claw-code), `--harness browser-use` to use [browser-use](https://github.com/browser-use/browser-use) (Python framework, routed via LiteLLM), or `--harness hermes` to use [Hermes Agent](https://github.com/NousResearch/hermes-agent) with native browser tools attached to ClawBench Chrome via CDP.
+Results land in `./test-output/<model>/<harness>-<case>-<model>-<timestamp>/` with the full five-layer recording. The default harness is `openclaw`; pass `--harness opencode` to use [opencode](https://opencode.ai), `--harness claude-code` to use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), `--harness claude-code-chrome-extension` to use Claude Code + the [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension (Microsoft Edge + local bridge, bypass stack so any LiteLLM-routed provider works), `--harness codex` to use [OpenAI Codex CLI](https://github.com/openai/codex), `--harness claw-code` to use [claw-code](https://github.com/ultraworkers/claw-code), `--harness browser-use` to use [browser-use](https://github.com/browser-use/browser-use) (Python framework, routed via LiteLLM), or `--harness hermes` to use [Hermes Agent](https://github.com/NousResearch/hermes-agent) with native browser tools attached to ClawBench Chrome via CDP.
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
-clawbench run 001-daily-life-food-uber-eats --human
+uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
 
-**(d) Pair with an external browser agent** — e.g. [Claude for Chrome](https://claude.com/claude-for-chrome) running in your own browser. See [`docs/integrations.md`](docs/integrations.md) for the flow and caveats.
+**(d) Pair with an external browser agent** — run in Human mode, open the noVNC URL, and let an external browser agent control that browser session while ClawBench records and intercepts it.
 
 <details>
 <summary><b>Develop from source</b> &nbsp;— clone + ``./run.sh`` for contributors</summary>
@@ -233,16 +229,15 @@ Prefer the repo checkout if you want to modify the driver, the bundled test-case
 ```bash
 git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
 cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
-# `.env` (PurelyMail creds for disposable-email signups) is already committed
-# and works out of the box. Edit it only to override defaults or add HF_TOKEN.
+cp .env.example .env                              # edit: add PurelyMail creds; optional HF_TOKEN
 ./run.sh                                           # interactive TUI
-uv run claw-bench run \
+uv run --no-editable clawbench-run \
   test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
-uv run claw-bench run \
+uv run --no-editable clawbench-run \
   test-cases/001-daily-life-food-uber-eats --human             # human mode
 ```
 
-This path gives you live-reload on ``src/clawbench/``, ``chrome-extension/``, and ``test-cases/`` — useful when iterating on the harness itself. For everything else, the PyPI install above is faster.
+This path gives you live-reload on ``src/``, ``src/chrome-extension/``, and ``test-cases/`` — useful when iterating on the harness itself.
 
 </details>
 
@@ -258,44 +253,9 @@ See [`test-cases/lite.schema.json`](test-cases/lite.schema.json) for the manifes
 
 <br/>
 
-# <img src="static/icons/video.svg" width="28" height="28"> Tutorial
-
-<div align="center">
-
-<!-- TODO: Replace with actual video links -->
-
-[![Watch on YouTube](https://img.shields.io/badge/Watch_Tutorial-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
-&nbsp;&nbsp;
-[![Watch on Bilibili](https://img.shields.io/badge/Watch_Tutorial-Bilibili-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white)](https://bilibili.com)
-
-</div>
-
-<br/>
-
 # <img src="static/icons/play.svg" width="28" height="28"> Demos
 
-<!-- TODO: Replace with actual demo GIFs/recordings -->
-
-<table>
-<tr>
-<td width="50%" align="center">
-
-**Ordering food on Uber Eats**
-
-https://github.com/user-attachments/assets/placeholder-uber-eats
-
-</td>
-<td width="50%" align="center">
-
-**Submitting a job application**
-
-https://github.com/user-attachments/assets/placeholder-greenhouse
-
-</td>
-</tr>
-</table>
-
-> Each ClawBench run produces a full MP4 session recording. See the [project page](https://claw-bench.com) for all 153 task recordings.
+Each ClawBench run produces a full MP4 session recording. See the [project page](https://claw-bench.com) for all 153 task recordings.
 
 <br/>
 
@@ -441,16 +401,16 @@ ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recordin
 ./run.sh
 
 # Single run:
-uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 
 # Human mode (you control the browser via noVNC):
-uv run --project test-driver test-driver/run.py test-cases/001-daily-life-food-uber-eats --human
+uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats --human
 
 # Batch (all models x cases 1-50, 3 concurrent):
-uv run --project test-driver test-driver/batch.py --all-models --case-range 1-50 --max-concurrent 3
+uv run --no-editable clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
 ```
 
-See [test-driver/README.md](test-driver/README.md) for full CLI documentation, batch runner flags, test case format, and output structure.
+For test case authoring details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [`test-cases/task.schema.json`](test-cases/task.schema.json). For output structure and evaluation guidance, see [eval/README.md](eval/README.md).
 
 <br/>
 
@@ -459,9 +419,9 @@ See [test-driver/README.md](test-driver/README.md) for full CLI documentation, b
 Evaluation is a **post-session** step -- first run agents to collect trajectories, then evaluate them against human reference runs.
 
 ```
- 1. Run agents (test-driver)       2. Evaluate (eval/)
+ 1. Run agents (root uv package)   2. Evaluate (eval/)
  ─────────────────────────         ────────────────────────────────
- ./run.sh  or  batch.py     ──►    Claude Code subagents compare
+ ./run.sh / clawbench-batch ──►    Claude Code subagents compare
  produces test-output/             agent vs human trajectories
    with 5-layer recordings         under eval/agentic_eval.md rubric
 ```
@@ -507,7 +467,7 @@ For tasks behind payment walls (agent has no valid credit card), the eval schema
 
 Each container gets a `/my-info/` directory with a dummy user identity (Alex Green): personal info JSON, email credentials, and a resume PDF. The email is a fresh disposable PurelyMail address generated per run. The agent reads these files when it needs to fill forms, register accounts, etc.
 
-Source templates: `shared/alex_green_personal_info.json` (profile) and `test-driver/resume_template.json` (resume).
+Source templates: `shared/alex_green_personal_info.json` (profile) and `src/utils/resume_template.json` (resume).
 
 </details>
 
@@ -588,22 +548,22 @@ ClawBench is an open-source benchmark for AI browser agents — the systems (GPT
 Fifteen life categories: food delivery, travel booking, job applications, shopping, housing search, email and calendar management, academic research, software development, learning platforms, and more. Every task is something a normal person might do in a normal week, on a real website.
 
 **How is a task judged successful?**
-Each task runs in an isolated browser container with a 5-layer recording (DOM, network, screenshots, action trace, console). A rubric of deterministic DOM checks covers the verifiable steps; an LLM judge grades the remaining subjective criteria against the recording. Scores are the fraction of rubric items the agent satisfied end-to-end.
+Each task runs in an isolated browser container with a five-layer recording: video, screenshots, network requests, browser actions, and agent messages. The evaluator compares the agent trajectory against a human reference run and assigns PASS or FAIL with evidence from the recording.
 
 **What's the current top score?**
 33.3% — roughly one task in three — from the strongest frontier model we evaluated. The majority of tasks still defeat every model we've tested; the headroom is real, and the benchmark is not saturated.
 
 **How do I reproduce a published score?**
-`uv tool install clawbench-eval && clawbench` installs the harness and launches an interactive TUI that will download the task set from Hugging Face, build the container image, and run any subset of the 153 tasks against your model of choice. No manual dataset setup and no API keys to paste into config files.
+From a source checkout, configure `models/models.yaml` and `.env`, then run `uv run --no-editable clawbench`. The TUI builds the container image and runs any subset of the 153 local `test-cases/` tasks against your model of choice.
 
 **Is ClawBench safe to run against live websites?**
 The runner uses a hardened container with a request interceptor that blocks purchases, account creation, outbound email sends, and similar irreversible actions by default. Tasks that need to *simulate* those actions (e.g., "add to cart and checkout") terminate at the last reversible step. You can relax the interceptor per-task if your research requires it.
 
 **Can I contribute new tasks or harnesses?**
-Yes. Tasks live in `src/clawbench/data/test-cases/` as a YAML spec plus a rubric; see `docs/contributing/adding-a-task.md`. Harnesses (the glue between a model and the browser) plug in as Python entry points — see the sister project [HarnessBench](https://github.com/reacher-z/HarnessBench) for the harness-side scaffold.
+Yes. Tasks live in `test-cases/`; see `CONTRIBUTING.md` for the task schema and validation flow.
 
 **How does ClawBench relate to HarnessBench?**
-Same scoring pipeline, orthogonal axis. ClawBench fixes the harness and varies the model; HarnessBench fixes the model and varies the harness. They share the 153-task corpus, the 5-layer recording, and the DOM + LLM judge — so numbers are directly comparable.
+Same scoring pipeline, orthogonal axis. ClawBench fixes the harness and varies the model; HarnessBench fixes the model and varies the harness. They share the 153-task corpus, the five-layer recording, and the agentic evaluator — so numbers are directly comparable.
 
 ## Citation
 

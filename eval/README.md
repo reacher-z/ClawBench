@@ -4,11 +4,11 @@ ClawBench evaluation is a **post-session** step: first you run agents to collect
 
 ```
 Step 1: Run agents          Step 2: Evaluate
-(test-driver)               (this directory)
+(runner package)            (this directory)
 
 ./run.sh                    Claude Code subagents compare
   or                        agent traces vs human references
-test-driver/batch.py        under eval/agentic_eval.md rubric
+src/runner/batch.py         under eval/agentic_eval.md rubric
        │                              │
        ▼                              ▼
   test-output/                {model}-eval-results.csv
@@ -33,7 +33,7 @@ The evaluator follows a fixed rubric ([`agentic_eval.md`](agentic_eval.md)) to d
 
 ## Prerequisites
 
-- Agent run outputs in `test-output/{model}/` (produced by `test-driver/run.py` or `batch.py`)
+- Agent run outputs in `test-output/{model}/` (produced by `clawbench-run` or `clawbench-batch`)
 - Human reference runs in a separate directory (same five-layer format)
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
 
