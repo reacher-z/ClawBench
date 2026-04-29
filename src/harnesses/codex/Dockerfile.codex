@@ -1,0 +1,20 @@
+FROM clawbench-base
+
+# Pin Codex CLI to 0.120.0 and Playwright MCP to 0.0.70.
+#
+# Codex 0.121.0 introduced a proprietary
+# `type: "namespace"` MCP tool wrapper in the Responses-API request
+# (PR openai/codex#17404) that non-OpenAI providers reject. t.
+# See also: openai/codex#12114 (downgrade-to-0.120.0 workaround
+# confirmed in-thread).
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g \
+    @openai/codex@0.120.0 \
+    @playwright/mcp@0.0.70
+
+# LiteLLM proxy translates Codex's Responses-API requests into whatever
+# format the upstream provider actually speaks.
+RUN pip install --no-cache-dir 'litellm[proxy]==1.83.9'
+
+COPY src/harnesses/codex/setup-codex.sh /setup-codex.sh
+COPY src/harnesses/codex/run-codex.sh /run-harness.sh
+RUN chmod +x /setup-codex.sh /run-harness.sh

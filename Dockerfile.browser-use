@@ -1,9 +1,0 @@
-FROM clawbench-base
-
-RUN pip install --no-cache-dir 'browser-use==0.12.6'
-RUN pip install --no-cache-dir 'litellm[proxy]==1.83.9'
-
-COPY setup-browser-use.sh        /setup-browser-use.sh
-COPY run-browser-use.sh          /run-harness.sh
-COPY run-browser-use-agent.py    /run-browser-use-agent.py
-RUN chmod +x /setup-browser-use.sh /run-harness.sh

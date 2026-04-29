@@ -3,7 +3,7 @@
 {
   "name": "ClawBench Devcontainer",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/python:3-3.14-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/python:3-3.11-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker": {}, // DOD is having issue with bind mounts, so use DID instead
     "ghcr.io/va-h/devcontainers-features/uv": {}

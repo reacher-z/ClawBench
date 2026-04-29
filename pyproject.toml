@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clawbench"
+version = "0.2.0"
+description = "Benchmarking framework for evaluating AI web agents on real-world online tasks"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fpdf2>=2.8",
+    "huggingface_hub>=0.27",
+    "pyyaml>=6.0",
+    "questionary>=2.0",
+    "rich>=13.0",
+]
+
+[project.scripts]
+clawbench = "tui:main"
+clawbench-run = "runner.run:main"
+clawbench-batch = "runner.batch:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["tui"]
+packages = ["runner", "utils"]
+
+[tool.setuptools.package-data]
+utils = ["resume_template.json"]

@@ -8,7 +8,7 @@
 |---|---|---|
 | Add one new test case | ~30 min | Every additional site expands coverage |
 | Add a batch of test cases in one new category (e.g., healthcare, K-12, real estate) | ~2-3 hours | Unlocks a new evaluation axis |
-| Add a new model runner (config in `configs/models/`) | ~1 hour | Get your model on the leaderboard |
+| Add a new model config (in `models/models.yaml`) | ~1 hour | Get your model on the leaderboard |
 | Fix a flaky task (find a broken task, propose a fix) | ~20 min | Keeps the leaderboard fair |
 | Translate docs into a new language | ~1 hour | Chinese / Japanese / Korean / Spanish welcomed |
 | Report a bug via [issue template](https://github.com/reacher-z/ClawBench/issues/new/choose) | ~5 min | Helps us prioritize |
@@ -69,11 +69,11 @@ If no `good first issue` is currently open, just open one with your idea and we'
 4. **Set the eval_schema** — this tells the interceptor which HTTP request to block:
    - If the task has an irreversible action (form submit, email send, application submit): set `url_pattern` to a regex matching the submission endpoint, and `method` to the HTTP method.
    - If the task is behind a payment wall (agent has no valid credit card): use `"url_pattern": "__PLACEHOLDER_WILL_NOT_MATCH__"` — the interceptor will never fire and the session runs until timeout.
-   - See [test-driver/README.md](test-driver/README.md#eval_schema) for details on `body` and `params` filters.
+   - See [`test-cases/task.schema.json`](test-cases/task.schema.json) for the supported `body` and `params` filters.
 
 5. **Test with human mode** to verify the task is completable:
    ```bash
-   uv run --project test-driver test-driver/run.py test-cases/887-daily-life-food-grubhub --human
+   uv run --no-editable clawbench-run test-cases/887-daily-life-food-grubhub --human
    ```
 
 6. **Submit a PR** with your new test case directory. Include in the PR description:
@@ -99,9 +99,9 @@ If the task requires additional context (e.g., a pre-filled profile, a specific 
 For changes to the framework itself (test driver, extension server, Chrome extension, container):
 
 1. Read the relevant sub-README for component-specific documentation:
-   - [test-driver/README.md](test-driver/README.md)
-   - [extension-server/README.md](extension-server/README.md)
-   - [chrome-extension/README.md](chrome-extension/README.md)
+   - [README.md#-cli](README.md#-cli)
+   - [src/extension-server/README.md](src/extension-server/README.md)
+   - [src/chrome-extension/README.md](src/chrome-extension/README.md)
 2. Open an issue first for anything beyond a small bug fix so we can align on approach before you spend time.
 3. Open a PR with a clear description of the change and how you tested it.
 

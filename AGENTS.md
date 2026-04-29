@@ -11,32 +11,33 @@ ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-w
 ```
 ClawBench/
   run.sh                          # Entry point -- launches interactive TUI
-  Dockerfile.base                 # Base image (Chromium + extension + Node + uv, harness-agnostic)
-  Dockerfile.openclaw             # Layer that adds the openclaw CLI on top of base
-  Dockerfile.opencode             # Layer that adds opencode + @playwright/mcp on top of base
-  Dockerfile.claude-code          # Layer that adds Claude Code + @playwright/mcp + LiteLLM on top of base
-  Dockerfile.codex                # Layer that adds @openai/codex@0.120 + @playwright/mcp + LiteLLM on top of base
-  Dockerfile.browser-use          # Layer that adds browser-use Python framework + LiteLLM on top of base
-  Dockerfile.claw-code            # Layer that builds ultraworkers/claw-code (Rust) + @playwright/mcp + LiteLLM on top of base
-  Dockerfile.hermes               # Layer that adds Hermes Agent + agent-browser on top of base
-  entrypoint.sh                   # Shared infra (Xvfb, Chrome, noVNC, human mode); execs /run-harness.sh in agent mode
-  setup-openclaw.sh               # Generates ~/.openclaw/openclaw.json from env vars (called from run-openclaw.sh)
-  setup-opencode.sh               # Generates ~/.config/opencode/opencode.json from env vars (called from run-opencode.sh)
-  setup-claude-code.sh            # Configures API keys + LiteLLM proxy from env vars (called from run-claude-code.sh)
-  setup-codex.sh                  # Generates ~/.codex/config.toml (wire_api=responses + playwright MCP) + /tmp/litellm-config.yaml from env vars
-  setup-browser-use.sh            # Generates /tmp/browser-use-env.sh + /tmp/litellm-config.yaml (routes via LiteLLM)
-  setup-claw-code.sh              # Generates /tmp/claw-code-env.sh + /tmp/litellm-config.yaml + /tmp/claw-settings.json (MCP + tool deny list)
-  setup-hermes.sh                 # Generates ~/.hermes/config.yaml + ~/.hermes/.env (native CDP browser tools)
-  run-openclaw.sh                 # Per-harness agent runner; copied into clawbench-openclaw image as /run-harness.sh
-  run-opencode.sh                 # Per-harness agent runner; copied into clawbench-opencode image as /run-harness.sh
-  run-claude-code.sh              # Per-harness agent runner; copied into clawbench-claude-code image as /run-harness.sh
-  run-codex.sh                    # Per-harness agent runner; copied into clawbench-codex image as /run-harness.sh
-  run-browser-use.sh              # Per-harness agent runner; copied into clawbench-browser-use image as /run-harness.sh
-  run-browser-use-agent.py        # Python entry script invoked by run-browser-use.sh — always uses ChatOpenAI pointed at LiteLLM
-  run-claw-code.sh                # Per-harness agent runner; copied into clawbench-claw-code image as /run-harness.sh
-  run-hermes.sh                   # Per-harness agent runner; copied into clawbench-hermes image as /run-harness.sh
-  claw-code-ndjson.patch.py       # Patches upstream claw to use newline-delimited JSON on MCP stdio (spec-compliant; upstream uses LSP framing)
+  pyproject.toml                  # Root uv package metadata and CLI scripts
   .env.example                    # Template for PurelyMail credentials
+  src/
+    tui.py                        # Interactive TUI (called by run.sh)
+    runner/
+      run.py                      # Single test-case runner
+      batch.py                    # Batch runner (model x case cross-product)
+    utils/
+      generate_resume_pdf.py      # Resume PDF generator
+      hf_upload.py                # Optional HuggingFace upload helpers
+    extension-server/
+      pyproject.toml              # Container-only uv project for server deps
+      uv.lock
+      server.py                   # FastAPI data collection server
+    chrome-extension/             # Recording extension (content.js, background.js)
+    harnesses/
+      base/
+        Dockerfile.base           # Base image + shared entrypoint
+        entrypoint.sh             # Shared infra; execs /run-harness.sh in agent mode
+      openclaw/                   # Dockerfile + setup/run scripts
+      opencode/
+      claude-code/
+      claude-code-chrome-extension/
+      codex/
+      browser-use/
+      claw-code/
+      hermes/
   models/
     models.yaml                   # Model API configs (gitignored -- copy from example)
     models.example.yaml           # Template with placeholder keys
@@ -46,16 +47,6 @@ ClawBench/
     001-daily-life-food-uber-eats/
       task.json                   # Task instruction, eval schema, time limit
     ...
-  test-driver/
-    tui.py                        # Interactive TUI (called by run.sh)
-    run.py                        # Single test-case runner
-    batch.py                      # Batch runner (model x case cross-product)
-    generate_resume_pdf.py        # Resume PDF generator
-    README.md                     # Full test driver documentation
-  extension-server/
-    server.py                     # FastAPI data collection server
-    README.md                     # Server documentation
-  chrome-extension/               # Recording extension (content.js, background.js)
   shared/
     alex_green_personal_info.json # Synthetic user profile template
   eval/
@@ -87,17 +78,17 @@ cp models/models.example.yaml models/models.yaml
 ./run.sh
 
 # Single run:
-uv run --project test-driver test-driver/run.py test-cases/<case-dir> <model-name> --harness openclaw
+uv run --no-editable clawbench-run test-cases/<case-dir> <model-name> --harness openclaw
 
 # Single run with Claude Code harness:
-uv run --project test-driver test-driver/run.py test-cases/<case-dir> <model-name> --harness claude-code
+uv run --no-editable clawbench-run test-cases/<case-dir> <model-name> --harness claude-code
 
 # Batch run (model x case cross-product):
-uv run --project test-driver test-driver/batch.py \
+uv run --no-editable clawbench-batch \
   --models <model-name> --all-cases --max-concurrent 3 --harness openclaw
 
 # Human mode (manual browser control via noVNC; no harness needed):
-uv run --project test-driver test-driver/run.py test-cases/<case-dir> --human
+uv run --no-editable clawbench-run test-cases/<case-dir> --human
 ```
 
 ## Model Configuration
@@ -138,8 +129,9 @@ test-output/<model>/<harness>-<case>-<model>-<timestamp>/
                             #   function_call, and function_call_output items interleaved;
                             #   browser-use → one `AgentHistory` item per step with `model_output.action`,
                             #   `result`, `state`, `metadata` fields;
-                            #   hermes → `session_meta` + one `message` row per Hermes message,
-                            #   preserving reasoning/tool_calls/tool result fields)
+                            #   hermes → live `session_meta`/`thinking`/`reasoning`/
+                            #   `tool_use`/`tool_result` capture, falling back to
+                            #   Hermes session export when it contains messages)
     screenshots/            # Timestamped PNGs
     recording.mp4           # Full session video
     interception.json       # Interception result
@@ -147,8 +139,8 @@ test-output/<model>/<harness>-<case>-<model>-<timestamp>/
 
 ## Key Documentation
 
-- [test-driver/README.md](test-driver/README.md) -- test driver, batch runner, output format, personal info
-- [extension-server/README.md](extension-server/README.md) -- FastAPI server, endpoints, screen recording
+- [README.md#-cli](README.md#-cli) -- CLI usage, batch runner flags, output format
+- [src/extension-server/README.md](src/extension-server/README.md) -- FastAPI server, endpoints, screen recording
 - [CONTRIBUTING.md](CONTRIBUTING.md) -- how to add new test cases
 - [eval/README.md](eval/README.md) -- evaluation guide and Claude Code prompt template
 - [eval/agentic_eval.md](eval/agentic_eval.md) -- evaluator rubric for PASS/FAIL judgment
