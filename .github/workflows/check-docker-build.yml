@@ -1,0 +1,158 @@
+name: check-docker-build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "src/harnesses/**/Dockerfile*"
+  push:
+    branches: [ main ]
+    paths:
+      - "src/harnesses/**/Dockerfile*"
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select harness Dockerfiles
+        id: dockerfiles
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base_dockerfile="src/harnesses/base/Dockerfile.base"
+
+          mapfile -t all_harness_dockerfiles < <(
+            find src/harnesses -mindepth 2 -maxdepth 2 -type f -name 'Dockerfile*' \
+              ! -path "${base_dockerfile}" \
+              | sort
+          )
+
+          build_all=false
+          changed_dockerfiles=()
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            build_all=true
+          else
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              base_sha="${{ github.event.pull_request.base.sha }}"
+              head_sha="${{ github.event.pull_request.head.sha }}"
+            else
+              base_sha="${{ github.event.before }}"
+              head_sha="${{ github.sha }}"
+            fi
+
+            if [[ -z "${base_sha}" || "${base_sha}" =~ ^0+$ ]]; then
+              echo "Unable to determine base SHA for Dockerfile diff." >&2
+              exit 1
+            elif ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              echo "Base SHA ${base_sha} is not available in the checkout." >&2
+              exit 1
+            elif ! git cat-file -e "${head_sha}^{commit}" 2>/dev/null; then
+              echo "Head SHA ${head_sha} is not available in the checkout." >&2
+              exit 1
+            else
+              mapfile -t changed_dockerfiles < <(
+                git diff --name-only --diff-filter=ACMRT "${base_sha}" "${head_sha}" -- src/harnesses \
+                  | grep -E '^src/harnesses/[^/]+/Dockerfile[^/]*$' \
+                  | sort
+              )
+
+              for dockerfile in "${changed_dockerfiles[@]}"; do
+                if [[ "${dockerfile}" == "${base_dockerfile}" ]]; then
+                  build_all=true
+                  break
+                fi
+              done
+            fi
+          fi
+
+          if [[ "${build_all}" == "true" ]]; then
+            selected_dockerfiles=("${all_harness_dockerfiles[@]}")
+          else
+            selected_dockerfiles=()
+            for dockerfile in "${changed_dockerfiles[@]}"; do
+              if [[ "${dockerfile}" != "${base_dockerfile}" && -f "${dockerfile}" ]]; then
+                selected_dockerfiles+=("${dockerfile}")
+              fi
+            done
+          fi
+
+          {
+            echo "dockerfiles<<EOF"
+            printf '%s\n' "${selected_dockerfiles[@]}"
+            echo "EOF"
+            echo "count=${#selected_dockerfiles[@]}"
+          } >> "${GITHUB_OUTPUT}"
+
+          echo "Selected ${#selected_dockerfiles[@]} harness Dockerfile(s):"
+          printf '  %s\n' "${selected_dockerfiles[@]}"
+          echo "::notice title=Docker build plan::Selected ${#selected_dockerfiles[@]} harness Dockerfile(s)"
+
+          {
+            echo "## Docker build plan"
+            echo
+            echo "- Event: \`${{ github.event_name }}\`"
+            echo "- Selection mode: \`$([[ "${build_all}" == "true" ]] && echo all || echo changed)\`"
+            echo "- Base image: \`clawbench-base\`"
+            echo "- Harness images: \`${#selected_dockerfiles[@]}\`"
+            echo
+            echo "| Image | Dockerfile |"
+            echo "| --- | --- |"
+            echo "| \`clawbench-base\` | \`${base_dockerfile}\` |"
+            for dockerfile in "${selected_dockerfiles[@]}"; do
+              harness="$(basename "$(dirname "${dockerfile}")")"
+              echo "| \`clawbench-${harness}\` | \`${dockerfile}\` |"
+            done
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Build base image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          {
+            echo
+            echo "## Docker build results"
+            echo
+            echo "| Image | Status |"
+            echo "| --- | --- |"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          if docker build -f src/harnesses/base/Dockerfile.base -t clawbench-base .; then
+            echo "| \`clawbench-base\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "| \`clawbench-base\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+
+      - name: Build harness images
+        if: steps.dockerfiles.outputs.count != '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r dockerfile; do
+            [[ -n "${dockerfile}" ]] || continue
+
+            harness="$(basename "$(dirname "${dockerfile}")")"
+            image="clawbench-${harness}"
+
+            echo "::group::Build ${image}"
+            if docker build -f "${dockerfile}" -t "${image}" .; then
+              echo "| \`${image}\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "| \`${image}\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
+          done <<'EOF'
+          ${{ steps.dockerfiles.outputs.dockerfiles }}
+          EOF
