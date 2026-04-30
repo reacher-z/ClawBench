@@ -35,6 +35,7 @@ one-liners in compact.rs (5), tools/lib.rs (1), and main.rs (3) are
 mechanical compile fixes, not design decisions; the compiler catches
 every omission.
 """
+
 from __future__ import annotations
 
 import sys
@@ -571,35 +572,77 @@ def _patch(path: Path, patches: list[tuple[str, str, str]]) -> int:
 
 def main() -> int:
     steps = [
-        (PATH, [
-            (OLD_WRITE, NEW_WRITE, "write_jsonrpc_message"),
-            (OLD_READ, NEW_READ, "read_jsonrpc_message"),
-        ]),
-        (CONVERSATION_PATH, [
-            (OLD_ASSISTANT_EVENT, NEW_ASSISTANT_EVENT, "AssistantEvent enum"),
-            (OLD_BUILD_BODY, NEW_BUILD_BODY, "build_assistant_message body"),
-        ]),
-        (SESSION_PATH, [
-            (OLD_CONTENT_BLOCK, NEW_CONTENT_BLOCK, "ContentBlock enum"),
-            (OLD_TO_JSON_HEAD, NEW_TO_JSON_HEAD, "ContentBlock::to_json thinking"),
-            (OLD_FROM_JSON_HEAD, NEW_FROM_JSON_HEAD, "ContentBlock::from_json thinking"),
-        ]),
-        (COMPACT_PATH, [
-            (OLD_COMPACT_TOOLNAMES, NEW_COMPACT_TOOLNAMES, "compact tool-name filter"),
-            (OLD_COMPACT_SUMMARIZE, NEW_COMPACT_SUMMARIZE, "compact summarize_block"),
-            (OLD_COMPACT_FILES, NEW_COMPACT_FILES, "compact file extraction"),
-            (OLD_COMPACT_FIRSTTEXT, NEW_COMPACT_FIRSTTEXT, "compact first_text_block"),
-            (OLD_COMPACT_TOKENS, NEW_COMPACT_TOKENS, "compact token estimator"),
-        ]),
-        (TOOLS_PATH, [
-            (OLD_TOOLS_BUILD_INPUT, NEW_TOOLS_BUILD_INPUT, "tools session->input skip Thinking"),
-        ]),
-        (MAIN_PATH, [
-            (OLD_MAIN_DUMP, NEW_MAIN_DUMP, "main.rs session dump formatter"),
-            (OLD_MAIN_MD, NEW_MAIN_MD, "main.rs markdown exporter"),
-            (OLD_MAIN_TO_INPUT, NEW_MAIN_TO_INPUT, "main.rs session->input skip Thinking"),
-            (OLD_MAIN_THINK, NEW_MAIN_THINK, "SSE ThinkingDelta -> AssistantEvent"),
-        ]),
+        (
+            PATH,
+            [
+                (OLD_WRITE, NEW_WRITE, "write_jsonrpc_message"),
+                (OLD_READ, NEW_READ, "read_jsonrpc_message"),
+            ],
+        ),
+        (
+            CONVERSATION_PATH,
+            [
+                (OLD_ASSISTANT_EVENT, NEW_ASSISTANT_EVENT, "AssistantEvent enum"),
+                (OLD_BUILD_BODY, NEW_BUILD_BODY, "build_assistant_message body"),
+            ],
+        ),
+        (
+            SESSION_PATH,
+            [
+                (OLD_CONTENT_BLOCK, NEW_CONTENT_BLOCK, "ContentBlock enum"),
+                (OLD_TO_JSON_HEAD, NEW_TO_JSON_HEAD, "ContentBlock::to_json thinking"),
+                (
+                    OLD_FROM_JSON_HEAD,
+                    NEW_FROM_JSON_HEAD,
+                    "ContentBlock::from_json thinking",
+                ),
+            ],
+        ),
+        (
+            COMPACT_PATH,
+            [
+                (
+                    OLD_COMPACT_TOOLNAMES,
+                    NEW_COMPACT_TOOLNAMES,
+                    "compact tool-name filter",
+                ),
+                (
+                    OLD_COMPACT_SUMMARIZE,
+                    NEW_COMPACT_SUMMARIZE,
+                    "compact summarize_block",
+                ),
+                (OLD_COMPACT_FILES, NEW_COMPACT_FILES, "compact file extraction"),
+                (
+                    OLD_COMPACT_FIRSTTEXT,
+                    NEW_COMPACT_FIRSTTEXT,
+                    "compact first_text_block",
+                ),
+                (OLD_COMPACT_TOKENS, NEW_COMPACT_TOKENS, "compact token estimator"),
+            ],
+        ),
+        (
+            TOOLS_PATH,
+            [
+                (
+                    OLD_TOOLS_BUILD_INPUT,
+                    NEW_TOOLS_BUILD_INPUT,
+                    "tools session->input skip Thinking",
+                ),
+            ],
+        ),
+        (
+            MAIN_PATH,
+            [
+                (OLD_MAIN_DUMP, NEW_MAIN_DUMP, "main.rs session dump formatter"),
+                (OLD_MAIN_MD, NEW_MAIN_MD, "main.rs markdown exporter"),
+                (
+                    OLD_MAIN_TO_INPUT,
+                    NEW_MAIN_TO_INPUT,
+                    "main.rs session->input skip Thinking",
+                ),
+                (OLD_MAIN_THINK, NEW_MAIN_THINK, "SSE ThinkingDelta -> AssistantEvent"),
+            ],
+        ),
     ]
     for path, patches in steps:
         rc = _patch(path, patches)

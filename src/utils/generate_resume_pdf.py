@@ -17,14 +17,13 @@ from fpdf import FPDF
 def _safe(text: str) -> str:
     """Replace Unicode characters that Helvetica (latin-1) cannot render."""
     return (
-        text
-        .replace("\u2014", " - ")   # em dash
-        .replace("\u2013", " - ")   # en dash
-        .replace("\u2022", "-")     # bullet
-        .replace("\u2018", "'")     # left single quote
-        .replace("\u2019", "'")     # right single quote
-        .replace("\u201c", '"')     # left double quote
-        .replace("\u201d", '"')     # right double quote
+        text.replace("\u2014", " - ")  # em dash
+        .replace("\u2013", " - ")  # en dash
+        .replace("\u2022", "-")  # bullet
+        .replace("\u2018", "'")  # left single quote
+        .replace("\u2019", "'")  # right single quote
+        .replace("\u201c", '"')  # left double quote
+        .replace("\u201d", '"')  # right double quote
     )
 
 
@@ -64,11 +63,21 @@ def generate_resume_pdf(resume_data: dict, output_path: Path) -> None:
         _section_heading(pdf, "Experience")
         for job in resume_data["experience"]:
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 5, _safe(f"{job['title']}  -  {job['company']}"),
-                     new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                5,
+                _safe(f"{job['title']}  -  {job['company']}"),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
             pdf.set_font("Helvetica", "I", 9)
-            pdf.cell(0, 5, _safe(f"{job.get('location', '')}    {job.get('dates', '')}"),
-                     new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                5,
+                _safe(f"{job.get('location', '')}    {job.get('dates', '')}"),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
             pdf.set_font("Helvetica", "", 9)
             for bullet in job.get("bullets", []):
                 x = pdf.get_x()
@@ -82,8 +91,13 @@ def generate_resume_pdf(resume_data: dict, output_path: Path) -> None:
         _section_heading(pdf, "Education")
         for edu in resume_data["education"]:
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 5, _safe(f"{edu['degree']}  -  {edu['institution']}"),
-                     new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                5,
+                _safe(f"{edu['degree']}  -  {edu['institution']}"),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
             pdf.set_font("Helvetica", "I", 9)
             pdf.cell(0, 5, _safe(edu.get("dates", "")), new_x="LMARGIN", new_y="NEXT")
             if edu.get("detail"):
@@ -97,8 +111,13 @@ def generate_resume_pdf(resume_data: dict, output_path: Path) -> None:
         pdf.set_font("Helvetica", "", 9)
         for category, items in resume_data["skills"].items():
             label = category.replace("_", " ").title()
-            pdf.cell(0, 5, _safe(f"{label}: {', '.join(items)}"),
-                     new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                5,
+                _safe(f"{label}: {', '.join(items)}"),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
         pdf.ln(2)
 
     # -- Certifications ---------------------------------------------------
@@ -114,7 +133,10 @@ def generate_resume_pdf(resume_data: dict, output_path: Path) -> None:
     if resume_data.get("languages"):
         _section_heading(pdf, "Languages")
         pdf.set_font("Helvetica", "", 9)
-        langs = [f"{l['language']} ({l['proficiency']})" for l in resume_data["languages"]]
+        langs = [
+            f"{language['language']} ({language['proficiency']})"
+            for language in resume_data["languages"]
+        ]
         pdf.cell(0, 5, _safe(", ".join(langs)), new_x="LMARGIN", new_y="NEXT")
 
     pdf.output(str(output_path))

@@ -3,6 +3,7 @@ test-output-*/
 test-output/
 **/__pycache__/
 **/.venv/
+.ruff_cache/
 venv/
 *.pyc
 .DS_Store

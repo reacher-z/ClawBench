@@ -41,7 +41,8 @@ def _patch_questionary_defaults() -> None:
         except (TypeError, ValueError):
             continue
         params_with_defaults = [
-            p for p in sig.parameters.values()
+            p
+            for p in sig.parameters.values()
             if p.default is not inspect.Parameter.empty
         ]
         if len(params_with_defaults) != len(defaults):
@@ -68,7 +69,8 @@ def _patch_questionary_defaults() -> None:
         except (TypeError, ValueError):
             continue
         params_with_defaults = [
-            p for p in sig.parameters.values()
+            p
+            for p in sig.parameters.values()
             if p.default is not inspect.Parameter.empty
         ]
         if len(params_with_defaults) != len(defaults):
@@ -181,29 +183,33 @@ def _make_style(theme: str) -> Style:
         Gray    #8E8E93             Gray    #8E8E93
     """
     if theme == "light":
-        return Style([
-            ("qmark", "fg:#5856D6 bold"),        # Apple Indigo (light)
-            ("question", "fg:#000000 bold"),
-            ("answer", "fg:#34C759 bold"),        # Apple Green (light)
-            ("pointer", "fg:#5856D6 bold"),
-            ("highlighted", "fg:#5856D6 bold"),
-            ("selected", "fg:#34C759"),
-            ("separator", "fg:#8E8E93"),          # Apple Gray
-            ("instruction", "fg:#8E8E93"),
-            ("text", "fg:#000000"),
-        ])
+        return Style(
+            [
+                ("qmark", "fg:#5856D6 bold"),  # Apple Indigo (light)
+                ("question", "fg:#000000 bold"),
+                ("answer", "fg:#34C759 bold"),  # Apple Green (light)
+                ("pointer", "fg:#5856D6 bold"),
+                ("highlighted", "fg:#5856D6 bold"),
+                ("selected", "fg:#34C759"),
+                ("separator", "fg:#8E8E93"),  # Apple Gray
+                ("instruction", "fg:#8E8E93"),
+                ("text", "fg:#000000"),
+            ]
+        )
     # dark (default)
-    return Style([
-        ("qmark", "fg:#5E5CE6 bold"),             # Apple Indigo (dark)
-        ("question", "fg:#ffffff bold"),
-        ("answer", "fg:#30D158 bold"),             # Apple Green (dark)
-        ("pointer", "fg:#5E5CE6 bold"),
-        ("highlighted", "fg:#5E5CE6 bold"),
-        ("selected", "fg:#30D158"),
-        ("separator", "fg:#8E8E93"),               # Apple Gray
-        ("instruction", "fg:#8E8E93"),
-        ("text", "fg:#ffffff"),
-    ])
+    return Style(
+        [
+            ("qmark", "fg:#5E5CE6 bold"),  # Apple Indigo (dark)
+            ("question", "fg:#ffffff bold"),
+            ("answer", "fg:#30D158 bold"),  # Apple Green (dark)
+            ("pointer", "fg:#5E5CE6 bold"),
+            ("highlighted", "fg:#5E5CE6 bold"),
+            ("selected", "fg:#30D158"),
+            ("separator", "fg:#8E8E93"),  # Apple Gray
+            ("instruction", "fg:#8E8E93"),
+            ("text", "fg:#ffffff"),
+        ]
+    )
 
 
 # Neutral style for the very first prompt (theme picker itself).
@@ -215,17 +221,19 @@ def _make_style(theme: str) -> Style:
 # highlighted row, which gives strong contrast on any terminal without
 # picking a single RGB value. Everything else is plain ``bold`` or the
 # terminal's own default foreground.
-_NEUTRAL_STYLE = Style([
-    ("qmark", ""),
-    ("question", "bold"),
-    ("answer", "bold"),
-    ("pointer", "bold"),
-    ("highlighted", "reverse bold"),
-    ("selected", "bold"),
-    ("separator", "fg:ansibrightblack"),
-    ("instruction", "fg:ansibrightblack"),
-    ("text", ""),
-])
+_NEUTRAL_STYLE = Style(
+    [
+        ("qmark", ""),
+        ("question", "bold"),
+        ("answer", "bold"),
+        ("pointer", "bold"),
+        ("highlighted", "reverse bold"),
+        ("selected", "bold"),
+        ("separator", "fg:ansibrightblack"),
+        ("instruction", "fg:ansibrightblack"),
+        ("text", ""),
+    ]
+)
 
 
 def _load_saved_theme() -> str | None:
@@ -283,13 +291,14 @@ STYLE: Style = _NEUTRAL_STYLE
 #   Indigo  #5856D6 / #5E5CE6
 #   Blue    #007AFF / #0A84FF
 #   Green   #34C759 / #30D158
-ACCENT = "#5E5CE6"   # Apple Indigo dark; replaced in main()
+ACCENT = "#5E5CE6"  # Apple Indigo dark; replaced in main()
 ACCENT2 = "#0A84FF"  # Apple Blue dark;   replaced in main()
 
 
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
+
 
 def load_models_data() -> dict:
     if not MODELS_YAML.exists():
@@ -317,6 +326,7 @@ def load_cases() -> list[str]:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _recommend_concurrent() -> int:
     cpus = multiprocessing.cpu_count()
@@ -419,6 +429,7 @@ def _show_models_table(data: dict) -> None:
 # Mode: Single run
 # ---------------------------------------------------------------------------
 
+
 def mode_single(models: list[str], cases: list[str]) -> None:
     _ADD_NEW = "+ Add new model"
     while True:
@@ -440,7 +451,16 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
     harness = questionary.select(
         "Harness:",
-        choices=["openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code", "hermes"],
+        choices=[
+            "openclaw",
+            "opencode",
+            "claude-code",
+            "claude-code-chrome-extension",
+            "codex",
+            "browser-use",
+            "claw-code",
+            "hermes",
+        ],
         default="openclaw",
         style=STYLE,
     ).ask()
@@ -458,19 +478,27 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     if case is None:
         return
 
-    ok = _confirm_launch({
-        "Mode": "Single run",
-        "Model": model,
-        "Harness": harness,
-        "Case": case,
-    })
+    ok = _confirm_launch(
+        {
+            "Mode": "Single run",
+            "Model": model,
+            "Harness": harness,
+            "Case": case,
+        }
+    )
     if not ok:
         return
 
     run_cmd(
         [
-            "uv", "run", "--no-editable", "clawbench-run", f"test-cases/{case}", model,
-            "--harness", harness,
+            "uv",
+            "run",
+            "--no-editable",
+            "clawbench-run",
+            f"test-cases/{case}",
+            model,
+            "--harness",
+            harness,
         ],
         hint=(
             "  [dim]Tip: once the container starts, open the noVNC URL\n"
@@ -483,6 +511,7 @@ def mode_single(models: list[str], cases: list[str]) -> None:
 # ---------------------------------------------------------------------------
 # Mode: Batch run
 # ---------------------------------------------------------------------------
+
 
 def mode_batch(models: list[str], cases: list[str]) -> None:
     _ADD_NEW = "+ Add new model"
@@ -505,7 +534,16 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Harness ---[/]\n")
     harness = questionary.select(
         "Harness:",
-        choices=["openclaw", "opencode", "claude-code", "claude-code-chrome-extension", "codex", "browser-use", "claw-code", "hermes"],
+        choices=[
+            "openclaw",
+            "opencode",
+            "claude-code",
+            "claude-code-chrome-extension",
+            "codex",
+            "browser-use",
+            "claw-code",
+            "hermes",
+        ],
         default="openclaw",
         style=STYLE,
     ).ask()
@@ -573,23 +611,31 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     if dry is None:
         return
 
-    ok = _confirm_launch({
-        "Mode": "Batch run",
-        "Models": ", ".join(selected_models),
-        "Harness": harness,
-        "Cases": case_summary,
-        "Concurrent": concurrent,
-        "Dry run": "Yes" if dry else "No",
-    })
+    ok = _confirm_launch(
+        {
+            "Mode": "Batch run",
+            "Models": ", ".join(selected_models),
+            "Harness": harness,
+            "Cases": case_summary,
+            "Concurrent": concurrent,
+            "Dry run": "Yes" if dry else "No",
+        }
+    )
     if not ok:
         return
 
     cmd = [
-        "uv", "run", "--no-editable", "clawbench-batch",
-        "--models", *selected_models,
+        "uv",
+        "run",
+        "--no-editable",
+        "clawbench-batch",
+        "--models",
+        *selected_models,
         *case_args,
-        "--max-concurrent", concurrent,
-        "--harness", harness,
+        "--max-concurrent",
+        concurrent,
+        "--harness",
+        harness,
     ]
     if dry:
         cmd.append("--dry-run")
@@ -600,6 +646,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
 # ---------------------------------------------------------------------------
 # Mode: Human
 # ---------------------------------------------------------------------------
+
 
 def mode_human(cases: list[str]) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Test Case ---[/]\n")
@@ -619,7 +666,12 @@ def mode_human(cases: list[str]) -> None:
 
     run_cmd(
         [
-            "uv", "run", "--no-editable", "clawbench-run", f"test-cases/{case}", "--human",
+            "uv",
+            "run",
+            "--no-editable",
+            "clawbench-run",
+            f"test-cases/{case}",
+            "--human",
         ],
         hint=(
             "  [dim]Tip: open the noVNC URL printed below to\n"
@@ -631,6 +683,7 @@ def mode_human(cases: list[str]) -> None:
 # ---------------------------------------------------------------------------
 # Mode: Configure models
 # ---------------------------------------------------------------------------
+
 
 def mode_configure() -> None:
     while True:
@@ -669,8 +722,9 @@ def _add_model(data: dict) -> None:
         for key, preset in PROVIDER_PRESETS.items()
     ]
     provider_choices.append(
-        questionary.Choice("Custom     (enter base URL + API type by hand)",
-                           value="custom")
+        questionary.Choice(
+            "Custom     (enter base URL + API type by hand)", value="custom"
+        )
     )
 
     console.print(f"\n[bold {ACCENT}]--- Step 1: Provider ---[/]\n")
@@ -687,9 +741,7 @@ def _add_model(data: dict) -> None:
     # -- Step 2: Model name (with per-provider examples) --------------------
     console.print(f"\n[bold {ACCENT}]--- Step 2: Model name ---[/]\n")
     if preset:
-        console.print(
-            f"  [dim]Examples for {preset['label'].strip()}:[/]"
-        )
+        console.print(f"  [dim]Examples for {preset['label'].strip()}:[/]")
         for ex in preset["examples"]:
             console.print(f"    [{ACCENT2}]{ex}[/]")
         console.print(
@@ -697,16 +749,16 @@ def _add_model(data: dict) -> None:
             "the model id, and used as the key in models.yaml.)[/]\n"
         )
     else:
-        console.print(
-            "  [dim]Enter the exact model id your custom API expects.[/]\n"
-        )
+        console.print("  [dim]Enter the exact model id your custom API expects.[/]\n")
 
     name = questionary.text(
         "Model name:",
         style=STYLE,
         validate=lambda x: (
-            "Name cannot be empty" if not x.strip()
-            else f"'{x.strip()}' already exists" if x.strip() in data
+            "Name cannot be empty"
+            if not x.strip()
+            else f"'{x.strip()}' already exists"
+            if x.strip() in data
             else True
         ),
     ).ask()
@@ -836,9 +888,7 @@ def _delete_model(data: dict) -> None:
     if name is None:
         return
 
-    confirm = questionary.confirm(
-        f"Delete '{name}'?", default=False, style=STYLE
-    ).ask()
+    confirm = questionary.confirm(f"Delete '{name}'?", default=False, style=STYLE).ask()
     if not confirm:
         return
 
@@ -850,6 +900,7 @@ def _delete_model(data: dict) -> None:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def _require_tty() -> None:
     """Bail out with a friendly message when stdin/stdout is not a real TTY.
@@ -866,35 +917,25 @@ def _require_tty() -> None:
     console.print()
     console.print("[yellow bold]![/] This TUI needs an interactive terminal.")
     console.print()
-    console.print(
-        "  stdin/stdout is not a TTY (piped input, CI, some IDE terminals,"
-    )
+    console.print("  stdin/stdout is not a TTY (piped input, CI, some IDE terminals,")
     console.print(
         f"  or tool-based invocations). The underlying [{ACCENT2}]questionary[/]"
     )
-    console.print(
-        "  library requires a real terminal to render prompts."
-    )
+    console.print("  library requires a real terminal to render prompts.")
     console.print()
     console.print("  For non-interactive use, call the Python entrypoints directly:")
     console.print()
-    console.print(
-        f"    [{ACCENT2}]uv run --no-editable clawbench-run[/] \\"
-    )
+    console.print(f"    [{ACCENT2}]uv run --no-editable clawbench-run[/] \\")
     console.print(
         f"        [{ACCENT2}]test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6[/]"
     )
     console.print()
-    console.print(
-        f"    [{ACCENT2}]uv run --no-editable clawbench-batch[/] \\"
-    )
+    console.print(f"    [{ACCENT2}]uv run --no-editable clawbench-batch[/] \\")
     console.print(
         f"        [{ACCENT2}]--all-models --case-range 1-50 --max-concurrent 3[/]"
     )
     console.print()
-    console.print(
-        f"  See [{ACCENT2}]src/README.md[/] for full CLI usage."
-    )
+    console.print(f"  See [{ACCENT2}]src/README.md[/] for full CLI usage.")
     console.print()
     sys.exit(1)
 
@@ -959,7 +1000,9 @@ def _check_engine() -> tuple[str | None, str, str]:
             try:
                 r = subprocess.run(
                     ["podman", "machine", "list", "--format", "json"],
-                    capture_output=True, text=True, timeout=10,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
             except (subprocess.TimeoutExpired, FileNotFoundError) as e:
                 return engine, "unknown_error", str(e)
@@ -977,7 +1020,10 @@ def _check_engine() -> tuple[str | None, str, str]:
 
         try:
             r = subprocess.run(
-                ["podman", "ps"], capture_output=True, text=True, timeout=10,
+                ["podman", "ps"],
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
         except (subprocess.TimeoutExpired, FileNotFoundError) as e:
             return engine, "unknown_error", str(e)
@@ -992,9 +1038,16 @@ def _check_engine() -> tuple[str | None, str, str]:
         if platform.system() in ("Darwin", "Windows"):
             try:
                 mi = subprocess.run(
-                    ["podman", "machine", "inspect", "--format",
-                     "{{.Resources.Memory}}"],
-                    capture_output=True, text=True, timeout=10,
+                    [
+                        "podman",
+                        "machine",
+                        "inspect",
+                        "--format",
+                        "{{.Resources.Memory}}",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
                 mem_mb = int(mi.stdout.strip())
                 if mem_mb < 4096:
@@ -1007,7 +1060,10 @@ def _check_engine() -> tuple[str | None, str, str]:
     # engine == "docker"
     try:
         r = subprocess.run(
-            ["docker", "info"], capture_output=True, text=True, timeout=10,
+            ["docker", "info"],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
     except (subprocess.TimeoutExpired, FileNotFoundError) as e:
         return engine, "unknown_error", str(e)
@@ -1032,6 +1088,7 @@ def _diagnose_fix_failure(buf: list[str]) -> str | None:
     if "proxyconnect" in blob and "connection refused" in blob:
         # Pull out the port we couldn't reach, if visible.
         import re as _re
+
         m = _re.search(r"dial tcp \S+?:(\d+)", blob)
         port = m.group(1) if m else "?"
         return (
@@ -1092,10 +1149,12 @@ def _run_streamed(cmd: list[str], *, status_msg: str) -> int:
         hint = _diagnose_fix_failure(buf)
         if hint:
             console.print()
-            console.print(Panel(
-                Text(hint, style="dim"),
-                title="[bold]Likely cause[/]",
-            ))
+            console.print(
+                Panel(
+                    Text(hint, style="dim"),
+                    title="[bold]Likely cause[/]",
+                )
+            )
         console.print()
     return rc
 
@@ -1110,66 +1169,76 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
         return True
 
     is_mac = platform.system() == "Darwin"
-    is_win = platform.system() == "Windows"
 
     if status == "not_installed":
         console.print()
-        console.print(Panel(
-            Text.assemble(
-                Text("No container engine found.\n\n", style="bold"),
-                Text(
-                    "ClawBench runs every task inside a container, so you "
-                    "need either Docker or Podman installed before any mode "
-                    "(including Human mode) can work.\n\n"
-                    "macOS:   brew install --cask docker\n"
-                    "         — or —\n"
-                    "         brew install podman && podman machine init && podman machine start\n\n"
-                    "Linux:   sudo apt install podman   (or docker.io)\n\n"
-                    "Windows: winget install Docker.DockerDesktop\n"
-                    "         — or —\n"
-                    "         winget install RedHat.Podman && podman machine init && podman machine start",
-                    style="dim",
+        console.print(
+            Panel(
+                Text.assemble(
+                    Text("No container engine found.\n\n", style="bold"),
+                    Text(
+                        "ClawBench runs every task inside a container, so you "
+                        "need either Docker or Podman installed before any mode "
+                        "(including Human mode) can work.\n\n"
+                        "macOS:   brew install --cask docker\n"
+                        "         — or —\n"
+                        "         brew install podman && podman machine init && podman machine start\n\n"
+                        "Linux:   sudo apt install podman   (or docker.io)\n\n"
+                        "Windows: winget install Docker.DockerDesktop\n"
+                        "         — or —\n"
+                        "         winget install RedHat.Podman && podman machine init && podman machine start",
+                        style="dim",
+                    ),
                 ),
-            ),
-            title="[bold]Container engine not installed[/]",
-        ))
+                title="[bold]Container engine not installed[/]",
+            )
+        )
         console.print()
         return False
 
     if engine == "podman" and status == "podman_no_machine":
         console.print()
-        console.print(Panel(
-            Text.assemble(
-                Text("Podman needs a Linux VM on this platform.\n\n", style="bold"),
-                Text(
-                    "On macOS and Windows, podman runs Linux containers "
-                    "inside a small helper VM. You don't have one yet. "
-                    "I can run these two commands for you now:\n\n"
-                    "    podman machine init\n"
-                    "    podman machine start\n\n"
-                    "The first one downloads a ~1 GB VM image, so it "
-                    "takes a few minutes.",
-                    style="dim",
+        console.print(
+            Panel(
+                Text.assemble(
+                    Text("Podman needs a Linux VM on this platform.\n\n", style="bold"),
+                    Text(
+                        "On macOS and Windows, podman runs Linux containers "
+                        "inside a small helper VM. You don't have one yet. "
+                        "I can run these two commands for you now:\n\n"
+                        "    podman machine init\n"
+                        "    podman machine start\n\n"
+                        "The first one downloads a ~1 GB VM image, so it "
+                        "takes a few minutes.",
+                        style="dim",
+                    ),
                 ),
-            ),
-            title="[bold]Podman machine not initialized[/]",
-        ))
+                title="[bold]Podman machine not initialized[/]",
+            )
+        )
         console.print()
         ok = questionary.confirm(
             "Run `podman machine init && podman machine start` now?",
-            default=True, style=STYLE,
+            default=True,
+            style=STYLE,
         ).ask()
         if not ok:
             return False
-        if _run_streamed(
-            ["podman", "machine", "init"],
-            status_msg="Running podman machine init (downloads VM image, may take a few minutes)...",
-        ) != 0:
+        if (
+            _run_streamed(
+                ["podman", "machine", "init"],
+                status_msg="Running podman machine init (downloads VM image, may take a few minutes)...",
+            )
+            != 0
+        ):
             return False
-        if _run_streamed(
-            ["podman", "machine", "start"],
-            status_msg="Starting podman machine...",
-        ) != 0:
+        if (
+            _run_streamed(
+                ["podman", "machine", "start"],
+                status_msg="Starting podman machine...",
+            )
+            != 0
+        ):
             return False
         # Re-verify
         _, new_status, _ = _check_engine()
@@ -1180,28 +1249,35 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
 
     if engine == "podman" and status == "podman_machine_stopped":
         console.print()
-        console.print(Panel(
-            Text.assemble(
-                Text("Podman machine is not running.\n\n", style="bold"),
-                Text(
-                    "The Linux VM that podman uses to run containers is "
-                    "currently stopped. I can start it for you with:\n\n"
-                    "    podman machine start",
-                    style="dim",
+        console.print(
+            Panel(
+                Text.assemble(
+                    Text("Podman machine is not running.\n\n", style="bold"),
+                    Text(
+                        "The Linux VM that podman uses to run containers is "
+                        "currently stopped. I can start it for you with:\n\n"
+                        "    podman machine start",
+                        style="dim",
+                    ),
                 ),
-            ),
-            title="[bold]Podman machine stopped[/]",
-        ))
+                title="[bold]Podman machine stopped[/]",
+            )
+        )
         console.print()
         ok = questionary.confirm(
-            "Run `podman machine start` now?", default=True, style=STYLE,
+            "Run `podman machine start` now?",
+            default=True,
+            style=STYLE,
         ).ask()
         if not ok:
             return False
-        if _run_streamed(
-            ["podman", "machine", "start"],
-            status_msg="Starting podman machine...",
-        ) != 0:
+        if (
+            _run_streamed(
+                ["podman", "machine", "start"],
+                status_msg="Starting podman machine...",
+            )
+            != 0
+        ):
             return False
         _, new_status, _ = _check_engine()
         if new_status == "ready":
@@ -1212,39 +1288,41 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
     if engine == "podman" and status == "podman_low_memory":
         mem_mb = int(detail) if detail.isdigit() else 0
         console.print()
-        console.print(Panel(
-            Text.assemble(
-                Text(f"Podman machine has only {mem_mb} MB RAM.\n\n",
-                     style="bold"),
-                Text(
-                    "ClawBench runs Chrome + an AI agent gateway inside "
-                    "the container, which needs at least 4 GB RAM. With "
-                    f"the current {mem_mb} MB the agent process will be "
-                    "killed by the OOM killer.\n\n"
-                    "I can stop the VM, increase its memory to 4 GB, and "
-                    "restart it:\n\n"
-                    "    podman machine stop\n"
-                    "    podman machine set --memory 4096\n"
-                    "    podman machine start",
-                    style="dim",
+        console.print(
+            Panel(
+                Text.assemble(
+                    Text(f"Podman machine has only {mem_mb} MB RAM.\n\n", style="bold"),
+                    Text(
+                        "ClawBench runs Chrome + an AI agent gateway inside "
+                        "the container, which needs at least 4 GB RAM. With "
+                        f"the current {mem_mb} MB the agent process will be "
+                        "killed by the OOM killer.\n\n"
+                        "I can stop the VM, increase its memory to 4 GB, and "
+                        "restart it:\n\n"
+                        "    podman machine stop\n"
+                        "    podman machine set --memory 4096\n"
+                        "    podman machine start",
+                        style="dim",
+                    ),
                 ),
-            ),
-            title="[bold]Podman machine: not enough memory[/]",
-        ))
+                title="[bold]Podman machine: not enough memory[/]",
+            )
+        )
         console.print()
         ok = questionary.confirm(
             "Resize podman machine to 4 GB RAM now?",
-            default=True, style=STYLE,
+            default=True,
+            style=STYLE,
         ).ask()
         if not ok:
             return False
         for cmd, msg in [
-            (["podman", "machine", "stop"],
-             "Stopping podman machine..."),
-            (["podman", "machine", "set", "--memory", "4096"],
-             "Setting memory to 4096 MB..."),
-            (["podman", "machine", "start"],
-             "Starting podman machine..."),
+            (["podman", "machine", "stop"], "Stopping podman machine..."),
+            (
+                ["podman", "machine", "set", "--memory", "4096"],
+                "Setting memory to 4096 MB...",
+            ),
+            (["podman", "machine", "start"], "Starting podman machine..."),
         ]:
             if _run_streamed(cmd, status_msg=msg) != 0:
                 return False
@@ -1256,24 +1334,27 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
 
     if engine == "docker" and status == "docker_not_running":
         console.print()
-        console.print(Panel(
-            Text.assemble(
-                Text("Docker daemon is not running.\n\n", style="bold"),
-                Text(
-                    "The `docker` CLI is installed but can't reach the "
-                    "daemon. On macOS/Windows this usually means Docker "
-                    "Desktop isn't launched.",
-                    style="dim",
+        console.print(
+            Panel(
+                Text.assemble(
+                    Text("Docker daemon is not running.\n\n", style="bold"),
+                    Text(
+                        "The `docker` CLI is installed but can't reach the "
+                        "daemon. On macOS/Windows this usually means Docker "
+                        "Desktop isn't launched.",
+                        style="dim",
+                    ),
                 ),
-            ),
-            title="[bold]Docker daemon unreachable[/]",
-        ))
+                title="[bold]Docker daemon unreachable[/]",
+            )
+        )
         console.print()
         if is_mac:
             ok = questionary.confirm(
                 "Open Docker Desktop now? (you'll still need to wait "
                 "for it to finish starting)",
-                default=True, style=STYLE,
+                default=True,
+                style=STYLE,
             ).ask()
             if ok:
                 subprocess.run(["open", "-a", "Docker"])
@@ -1290,17 +1371,18 @@ def _fix_engine(engine: str, status: str, detail: str) -> bool:
 
     # unknown_error — nothing to automate
     console.print()
-    console.print(Panel(
-        Text.assemble(
-            Text("Container engine probe failed.\n\n", style="bold"),
-            Text(
-                f"Engine: {engine}\n\n"
-                f"{detail or '(no details)'}",
-                style="dim",
+    console.print(
+        Panel(
+            Text.assemble(
+                Text("Container engine probe failed.\n\n", style="bold"),
+                Text(
+                    f"Engine: {engine}\n\n{detail or '(no details)'}",
+                    style="dim",
+                ),
             ),
-        ),
-        title="[bold]Engine check error[/]",
-    ))
+            title="[bold]Engine check error[/]",
+        )
+    )
     console.print()
     return False
 
@@ -1365,16 +1447,20 @@ def main() -> None:
         style="dim",
     )
     console.print()
-    console.print(Panel(
-        Text.assemble(title, "\n", subtitle),
-    ))
+    console.print(
+        Panel(
+            Text.assemble(title, "\n", subtitle),
+        )
+    )
     console.print()
 
     while True:
         mode = questionary.select(
             "Select mode:",
             choices=[
-                questionary.Choice("Single run  (one model x one case)", value="single"),
+                questionary.Choice(
+                    "Single run  (one model x one case)", value="single"
+                ),
                 questionary.Choice("Batch run   (models x cases)", value="batch"),
                 questionary.Choice("Human mode  (no agent, noVNC)", value="human"),
                 questionary.Choice("Configure models", value="configure"),
@@ -1427,9 +1513,7 @@ def main() -> None:
         # of printing an error and looping, offer to configure one now.
         if mode in ("single", "batch") and not models:
             console.print()
-            console.print(
-                "  [dim]This mode needs at least one configured model.[/]"
-            )
+            console.print("  [dim]This mode needs at least one configured model.[/]")
             add_now = questionary.confirm(
                 "Add a model now?", default=True, style=STYLE
             ).ask()
@@ -1453,21 +1537,23 @@ def _onboard_no_models() -> None:
     (which doesn't need any LLM), or quit.
     """
     console.print()
-    console.print(Panel(
-        Text.assemble(
-            Text("No models configured yet.\n\n", style="bold"),
-            Text(
-                "ClawBench needs at least one model entry in "
-                "models/models.yaml before it can run agent-mode tasks. "
-                "Let's add one now — it takes about 30 seconds and you "
-                "only need your API key.\n\n"
-                "You can also skip this and jump straight to Human mode, "
-                "which drives the browser via noVNC without any LLM.",
-                style="dim",
+    console.print(
+        Panel(
+            Text.assemble(
+                Text("No models configured yet.\n\n", style="bold"),
+                Text(
+                    "ClawBench needs at least one model entry in "
+                    "models/models.yaml before it can run agent-mode tasks. "
+                    "Let's add one now — it takes about 30 seconds and you "
+                    "only need your API key.\n\n"
+                    "You can also skip this and jump straight to Human mode, "
+                    "which drives the browser via noVNC without any LLM.",
+                    style="dim",
+                ),
             ),
-        ),
-        title="[bold]First-run setup[/]",
-    ))
+            title="[bold]First-run setup[/]",
+        )
+    )
     console.print()
 
     choice = questionary.select(

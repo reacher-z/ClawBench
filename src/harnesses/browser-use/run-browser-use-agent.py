@@ -21,12 +21,12 @@ STOP = Path("/data/.stop-requested")  # extension-server eval-match marker
 
 # Map our THINKING_LEVEL values onto browser-use's `reasoning_effort` levels.
 _EFFORT_MAP = {
-    "minimal":  "minimal",
-    "low":      "low",
-    "medium":   "medium",
+    "minimal": "minimal",
+    "low": "low",
+    "medium": "medium",
     "adaptive": "medium",
-    "high":     "high",
-    "xhigh":    "high",
+    "high": "high",
+    "xhigh": "high",
 }
 
 
@@ -55,10 +55,7 @@ def dump_history(agent_obj) -> None:
     """Write the current AgentHistoryList to /data/agent-messages.jsonl as JSONL."""
     with OUT.open("w") as f:
         for h in agent_obj.history.history:
-            f.write(
-                json.dumps(h.model_dump(), default=str,
-                           ensure_ascii=False) + "\n"
-            )
+            f.write(json.dumps(h.model_dump(), default=str, ensure_ascii=False) + "\n")
 
 
 async def main() -> None:
