@@ -14,13 +14,14 @@ ClawBench/
   pyproject.toml                  # Root uv package metadata and CLI scripts
   .env.example                    # Template for PurelyMail credentials
   src/
-    tui.py                        # Interactive TUI (called by run.sh)
-    runner/
-      run.py                      # Single test-case runner
-      batch.py                    # Batch runner (model x case cross-product)
-    utils/
-      generate_resume_pdf.py      # Resume PDF generator
-      hf_upload.py                # Optional HuggingFace upload helpers
+    clawbench/                    # Main Python package
+      tui.py                      # Interactive TUI (called by run.sh)
+      runner/
+        run.py                    # Single test-case runner
+        batch.py                  # Batch runner (model x case cross-product)
+      utils/
+        generate_resume_pdf.py    # Resume PDF generator
+        hf_upload.py              # Optional HuggingFace upload helpers
     extension-server/
       pyproject.toml              # Container-only uv project for server deps
       uv.lock
@@ -78,17 +79,17 @@ cp models/models.example.yaml models/models.yaml
 ./run.sh
 
 # Single run:
-uv run --no-editable clawbench-run test-cases/<case-dir> <model-name> --harness openclaw
+uv run clawbench-run test-cases/<case-dir> <model-name> --harness openclaw
 
 # Single run with Claude Code harness:
-uv run --no-editable clawbench-run test-cases/<case-dir> <model-name> --harness claude-code
+uv run clawbench-run test-cases/<case-dir> <model-name> --harness claude-code
 
 # Batch run (model x case cross-product):
-uv run --no-editable clawbench-batch \
+uv run clawbench-batch \
   --models <model-name> --all-cases --max-concurrent 3 --harness openclaw
 
 # Human mode (manual browser control via noVNC; no harness needed):
-uv run --no-editable clawbench-run test-cases/<case-dir> --human
+uv run clawbench-run test-cases/<case-dir> --human
 ```
 
 ## Model Configuration

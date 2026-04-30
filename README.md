@@ -201,13 +201,13 @@ $EDITOR .env
 > [!TIP]
 > **Recommended &rarr; Interactive TUI** &nbsp; guided model + test case selection
 > ```bash
-> uv run --no-editable clawbench
+> uv run clawbench
 > ```
-> Needs an interactive terminal. For pipes / CI / non-TTY, use `uv run --no-editable clawbench-run` or `uv run --no-editable clawbench-batch` directly.
+> Needs an interactive terminal. For pipes / CI / non-TTY, use `uv run clawbench-run` or `uv run clawbench-batch` directly.
 
 **(b) Run one specific task against a specific model:**
 ```bash
-uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
@@ -215,7 +215,7 @@ Results land in `./test-output/<model>/<harness>-<case>-<model>-<timestamp>/` wi
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
-uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats --human
+uv run clawbench-run test-cases/001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
 
@@ -231,9 +231,9 @@ git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
 cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
 cp .env.example .env                              # edit: add PurelyMail creds; optional HF_TOKEN
 ./run.sh                                           # interactive TUI
-uv run --no-editable clawbench-run \
+uv run clawbench-run \
   test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
-uv run --no-editable clawbench-run \
+uv run clawbench-run \
   test-cases/001-daily-life-food-uber-eats --human             # human mode
 ```
 
@@ -401,13 +401,13 @@ ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recordin
 ./run.sh
 
 # Single run:
-uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
 
 # Human mode (you control the browser via noVNC):
-uv run --no-editable clawbench-run test-cases/001-daily-life-food-uber-eats --human
+uv run clawbench-run test-cases/001-daily-life-food-uber-eats --human
 
 # Batch (all models x cases 1-50, 3 concurrent):
-uv run --no-editable clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
+uv run clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
 ```
 
 For test case authoring details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [`test-cases/task.schema.json`](test-cases/task.schema.json). For output structure and evaluation guidance, see [eval/README.md](eval/README.md).
@@ -467,7 +467,7 @@ For tasks behind payment walls (agent has no valid credit card), the eval schema
 
 Each container gets a `/my-info/` directory with a dummy user identity (Alex Green): personal info JSON, email credentials, and a resume PDF. The email is a fresh disposable PurelyMail address generated per run. The agent reads these files when it needs to fill forms, register accounts, etc.
 
-Source templates: `shared/alex_green_personal_info.json` (profile) and `src/utils/resume_template.json` (resume).
+Source templates: `shared/alex_green_personal_info.json` (profile) and `src/clawbench/utils/resume_template.json` (resume).
 
 </details>
 
@@ -554,7 +554,7 @@ Each task runs in an isolated browser container with a five-layer recording: vid
 33.3% — roughly one task in three — from the strongest frontier model we evaluated. The majority of tasks still defeat every model we've tested; the headroom is real, and the benchmark is not saturated.
 
 **How do I reproduce a published score?**
-From a source checkout, configure `models/models.yaml` and `.env`, then run `uv run --no-editable clawbench`. The TUI builds the container image and runs any subset of the 153 local `test-cases/` tasks against your model of choice.
+From a source checkout, configure `models/models.yaml` and `.env`, then run `uv run clawbench`. The TUI builds the container image and runs any subset of the 153 local `test-cases/` tasks against your model of choice.
 
 **Is ClawBench safe to run against live websites?**
 The runner uses a hardened container with a request interceptor that blocks purchases, account creation, outbound email sends, and similar irreversible actions by default. Tasks that need to *simulate* those actions (e.g., "add to cart and checkout") terminate at the last reversible step. You can relax the interceptor per-task if your research requires it.

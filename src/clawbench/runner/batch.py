@@ -17,7 +17,7 @@ from pathlib import Path
 
 import yaml
 
-from utils.paths import PROJECT_ROOT
+from clawbench.utils.paths import PROJECT_ROOT
 
 
 def detect_engine() -> str:
@@ -222,10 +222,9 @@ async def run_job(
             proc: asyncio.subprocess.Process | None = None
             try:
                 cmd_parts = [
-                    "uv",
-                    "run",
-                    "--no-editable",
-                    "clawbench-run",
+                    sys.executable,
+                    "-m",
+                    "clawbench.runner.run",
                     str(job.case_dir),
                     job.model,
                     "--output-dir",
@@ -351,7 +350,7 @@ def print_summary(jobs: list[Job], elapsed: float, max_concurrent: int) -> None:
     if bad:
         print("\nTo debug a failed case with live noVNC, re-run it as a single run:")
         for j in bad[:10]:
-            print(f"  uv run --no-editable clawbench-run {j.case_dir} {j.model}")
+            print(f"  uv run clawbench-run {j.case_dir} {j.model}")
         if len(bad) > 10:
             print(f"  ... and {len(bad) - 10} more")
 
@@ -534,7 +533,7 @@ async def async_main(args: argparse.Namespace) -> int:
     # Ensure child run.py processes (and the imported helper below) use the
     # same engine as we just detected.
     os.environ["CONTAINER_ENGINE"] = engine
-    from runner import run as _run_mod  # lazy: import after CONTAINER_ENGINE is set
+    from clawbench.runner import run as _run_mod
 
     _run_mod.docker_build(args.harness)
 
@@ -622,8 +621,8 @@ async def async_main(args: argparse.Namespace) -> int:
 
     # Upload batch summary to HuggingFace
     if not args.no_upload:
-        from runner.run import load_dotenv
-        from utils.hf_upload import hf_upload_enabled, upload_file
+        from clawbench.runner.run import load_dotenv
+        from clawbench.utils.hf_upload import hf_upload_enabled, upload_file
 
         env = load_dotenv(PROJECT_ROOT / ".env")
         hf_env = {
@@ -679,7 +678,7 @@ def main() -> None:
         action="store_true",
         help="Skip HuggingFace upload for all runs",
     )
-    from runner.run import HARNESSES, DEFAULT_HARNESS
+    from clawbench.runner.run import HARNESSES, DEFAULT_HARNESS
 
     p.add_argument(
         "--harness",

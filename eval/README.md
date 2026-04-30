@@ -8,7 +8,7 @@ Step 1: Run agents          Step 2: Evaluate
 
 ./run.sh                    Claude Code subagents compare
   or                        agent traces vs human references
-src/runner/batch.py         under eval/agentic_eval.md rubric
+src/clawbench/runner/batch.py         under eval/agentic_eval.md rubric
        │                              │
        ▼                              ▼
   test-output/                {model}-eval-results.csv

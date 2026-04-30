@@ -73,7 +73,7 @@ If no `good first issue` is currently open, just open one with your idea and we'
 
 5. **Test with human mode** to verify the task is completable:
    ```bash
-   uv run --no-editable clawbench-run test-cases/887-daily-life-food-grubhub --human
+   uv run clawbench-run test-cases/887-daily-life-food-grubhub --human
    ```
 
 6. **Submit a PR** with your new test case directory. Include in the PR description:
