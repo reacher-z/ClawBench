@@ -112,7 +112,7 @@ jobs:
             done
           } >> "${GITHUB_STEP_SUMMARY}"
 
-      - name: Build base image
+      - name: Build Docker images
         shell: bash
         run: |
           set -euo pipefail
@@ -131,12 +131,6 @@ jobs:
             echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
-
-      - name: Build harness images
-        if: steps.dockerfiles.outputs.count != '0'
-        shell: bash
-        run: |
-          set -euo pipefail
 
           while IFS= read -r dockerfile; do
             [[ -n "${dockerfile}" ]] || continue
