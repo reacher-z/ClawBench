@@ -100,12 +100,12 @@ jobs:
             echo
             echo "- Event: \`${{ github.event_name }}\`"
             echo "- Selection mode: \`$([[ "${build_all}" == "true" ]] && echo all || echo changed)\`"
-            echo "- Base image: \`clawbench-base\`"
+            echo "- Base image: \`clawbench-base\`, \`clawbench-base:amd64\`"
             echo "- Harness images: \`${#selected_dockerfiles[@]}\`"
             echo
             echo "| Image | Dockerfile |"
             echo "| --- | --- |"
-            echo "| \`clawbench-base\` | \`${base_dockerfile}\` |"
+            echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | \`${base_dockerfile}\` |"
             for dockerfile in "${selected_dockerfiles[@]}"; do
               harness="$(basename "$(dirname "${dockerfile}")")"
               echo "| \`clawbench-${harness}\` | \`${dockerfile}\` |"
@@ -125,10 +125,10 @@ jobs:
             echo "| --- | --- |"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-          if docker build -f src/harnesses/base/Dockerfile.base -t clawbench-base .; then
-            echo "| \`clawbench-base\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
+          if docker build -f src/harnesses/base/Dockerfile.base -t clawbench-base -t clawbench-base:amd64 .; then
+            echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
           else
-            echo "| \`clawbench-base\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
 
