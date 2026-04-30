@@ -9,7 +9,6 @@ import os
 import re
 import shutil
 import signal
-import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -48,7 +47,9 @@ MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
 def load_models_yaml() -> dict:
     """Load all model definitions from models/models.yaml."""
     if not MODELS_YAML.exists():
-        print(f"ERROR: {MODELS_YAML} not found (copy models.example.yaml and fill in your keys)")
+        print(
+            f"ERROR: {MODELS_YAML} not found (copy models.example.yaml and fill in your keys)"
+        )
         sys.exit(1)
     return yaml.safe_load(MODELS_YAML.read_text()) or {}
 
@@ -80,8 +81,9 @@ def _case_id(d: Path) -> int | None:
         return None
 
 
-def discover_cases(patterns: list[str] | None, all_cases: bool,
-                   case_range: str | None = None) -> list[Path]:
+def discover_cases(
+    patterns: list[str] | None, all_cases: bool, case_range: str | None = None
+) -> list[Path]:
     base = PROJECT_ROOT / "test-cases"
     if all_cases:
         dirs = sorted(p.parent for p in base.glob("*/task.json"))
@@ -105,7 +107,9 @@ def discover_cases(patterns: list[str] | None, all_cases: bool,
 
     dirs = sorted(set(dirs))
     if not dirs:
-        print(f"ERROR: no test-case directories matched (patterns={patterns}, range={case_range})")
+        print(
+            f"ERROR: no test-case directories matched (patterns={patterns}, range={case_range})"
+        )
         sys.exit(1)
     return dirs
 
@@ -130,6 +134,7 @@ def _parse_range(r: str) -> tuple[int, int]:
 # ---------------------------------------------------------------------------
 # Job
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class Job:
@@ -210,16 +215,21 @@ async def run_job(
             print(f"[{ts()}] [START] {job.case_name} x {job.model}")
             print_progress(all_jobs, batch_start)
 
-            safe_model = re.sub(r'[/:]+', '--', job.model)
+            safe_model = re.sub(r"[/:]+", "--", job.model)
             log_path = log_dir / f"{job.case_name}-{safe_model}.log"
             start = time.monotonic()
 
             proc: asyncio.subprocess.Process | None = None
             try:
                 cmd_parts = [
-                    "uv", "run", "--no-editable", "clawbench-run",
-                    str(job.case_dir), job.model,
-                    "--output-dir", str(base_output),
+                    "uv",
+                    "run",
+                    "--no-editable",
+                    "clawbench-run",
+                    str(job.case_dir),
+                    job.model,
+                    "--output-dir",
+                    str(base_output),
                     "--no-build",
                 ]
                 if no_upload:
@@ -276,7 +286,9 @@ async def run_job(
                     pass
 
             tag = job.status.upper()
-            print(f"[{ts()}] [DONE] {job.case_name} x {job.model}: {tag} in {fmt_duration(job.duration)}")
+            print(
+                f"[{ts()}] [DONE] {job.case_name} x {job.model}: {tag} in {fmt_duration(job.duration)}"
+            )
             print_progress(all_jobs, batch_start)
 
     except asyncio.CancelledError:
@@ -305,6 +317,7 @@ def print_progress(jobs: list[Job], start: float) -> None:
 # Summary
 # ---------------------------------------------------------------------------
 
+
 def print_summary(jobs: list[Job], elapsed: float, max_concurrent: int) -> None:
     print(f"\n{'=' * 60}")
     print("BATCH SUMMARY")
@@ -317,12 +330,18 @@ def print_summary(jobs: list[Job], elapsed: float, max_concurrent: int) -> None:
     print("-" * len(header))
     for j in jobs:
         tag = j.status.upper()
-        print(f"{j.model:<{model_w}}  {j.case_name:<{case_w}}  {tag:<7}  {fmt_duration(j.duration)}")
+        print(
+            f"{j.model:<{model_w}}  {j.case_name:<{case_w}}  {tag:<7}  {fmt_duration(j.duration)}"
+        )
 
     totals = {}
     for j in jobs:
         totals[j.status] = totals.get(j.status, 0) + 1
-    parts = [f"{totals.get(s, 0)} {s}" for s in ("passed", "failed", "error", "skipped") if totals.get(s)]
+    parts = [
+        f"{totals.get(s, 0)} {s}"
+        for s in ("passed", "failed", "error", "skipped")
+        if totals.get(s)
+    ]
     print(f"\nTotal: {len(jobs)} jobs | {' | '.join(parts)}")
     print(f"Total elapsed: {fmt_duration(elapsed)} (max_concurrent={max_concurrent})")
 
@@ -330,7 +349,7 @@ def print_summary(jobs: list[Job], elapsed: float, max_concurrent: int) -> None:
     # copy-paste to debug with real-time noVNC.
     bad = [j for j in jobs if j.status in ("failed", "error")]
     if bad:
-        print(f"\nTo debug a failed case with live noVNC, re-run it as a single run:")
+        print("\nTo debug a failed case with live noVNC, re-run it as a single run:")
         for j in bad[:10]:
             print(f"  uv run --no-editable clawbench-run {j.case_dir} {j.model}")
         if len(bad) > 10:
@@ -370,7 +389,11 @@ def print_run_stats(base_output: Path) -> None:
 
             # Count actions
             actions_file = data / "actions.jsonl"
-            actions = sum(1 for _ in open(actions_file)) if actions_file.exists() and actions_file.stat().st_size > 0 else 0
+            actions = (
+                sum(1 for _ in open(actions_file))
+                if actions_file.exists() and actions_file.stat().st_size > 0
+                else 0
+            )
 
             # Count screenshots
             ss_dir = data / "screenshots"
@@ -380,11 +403,17 @@ def print_run_stats(base_output: Path) -> None:
             rec = data / "recording.mp4"
             rec_mb = rec.stat().st_size / (1024 * 1024) if rec.exists() else 0
 
-            rows.append({
-                "case": case, "model": model, "actions": actions,
-                "screenshots": screenshots, "recording_mb": rec_mb,
-                "duration": duration, "intercepted": intercepted,
-            })
+            rows.append(
+                {
+                    "case": case,
+                    "model": model,
+                    "actions": actions,
+                    "screenshots": screenshots,
+                    "recording_mb": rec_mb,
+                    "duration": duration,
+                    "intercepted": intercepted,
+                }
+            )
 
     if not rows:
         print("  No run data found.")
@@ -402,8 +431,12 @@ def print_run_stats(base_output: Path) -> None:
         result = "yes" if r["intercepted"] else "no"
         case = r["case"][:case_w]
         # Flag abnormal runs: no actions, no screenshots, no recording, or very short duration
-        abnormal = (r["actions"] == 0 or r["screenshots"] == 0
-                    or r["recording_mb"] < 0.5 or r["duration"] < 30)
+        abnormal = (
+            r["actions"] == 0
+            or r["screenshots"] == 0
+            or r["recording_mb"] < 0.5
+            or r["duration"] < 30
+        )
         line = (
             f"{case:<{case_w}}  {r['model']:<{model_w}}  "
             f"{r['actions']:>7}  {r['screenshots']:>11}  "
@@ -416,8 +449,14 @@ def print_run_stats(base_output: Path) -> None:
             print(line)
 
     total_pass = sum(1 for r in rows if r["intercepted"])
-    abnormal_count = sum(1 for r in rows if r["actions"] == 0 or r["screenshots"] == 0
-                         or r["recording_mb"] < 0.5 or r["duration"] < 30)
+    abnormal_count = sum(
+        1
+        for r in rows
+        if r["actions"] == 0
+        or r["screenshots"] == 0
+        or r["recording_mb"] < 0.5
+        or r["duration"] < 30
+    )
     print(f"\n{total_pass}/{len(rows)} intercepted", end="")
     if abnormal_count:
         print(f"  |  {RED}{abnormal_count} abnormal{RESET}")
@@ -425,8 +464,13 @@ def print_run_stats(base_output: Path) -> None:
         print()
 
 
-def write_summary_json(jobs: list[Job], base_output: Path, elapsed: float,
-                       max_concurrent: int, started_at: str) -> None:
+def write_summary_json(
+    jobs: list[Job],
+    base_output: Path,
+    elapsed: float,
+    max_concurrent: int,
+    started_at: str,
+) -> None:
     now = datetime.now(timezone.utc).isoformat()
     data = {
         "started_at": started_at,
@@ -454,6 +498,7 @@ def write_summary_json(jobs: list[Job], base_output: Path, elapsed: float,
 # Main
 # ---------------------------------------------------------------------------
 
+
 async def async_main(args: argparse.Namespace) -> int:
     global shutdown_event
     shutdown_event = asyncio.Event()
@@ -473,7 +518,9 @@ async def async_main(args: argparse.Namespace) -> int:
         print("No jobs to run.")
         return 0
 
-    print(f"Job matrix: {len(models)} model(s) x {len(cases)} case(s) = {len(jobs)} job(s)")
+    print(
+        f"Job matrix: {len(models)} model(s) x {len(cases)} case(s) = {len(jobs)} job(s)"
+    )
     for j in jobs:
         print(f"  {j.case_name} x {j.model}")
 
@@ -488,6 +535,7 @@ async def async_main(args: argparse.Namespace) -> int:
     # same engine as we just detected.
     os.environ["CONTAINER_ENGINE"] = engine
     from runner import run as _run_mod  # lazy: import after CONTAINER_ENGINE is set
+
     _run_mod.docker_build(args.harness)
 
     batch_ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
@@ -511,8 +559,10 @@ async def async_main(args: argparse.Namespace) -> int:
 
         if sigint_count == 1:
             n_running = sum(1 for j in jobs if j.status == "running")
-            print(f"\n[BATCH] Stopping — no new jobs will start. "
-                  f"Waiting for {n_running} running job(s) to finish...")
+            print(
+                f"\n[BATCH] Stopping — no new jobs will start. "
+                f"Waiting for {n_running} running job(s) to finish..."
+            )
             print("[BATCH] Press Ctrl+C again to kill running jobs.")
             # Cancel only non-running tasks so no new jobs start.
             # Running tasks are left alone — they'll finish naturally
@@ -538,8 +588,17 @@ async def async_main(args: argparse.Namespace) -> int:
     throttle = StartupThrottle(args.stagger_delay)
     all_tasks = [
         asyncio.create_task(
-            run_job(j, sem, throttle, base_output, log_dir, jobs, batch_start,
-                    no_upload=args.no_upload, harness=args.harness)
+            run_job(
+                j,
+                sem,
+                throttle,
+                base_output,
+                log_dir,
+                jobs,
+                batch_start,
+                no_upload=args.no_upload,
+                harness=args.harness,
+            )
         )
         for j in jobs
     ]
@@ -565,8 +624,12 @@ async def async_main(args: argparse.Namespace) -> int:
     if not args.no_upload:
         from runner.run import load_dotenv
         from utils.hf_upload import hf_upload_enabled, upload_file
+
         env = load_dotenv(PROJECT_ROOT / ".env")
-        hf_env = {"HF_TOKEN": env.get("HF_TOKEN", ""), "HF_REPO_ID": env.get("HF_REPO_ID", "")}
+        hf_env = {
+            "HF_TOKEN": env.get("HF_TOKEN", ""),
+            "HF_REPO_ID": env.get("HF_REPO_ID", ""),
+        }
         if hf_upload_enabled(hf_env):
             safe_ts = started_at.replace(":", "-")
             upload_file(
@@ -581,21 +644,49 @@ async def async_main(args: argparse.Namespace) -> int:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Run ClawBench model x case cross-product")
-    p.add_argument("--models", nargs="+", default=None, help="Model name patterns (matched against keys in models/models.yaml)")
-    p.add_argument("--all-models", action="store_true", help="Use all models in models/models.yaml")
-    p.add_argument("--cases", nargs="+", default=None, help="Glob patterns for case dirs")
-    p.add_argument("--all-cases", action="store_true", help="Use all test-cases/ subdirs")
+    p.add_argument(
+        "--models",
+        nargs="+",
+        default=None,
+        help="Model name patterns (matched against keys in models/models.yaml)",
+    )
+    p.add_argument(
+        "--all-models", action="store_true", help="Use all models in models/models.yaml"
+    )
+    p.add_argument(
+        "--cases", nargs="+", default=None, help="Glob patterns for case dirs"
+    )
+    p.add_argument(
+        "--all-cases", action="store_true", help="Use all test-cases/ subdirs"
+    )
     p.add_argument("--case-range", default=None, help="Numeric ID range, e.g. 1-50")
-    p.add_argument("--max-concurrent", type=int, default=2, help="Max parallel jobs (default: 2)")
+    p.add_argument(
+        "--max-concurrent", type=int, default=2, help="Max parallel jobs (default: 2)"
+    )
     p.add_argument("--output-dir", default="test-output", help="Base output directory")
-    p.add_argument("--stagger-delay", type=float, default=15,
-                   help="Min seconds between consecutive container starts — rolling start (default: 15)")
-    p.add_argument("--dry-run", action="store_true", help="Print job matrix without running")
-    p.add_argument("--no-upload", dest="no_upload", action="store_true",
-                   help="Skip HuggingFace upload for all runs")
+    p.add_argument(
+        "--stagger-delay",
+        type=float,
+        default=15,
+        help="Min seconds between consecutive container starts — rolling start (default: 15)",
+    )
+    p.add_argument(
+        "--dry-run", action="store_true", help="Print job matrix without running"
+    )
+    p.add_argument(
+        "--no-upload",
+        dest="no_upload",
+        action="store_true",
+        help="Skip HuggingFace upload for all runs",
+    )
     from runner.run import HARNESSES, DEFAULT_HARNESS
-    p.add_argument("--harness", choices=HARNESSES, default=DEFAULT_HARNESS,
-                   help=f"Coding-agent harness (default: {DEFAULT_HARNESS})")
+
+    p.add_argument(
+        "--harness",
+        choices=HARNESSES,
+        default=DEFAULT_HARNESS,
+        help=f"Coding-agent harness (default: {DEFAULT_HARNESS})",
+    )
     args = p.parse_args()
 
     rc = asyncio.run(async_main(args))

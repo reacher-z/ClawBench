@@ -69,17 +69,23 @@ def _install_capture():
     def patched_init_agent(self, *args, **kwargs):
         ok = original_init_agent(self, *args, **kwargs)
         agent = getattr(self, "agent", None)
-        if not ok or agent is None or getattr(agent, "_clawbench_capture_installed", False):
+        if (
+            not ok
+            or agent is None
+            or getattr(agent, "_clawbench_capture_installed", False)
+        ):
             return ok
 
         agent._clawbench_capture_installed = True
-        _write({
-            "type": "session_meta",
-            "session_id": getattr(agent, "session_id", None),
-            "model": getattr(agent, "model", None),
-            "provider": getattr(agent, "provider", None),
-            "platform": getattr(agent, "platform", None),
-        })
+        _write(
+            {
+                "type": "session_meta",
+                "session_id": getattr(agent, "session_id", None),
+                "model": getattr(agent, "model", None),
+                "provider": getattr(agent, "provider", None),
+                "platform": getattr(agent, "platform", None),
+            }
+        )
 
         def on_reasoning(text):
             if text:
@@ -111,48 +117,60 @@ def _install_capture():
                     default=str,
                 ),
             }
-            _write({
-                "type": "tool_use",
-                "session_id": getattr(agent, "session_id", None),
-                "role": "assistant",
-                "tool_name": name,
-                "tool_calls": [{
-                    "id": call_id,
-                    "type": "function",
-                    "function": function,
-                }],
-                "arguments": _safe_json(tool_args),
-            })
-
-        def on_tool_complete(call_id, name, tool_args, result):
-            _write({
-                "type": "tool_result",
-                "session_id": getattr(agent, "session_id", None),
-                "role": "tool",
-                "tool_call_id": call_id,
-                "tool_name": name,
-                "arguments": _safe_json(tool_args),
-                "content": _safe_json(result),
-            })
-
-        def on_tool_progress(event_type, function_name=None, preview=None, function_args=None, **extra):
-            if event_type == "reasoning.available" and preview:
-                _write({
-                    "type": "reasoning",
+            _write(
+                {
+                    "type": "tool_use",
                     "session_id": getattr(agent, "session_id", None),
                     "role": "assistant",
-                    "reasoning": preview,
-                    "source": "tool_progress",
-                })
-            elif event_type in {"tool.started", "tool.completed"}:
-                _write({
-                    "type": event_type.replace(".", "_"),
+                    "tool_name": name,
+                    "tool_calls": [
+                        {
+                            "id": call_id,
+                            "type": "function",
+                            "function": function,
+                        }
+                    ],
+                    "arguments": _safe_json(tool_args),
+                }
+            )
+
+        def on_tool_complete(call_id, name, tool_args, result):
+            _write(
+                {
+                    "type": "tool_result",
                     "session_id": getattr(agent, "session_id", None),
-                    "tool_name": function_name,
-                    "preview": preview,
-                    "arguments": _safe_json(function_args),
-                    "extra": _safe_json(extra),
-                })
+                    "role": "tool",
+                    "tool_call_id": call_id,
+                    "tool_name": name,
+                    "arguments": _safe_json(tool_args),
+                    "content": _safe_json(result),
+                }
+            )
+
+        def on_tool_progress(
+            event_type, function_name=None, preview=None, function_args=None, **extra
+        ):
+            if event_type == "reasoning.available" and preview:
+                _write(
+                    {
+                        "type": "reasoning",
+                        "session_id": getattr(agent, "session_id", None),
+                        "role": "assistant",
+                        "reasoning": preview,
+                        "source": "tool_progress",
+                    }
+                )
+            elif event_type in {"tool.started", "tool.completed"}:
+                _write(
+                    {
+                        "type": event_type.replace(".", "_"),
+                        "session_id": getattr(agent, "session_id", None),
+                        "tool_name": function_name,
+                        "preview": preview,
+                        "arguments": _safe_json(function_args),
+                        "extra": _safe_json(extra),
+                    }
+                )
 
         agent.reasoning_callback = _wrap_callback(
             agent.reasoning_callback,

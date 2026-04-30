@@ -45,8 +45,11 @@ def _const_fields_match(expected, actual):
 
 
 FILTERED_PREFIXES = (
-    "http://localhost:7878", "http://127.0.0.1:7878",
-    "chrome-extension://", "devtools://", "chrome://",
+    "http://localhost:7878",
+    "http://127.0.0.1:7878",
+    "chrome-extension://",
+    "devtools://",
+    "chrome://",
 )
 
 
@@ -75,8 +78,9 @@ def _log_request(log_file, params):
         return
 
     parsed = urlparse(request_url)
-    query_params = {k: v[0] if len(v) == 1 else v
-                    for k, v in parse_qs(parsed.query).items()}
+    query_params = {
+        k: v[0] if len(v) == 1 else v for k, v in parse_qs(parsed.query).items()
+    }
 
     entry = {
         "timestamp": time.time(),
@@ -91,16 +95,18 @@ def _log_request(log_file, params):
     log_file.flush()
 
 
-def start_cdp_handler(url_pattern=None, required_method=None,
-                      match_body=None, match_params=None):
+def start_cdp_handler(
+    url_pattern=None, required_method=None, match_body=None, match_params=None
+):
     """Connect to Chrome via CDP, log all requests, and optionally block by URL pattern + method + body/params."""
 
     # Wait for Chrome CDP to be ready
     ws_url = None
     for _ in range(30):
         try:
-            version = json.loads(urllib.request.urlopen(
-                f"{CDP_URL}/json/version").read())
+            version = json.loads(
+                urllib.request.urlopen(f"{CDP_URL}/json/version").read()
+            )
             ws_url = version["webSocketDebuggerUrl"]
             break
         except Exception:
@@ -125,11 +131,14 @@ def start_cdp_handler(url_pattern=None, required_method=None,
     # waitForDebuggerOnStart=True pauses new targets until we explicitly resume
     # them, which prevents the "Debugger paused in another tab" Chrome banner
     # and ensures no requests slip through before Fetch.enable is active.
-    send("Target.setAutoAttach", {
-        "autoAttach": True,
-        "waitForDebuggerOnStart": True,
-        "flatten": True,
-    })
+    send(
+        "Target.setAutoAttach",
+        {
+            "autoAttach": True,
+            "waitForDebuggerOnStart": True,
+            "flatten": True,
+        },
+    )
 
     if url_pattern:
         eval_interceptor_ready = True
@@ -165,12 +174,20 @@ def start_cdp_handler(url_pattern=None, required_method=None,
                 if target_type == "page":
                     session_to_target[child_session] = target_id
                     if child_session not in fetch_sessions:
-                        send("Fetch.enable", {
-                            "patterns": [{"urlPattern": "*", "requestStage": "Request"}],
-                        }, child_session)
+                        send(
+                            "Fetch.enable",
+                            {
+                                "patterns": [
+                                    {"urlPattern": "*", "requestStage": "Request"}
+                                ],
+                            },
+                            child_session,
+                        )
                         fetch_sessions.add(child_session)
                         print(
-                            f"[cdp] Fetch enabled on session {child_session[:12]}...", flush=True)
+                            f"[cdp] Fetch enabled on session {child_session[:12]}...",
+                            flush=True,
+                        )
                 # Always resume the target so it doesn't stay paused
                 send("Runtime.runIfWaitingForDebugger", {}, child_session)
                 continue
@@ -193,42 +210,41 @@ def start_cdp_handler(url_pattern=None, required_method=None,
                 if target_id and target_id != active_target[0]:
                     send("Target.activateTarget", {"targetId": target_id})
                     active_target[0] = target_id
-                    print(f"[cdp] Auto-focused tab {target_id[:12]}... (Document request)", flush=True)
+                    print(
+                        f"[cdp] Auto-focused tab {target_id[:12]}... (Document request)",
+                        flush=True,
+                    )
 
             # Log every non-internal request
             _log_request(log_file, params)
 
             # If no intercept pattern, just continue the request
             if not url_pattern:
-                send("Fetch.continueRequest", {
-                     "requestId": request_id}, session_id)
+                send("Fetch.continueRequest", {"requestId": request_id}, session_id)
                 continue
 
             # --- Intercept: block if URL + method + body/params match ---
             if not re.search(url_pattern, request_url):
-                send("Fetch.continueRequest", {
-                     "requestId": request_id}, session_id)
+                send("Fetch.continueRequest", {"requestId": request_id}, session_id)
                 continue
 
             if required_method and params["request"]["method"] != required_method:
-                send("Fetch.continueRequest", {
-                     "requestId": request_id}, session_id)
+                send("Fetch.continueRequest", {"requestId": request_id}, session_id)
                 continue
 
             # Parse request data for body/params matching
             parsed = urlparse(request_url)
-            query_params = {k: v[0] if len(
-                v) == 1 else v for k, v in parse_qs(parsed.query).items()}
+            query_params = {
+                k: v[0] if len(v) == 1 else v for k, v in parse_qs(parsed.query).items()
+            }
             body = _parse_body(params["request"].get("postData"))
 
             if not _const_fields_match(match_body, body):
-                send("Fetch.continueRequest", {
-                     "requestId": request_id}, session_id)
+                send("Fetch.continueRequest", {"requestId": request_id}, session_id)
                 continue
 
             if not _const_fields_match(match_params, query_params):
-                send("Fetch.continueRequest", {
-                     "requestId": request_id}, session_id)
+                send("Fetch.continueRequest", {"requestId": request_id}, session_id)
                 continue
 
             # All filters matched — block the request
@@ -241,16 +257,25 @@ def start_cdp_handler(url_pattern=None, required_method=None,
 
             print(f"[interceptor] Blocked: {request_url[:100]}", flush=True)
 
-            send("Fetch.failRequest", {
-                 "requestId": request_id, "errorReason": "BlockedByClient"}, session_id)
+            send(
+                "Fetch.failRequest",
+                {"requestId": request_id, "errorReason": "BlockedByClient"},
+                session_id,
+            )
 
             if not INTERCEPTION_FILE.exists():
-                result = {"intercepted": True, "request": request_obj,
-                          "schema": eval_schema}
+                result = {
+                    "intercepted": True,
+                    "request": request_obj,
+                    "schema": eval_schema,
+                }
                 INTERCEPTION_FILE.write_text(json.dumps(result, indent=2))
             try:
-                urllib.request.urlopen(urllib.request.Request(
-                    "http://127.0.0.1:7878/api/stop", method="POST"))
+                urllib.request.urlopen(
+                    urllib.request.Request(
+                        "http://127.0.0.1:7878/api/stop", method="POST"
+                    )
+                )
             except Exception:
                 pass
     finally:
@@ -282,14 +307,22 @@ async def lifespan(app: FastAPI):
     display = os.environ.get("DISPLAY", ":99")
     ffmpeg_proc = subprocess.Popen(
         [
-            "ffmpeg", "-y",
-            "-f", "x11grab",
-            "-video_size", "1920x1080",
-            "-framerate", "15",
-            "-i", display,
-            "-c:v", "libx264",
-            "-preset", "ultrafast",
-            "-crf", "28",
+            "ffmpeg",
+            "-y",
+            "-f",
+            "x11grab",
+            "-video_size",
+            "1920x1080",
+            "-framerate",
+            "15",
+            "-i",
+            display,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-crf",
+            "28",
             str(RECORDING_PATH),
         ],
         stdout=subprocess.DEVNULL,
@@ -297,9 +330,11 @@ async def lifespan(app: FastAPI):
     )
 
     # Start CDP handler: always logs requests, optionally blocks by URL pattern + method + body/params
-    threading.Thread(target=start_cdp_handler,
-                     args=(url_pattern, required_method, match_body, match_params),
-                     daemon=True).start()
+    threading.Thread(
+        target=start_cdp_handler,
+        args=(url_pattern, required_method, match_body, match_params),
+        daemon=True,
+    ).start()
 
     yield
 

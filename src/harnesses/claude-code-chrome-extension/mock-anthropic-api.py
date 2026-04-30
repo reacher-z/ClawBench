@@ -13,6 +13,7 @@ return canned "everything is fine, you are a subscriber" responses. Any
 path we haven't enumerated is answered with `{}` / 200 so a new CLI release
 that adds endpoints does not silently break the harness.
 """
+
 from __future__ import annotations
 
 import time

@@ -28,3 +28,12 @@ packages = ["runner", "utils"]
 
 [tool.setuptools.package-data]
 utils = ["resume_template.json"]
+
+[tool.ruff]
+target-version = "py311"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.0",
+    "ruff>=0.15.12",
+]
