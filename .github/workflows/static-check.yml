@@ -3,8 +3,18 @@ name: static-check
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - "**.py"
+      - ".github/workflows/static-check.yml"
+      - "pyproject.toml"
+      - "uv.lock"
   push:
     branches: [ main ]
+    paths:
+      - "**.py"
+      - ".github/workflows/static-check.yml"
+      - "pyproject.toml"
+      - "uv.lock"
   workflow_dispatch:
 
 jobs:

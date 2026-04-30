@@ -5,10 +5,12 @@ on:
     branches: [ main ]
     paths:
       - "src/harnesses/**/Dockerfile*"
+      - ".github/workflows/check-docker-build.yml"
   push:
     branches: [ main ]
     paths:
       - "src/harnesses/**/Dockerfile*"
+      - ".github/workflows/check-docker-build.yml"
   workflow_dispatch:
 
 jobs:
