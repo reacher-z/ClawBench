@@ -17,17 +17,16 @@ dependencies = [
 ]
 
 [project.scripts]
-clawbench = "tui:main"
-clawbench-run = "runner.run:main"
-clawbench-batch = "runner.batch:main"
+clawbench = "clawbench.tui:main"
+clawbench-run = "clawbench.runner.run:main"
+clawbench-batch = "clawbench.runner.batch:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["tui"]
-packages = ["runner", "utils"]
+packages = ["clawbench", "clawbench.runner", "clawbench.utils"]
 
 [tool.setuptools.package-data]
-utils = ["resume_template.json"]
+"clawbench.utils" = ["resume_template.json"]
 
 [tool.ruff]
 target-version = "py311"

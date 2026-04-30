@@ -23,9 +23,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.status import Status
 
-from utils.generate_resume_pdf import generate_resume_pdf
-from utils.hf_upload import hf_upload_enabled, upload_run
-from utils.paths import HARNESS_ROOT, PROJECT_ROOT
+from clawbench.utils.generate_resume_pdf import generate_resume_pdf
+from clawbench.utils.hf_upload import hf_upload_enabled, upload_run
+from clawbench.utils.paths import HARNESS_ROOT, PROJECT_ROOT
 
 HARNESSES = (
     "openclaw",
@@ -231,7 +231,7 @@ def delete_email(api_key: str, email: str) -> None:
 
 # -- Personal info --
 
-RESUME_TEMPLATE = PROJECT_ROOT / "src" / "utils" / "resume_template.json"
+RESUME_TEMPLATE = Path(__file__).resolve().parents[1] / "utils" / "resume_template.json"
 
 
 def prepare_personal_info(

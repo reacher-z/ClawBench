@@ -19,7 +19,7 @@ from rich.status import Status
 from rich.table import Table
 from rich.text import Text
 
-from utils.paths import PROJECT_ROOT
+from clawbench.utils.paths import PROJECT_ROOT
 
 
 def _patch_questionary_defaults() -> None:
@@ -493,7 +493,6 @@ def mode_single(models: list[str], cases: list[str]) -> None:
         [
             "uv",
             "run",
-            "--no-editable",
             "clawbench-run",
             f"test-cases/{case}",
             model,
@@ -627,7 +626,6 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     cmd = [
         "uv",
         "run",
-        "--no-editable",
         "clawbench-batch",
         "--models",
         *selected_models,
@@ -668,7 +666,6 @@ def mode_human(cases: list[str]) -> None:
         [
             "uv",
             "run",
-            "--no-editable",
             "clawbench-run",
             f"test-cases/{case}",
             "--human",
@@ -925,12 +922,12 @@ def _require_tty() -> None:
     console.print()
     console.print("  For non-interactive use, call the Python entrypoints directly:")
     console.print()
-    console.print(f"    [{ACCENT2}]uv run --no-editable clawbench-run[/] \\")
+    console.print(f"    [{ACCENT2}]uv run clawbench-run[/] \\")
     console.print(
         f"        [{ACCENT2}]test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6[/]"
     )
     console.print()
-    console.print(f"    [{ACCENT2}]uv run --no-editable clawbench-batch[/] \\")
+    console.print(f"    [{ACCENT2}]uv run clawbench-batch[/] \\")
     console.print(
         f"        [{ACCENT2}]--all-models --case-range 1-50 --max-concurrent 3[/]"
     )
