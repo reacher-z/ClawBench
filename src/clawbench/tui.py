@@ -5,6 +5,7 @@ import json
 import multiprocessing
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -88,7 +89,19 @@ def _patch_questionary_defaults() -> None:
 _patch_questionary_defaults()
 
 MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
-CASES_DIR = PROJECT_ROOT / "test-cases"
+DEFAULT_DATASET = "v1"
+DATASETS = {
+    "v1": {
+        "label": "V1 dataset  (test-cases)",
+        "summary": "V1 (test-cases)",
+        "cases_dir": "test-cases",
+    },
+    "v2": {
+        "label": "V2 dataset  (test-cases-v2)",
+        "summary": "V2 (test-cases-v2)",
+        "cases_dir": "test-cases-v2",
+    },
+}
 
 API_TYPES = [
     "openai-completions",
@@ -315,10 +328,38 @@ def load_models() -> list[str]:
     return sorted(load_models_data().keys())
 
 
-def load_cases() -> list[str]:
-    cases = sorted(p.parent.name for p in CASES_DIR.glob("*/task.json"))
+def _dataset_cases_dir_name(dataset: str) -> str:
+    return DATASETS[dataset]["cases_dir"]
+
+
+def _dataset_summary(dataset: str) -> str:
+    return DATASETS[dataset]["summary"]
+
+
+def _case_name_match(case: str) -> re.Match[str] | None:
+    return re.match(r"^(?:v\d+-)?(\d+)([a-z]?)(?=-|$)", case, re.IGNORECASE)
+
+
+def _case_numeric_id(case: str) -> int | None:
+    match = _case_name_match(case)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _case_sort_key(case: str) -> tuple[int, int, str]:
+    cid = _case_numeric_id(case)
+    return (0, cid, case) if cid is not None else (1, sys.maxsize, case)
+
+
+def load_cases(cases_dir_name: str = "test-cases") -> list[str]:
+    cases_dir = PROJECT_ROOT / cases_dir_name
+    cases = sorted(
+        (p.parent.name for p in cases_dir.glob("*/task.json")),
+        key=_case_sort_key,
+    )
     if not cases:
-        console.print("[red bold]ERROR:[/] No test cases found in test-cases/")
+        console.print(f"[red bold]ERROR:[/] No test cases found in {cases_dir_name}/")
         sys.exit(1)
     return cases
 
@@ -347,8 +388,9 @@ def _recommend_concurrent() -> int:
 
 def _case_display(case: str) -> str:
     """Format a case name for display: '886  886-entertainment-hobbies-...'"""
-    prefix = case.split("-", 1)[0]
-    return f"{prefix:>3}  {case}"
+    match = _case_name_match(case)
+    prefix = f"{match.group(1)}{match.group(2)}" if match else case.split("-", 1)[0]
+    return f"{prefix:>5}  {case}"
 
 
 def _parse_range_input(raw: str, cases: list[str]) -> list[str]:
@@ -356,28 +398,43 @@ def _parse_range_input(raw: str, cases: list[str]) -> list[str]:
     if raw.strip() == "*":
         return list(cases)
 
-    # Build ID map: both '001' and '1' → full case name
-    id_map: dict[str, str] = {}
+    # Build token map: V1 accepts '001' and '1'; V2 accepts 'v2-1065b',
+    # '1065b', and numeric '1065' for range-like selection.
+    id_map: dict[str, list[str]] = {}
     for c in cases:
-        prefix = c.split("-", 1)[0]
-        id_map[prefix] = c
-        stripped = prefix.lstrip("0") or "0"
-        id_map[stripped] = c
+        tokens = {c.lower()}
+        match = _case_name_match(c)
+        if match:
+            num, suffix = match.group(1), match.group(2)
+            label = f"{num}{suffix}".lower()
+            tokens.update({num, num.lstrip("0") or "0", label})
+            if c.lower().startswith("v"):
+                tokens.add(f"v2-{label}")
+        for token in tokens:
+            id_map.setdefault(token, []).append(c)
 
     selected: list[str] = []
+
+    def add_case(case: str) -> None:
+        if case not in selected:
+            selected.append(case)
+
     for part in raw.split(","):
         part = part.strip()
         if not part:
             continue
-        if "-" in part:
-            lo, hi = part.split("-", 1)
-            for i in range(int(lo), int(hi) + 1):
-                key = str(i)
-                if key in id_map and id_map[key] not in selected:
-                    selected.append(id_map[key])
+        if re.fullmatch(r"\d+\s*-\s*\d+", part):
+            lo_s, hi_s = re.split(r"\s*-\s*", part, maxsplit=1)
+            lo, hi = int(lo_s), int(hi_s)
+            if lo > hi:
+                continue
+            for c in cases:
+                cid = _case_numeric_id(c)
+                if cid is not None and lo <= cid <= hi:
+                    add_case(c)
         else:
-            if part in id_map and id_map[part] not in selected:
-                selected.append(id_map[part])
+            for c in id_map.get(part.lower(), []):
+                add_case(c)
     return selected
 
 
@@ -425,12 +482,42 @@ def _show_models_table(data: dict) -> None:
     console.print()
 
 
+def _pick_dataset(default: str = DEFAULT_DATASET) -> str | None:
+    console.print(f"\n[bold {ACCENT}]--- Select Dataset ---[/]\n")
+    return questionary.select(
+        "Dataset:",
+        choices=[
+            questionary.Choice(cfg["label"], value=key) for key, cfg in DATASETS.items()
+        ],
+        default=default,
+        style=STYLE,
+    ).ask()
+
+
+def _show_header(models: list[str], cases: list[str], dataset: str) -> None:
+    title = Text("ClawBench", style="bold")
+    subtitle = Text(
+        f"{len(models)} models configured  |  "
+        f"{_dataset_summary(dataset)}  |  "
+        f"{len(cases)} test cases available",
+        style="dim",
+    )
+    console.print()
+    console.print(Panel(Text.assemble(title, "\n", subtitle)))
+    console.print()
+
+
 # ---------------------------------------------------------------------------
 # Mode: Single run
 # ---------------------------------------------------------------------------
 
 
-def mode_single(models: list[str], cases: list[str]) -> None:
+def mode_single(
+    models: list[str],
+    cases: list[str],
+    cases_dir_name: str,
+    dataset_summary: str,
+) -> None:
     _ADD_NEW = "+ Add new model"
     while True:
         console.print(f"\n[bold {ACCENT}]--- Select Model ---[/]\n")
@@ -481,6 +568,7 @@ def mode_single(models: list[str], cases: list[str]) -> None:
     ok = _confirm_launch(
         {
             "Mode": "Single run",
+            "Dataset": dataset_summary,
             "Model": model,
             "Harness": harness,
             "Case": case,
@@ -494,7 +582,7 @@ def mode_single(models: list[str], cases: list[str]) -> None:
             "uv",
             "run",
             "clawbench-run",
-            f"test-cases/{case}",
+            f"{cases_dir_name}/{case}",
             model,
             "--harness",
             harness,
@@ -512,7 +600,12 @@ def mode_single(models: list[str], cases: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def mode_batch(models: list[str], cases: list[str]) -> None:
+def mode_batch(
+    models: list[str],
+    cases: list[str],
+    cases_dir_name: str,
+    dataset_summary: str,
+) -> None:
     _ADD_NEW = "+ Add new model"
     while True:
         console.print(f"\n[bold {ACCENT}]--- Select Models ---[/]\n")
@@ -565,7 +658,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     case_args: list[str] = []
 
     if case_mode == "all":
-        case_args = ["--all-cases"]
+        case_args = ["--cases-dir", cases_dir_name, "--all-cases"]
         case_summary = f"All ({len(cases)})"
     elif case_mode == "range":
         raw = questionary.text(
@@ -581,7 +674,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
             console.print("[red]No cases matched that range.[/]")
             return
         console.print(f"  Matched [green]{len(matched)}[/] cases")
-        case_args = ["--case-range", raw.strip()]
+        case_args = ["--cases-dir", cases_dir_name, "--case-range", raw.strip()]
         case_summary = f"Range {raw.strip()} ({len(matched)} cases)"
     else:
         # Interactive checkbox with all cases
@@ -593,7 +686,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
         ).ask()
         if not selected_cases:
             return
-        case_args = ["--cases"] + [f"test-cases/{c}" for c in selected_cases]
+        case_args = ["--cases"] + [f"{cases_dir_name}/{c}" for c in selected_cases]
         case_summary = f"{len(selected_cases)} selected"
 
     recommended = _recommend_concurrent()
@@ -613,6 +706,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
     ok = _confirm_launch(
         {
             "Mode": "Batch run",
+            "Dataset": dataset_summary,
             "Models": ", ".join(selected_models),
             "Harness": harness,
             "Cases": case_summary,
@@ -646,7 +740,7 @@ def mode_batch(models: list[str], cases: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def mode_human(cases: list[str]) -> None:
+def mode_human(cases: list[str], cases_dir_name: str, dataset_summary: str) -> None:
     console.print(f"\n[bold {ACCENT}]--- Select Test Case ---[/]\n")
     case = questionary.select(
         "Case (arrow keys, or type to filter):",
@@ -658,7 +752,9 @@ def mode_human(cases: list[str]) -> None:
     if case is None:
         return
 
-    ok = _confirm_launch({"Mode": "Human mode", "Case": case})
+    ok = _confirm_launch(
+        {"Mode": "Human mode", "Dataset": dataset_summary, "Case": case}
+    )
     if not ok:
         return
 
@@ -667,7 +763,7 @@ def mode_human(cases: list[str]) -> None:
             "uv",
             "run",
             "clawbench-run",
-            f"test-cases/{case}",
+            f"{cases_dir_name}/{case}",
             "--human",
         ],
         hint=(
@@ -1403,7 +1499,6 @@ def main() -> None:
     # they happen to have a stale saved theme from an earlier session.
     theme = _load_saved_theme()
     models = load_models()
-    cases = load_cases()
     first_run = (theme is None) or (not models)
     if first_run:
         console.print()
@@ -1415,6 +1510,13 @@ def main() -> None:
         ACCENT, ACCENT2 = "#5856D6", "#007AFF"
     else:
         ACCENT, ACCENT2 = "#5E5CE6", "#0A84FF"
+
+    dataset = _pick_dataset(DEFAULT_DATASET)
+    if dataset is None:
+        sys.exit(0)
+    cases_dir_name = _dataset_cases_dir_name(dataset)
+    cases = load_cases(cases_dir_name)
+    dataset_summary = _dataset_summary(dataset)
 
     # Engine health check: every mode (including Human) needs a working
     # docker/podman. If it's broken, offer to fix it right now rather
@@ -1436,20 +1538,7 @@ def main() -> None:
         _onboard_no_models()
         models = load_models()
 
-    # Header panel: deliberately uses no explicit color so it renders
-    # legibly regardless of the user's terminal background.
-    title = Text("ClawBench", style="bold")
-    subtitle = Text(
-        f"{len(models)} models configured  |  {len(cases)} test cases available",
-        style="dim",
-    )
-    console.print()
-    console.print(
-        Panel(
-            Text.assemble(title, "\n", subtitle),
-        )
-    )
-    console.print()
+    _show_header(models, cases, dataset)
 
     while True:
         mode = questionary.select(
@@ -1460,6 +1549,7 @@ def main() -> None:
                 ),
                 questionary.Choice("Batch run   (models x cases)", value="batch"),
                 questionary.Choice("Human mode  (no agent, noVNC)", value="human"),
+                questionary.Choice("Change dataset", value="dataset"),
                 questionary.Choice("Configure models", value="configure"),
                 questionary.Choice("Change theme", value="theme"),
                 questionary.Choice("Exit", value="exit"),
@@ -1480,9 +1570,20 @@ def main() -> None:
                 ACCENT, ACCENT2 = "#5E5CE6", "#0A84FF"
             continue
 
+        if mode == "dataset":
+            selected = _pick_dataset(dataset)
+            if selected is not None:
+                dataset = selected
+                cases_dir_name = _dataset_cases_dir_name(dataset)
+                cases = load_cases(cases_dir_name)
+                dataset_summary = _dataset_summary(dataset)
+                _show_header(models, cases, dataset)
+            continue
+
         if mode == "configure":
             mode_configure()
             models = load_models()
+            _show_header(models, cases, dataset)
             continue
 
         # Every run mode (including Human) needs a live engine. If it
@@ -1503,7 +1604,7 @@ def main() -> None:
         # Human mode is intentionally allowed with zero models — it
         # drives the browser via noVNC without any LLM at all.
         if mode == "human":
-            mode_human(cases)
+            mode_human(cases, cases_dir_name, dataset_summary)
             continue
 
         # Single / batch both need at least one configured model. Instead
@@ -1521,9 +1622,9 @@ def main() -> None:
             continue
 
         if mode == "single":
-            mode_single(models, cases)
+            mode_single(models, cases, cases_dir_name, dataset_summary)
         elif mode == "batch":
-            mode_batch(models, cases)
+            mode_batch(models, cases, cases_dir_name, dataset_summary)
 
 
 def _onboard_no_models() -> None:

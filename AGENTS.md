@@ -4,7 +4,7 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on 153 real-world online tasks spanning 144 live websites and 15 life categories. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `claude-code-chrome-extension`, `codex`, `browser-use`, `claw-code`, or `hermes`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on real-world online tasks. V1 lives in `test-cases/` with 153 tasks spanning 144 live websites and 15 life categories; V2 lives in `test-cases-v2/` with 130 tasks. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `claude-code-chrome-extension`, `codex`, `browser-use`, `claw-code`, or `hermes`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
@@ -43,10 +43,14 @@ ClawBench/
     models.yaml                   # Model API configs (gitignored -- copy from example)
     models.example.yaml           # Template with placeholder keys
     model.schema.json             # JSON schema for model entries
-  test-cases/                     # 153 task directories
+  test-cases/                     # V1: 153 task directories
     task.schema.json              # JSON schema for task.json
     001-daily-life-food-uber-eats/
       task.json                   # Task instruction, eval schema, time limit
+    ...
+  test-cases-v2/                  # V2: 130 task directories; uses test-cases/task.schema.json
+    v2-047-daily-life-personal-care-taskrabbit/
+      task.json
     ...
   shared/
     alex_green_personal_info.json # Synthetic user profile template
@@ -84,9 +88,17 @@ uv run clawbench-run test-cases/<case-dir> <model-name> --harness openclaw
 # Single run with Claude Code harness:
 uv run clawbench-run test-cases/<case-dir> <model-name> --harness claude-code
 
-# Batch run (model x case cross-product):
+# Batch run V1 (model x case cross-product):
 uv run clawbench-batch \
   --models <model-name> --all-cases --max-concurrent 3 --harness openclaw
+
+# Batch run V2:
+uv run clawbench-batch \
+  --models <model-name> --all-cases-v2 --max-concurrent 3 --harness hermes
+
+# Batch run using an explicit case directory:
+uv run clawbench-batch \
+  --models <model-name> --cases-dir test-cases-v2 --all-cases --harness hermes
 
 # Human mode (manual browser control via noVNC; no harness needed):
 uv run clawbench-run test-cases/<case-dir> --human
@@ -103,13 +115,13 @@ Optional: `thinking_level`, `temperature`, `max_tokens`. See `models/model.schem
 
 ## Test Case Format
 
-Each `test-cases/<id>-<metaclass>-<class>-<platform>/task.json` contains:
+Each `test-cases/<id>-<metaclass>-<class>-<platform>/task.json` or `test-cases-v2/v2-<id>-<metaclass>-<class>-<platform>/task.json` contains:
 - `instruction` -- task prompt for the agent
 - `eval_schema` -- request interceptor config (`url_pattern` regex + `method`)
 - `time_limit` -- max minutes before watchdog stops the agent
 - `extra_info` -- optional additional files to mount into the container
 
-See `test-cases/task.schema.json` for the full schema.
+See `test-cases/task.schema.json` for the full schema used by both corpora.
 
 ## Output Structure
 

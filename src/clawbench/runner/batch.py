@@ -42,6 +42,8 @@ def detect_engine() -> str:
 # ---------------------------------------------------------------------------
 
 MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
+DEFAULT_CASES_DIR = "test-cases"
+V2_CASES_DIR = "test-cases-v2"
 
 
 def load_models_yaml() -> dict:
@@ -73,29 +75,49 @@ def discover_models(patterns: list[str] | None, all_models: bool) -> list[str]:
 
 
 def _case_id(d: Path) -> int | None:
-    """Extract the leading numeric ID from a case directory name (e.g. '042-foo' -> 42)."""
-    parts = d.name.split("-", 1)
-    try:
-        return int(parts[0])
-    except (ValueError, IndexError):
+    """Extract the numeric task ID from V1/V2 case directory names."""
+    match = re.match(r"^(?:v\d+-)?(\d+)", d.name)
+    if not match:
         return None
+    return int(match.group(1))
+
+
+def _case_sort_key(d: Path) -> tuple[int, int, str]:
+    cid = _case_id(d)
+    return (0, cid, d.name) if cid is not None else (1, sys.maxsize, d.name)
+
+
+def _resolve_cases_dir(cases_dir: str | Path) -> Path:
+    path = Path(cases_dir)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    return path
 
 
 def discover_cases(
-    patterns: list[str] | None, all_cases: bool, case_range: str | None = None
+    patterns: list[str] | None,
+    all_cases: bool,
+    case_range: str | None = None,
+    cases_dir: str | Path = DEFAULT_CASES_DIR,
 ) -> list[Path]:
-    base = PROJECT_ROOT / "test-cases"
+    base = _resolve_cases_dir(cases_dir)
     if all_cases:
-        dirs = sorted(p.parent for p in base.glob("*/task.json"))
+        dirs = sorted((p.parent for p in base.glob("*/task.json")), key=_case_sort_key)
     elif patterns:
         dirs = []
         for pat in patterns:
-            expanded = sorted(PROJECT_ROOT.glob(pat))
+            expanded = []
+            pat_path = Path(pat)
+            if pat_path.is_absolute():
+                expanded.extend(Path("/").glob(str(pat_path.relative_to("/"))))
+            else:
+                expanded.extend(PROJECT_ROOT.glob(pat))
+                expanded.extend(base.glob(pat))
             for d in expanded:
                 if d.is_dir() and (d / "task.json").exists():
                     dirs.append(d)
     elif case_range:
-        dirs = sorted(p.parent for p in base.glob("*/task.json"))
+        dirs = sorted((p.parent for p in base.glob("*/task.json")), key=_case_sort_key)
     else:
         print("ERROR: provide --cases, --all-cases, or --case-range")
         sys.exit(1)
@@ -105,10 +127,11 @@ def discover_cases(
         lo, hi = _parse_range(case_range)
         dirs = [d for d in dirs if (cid := _case_id(d)) is not None and lo <= cid <= hi]
 
-    dirs = sorted(set(dirs))
+    dirs = sorted(set(dirs), key=_case_sort_key)
     if not dirs:
         print(
-            f"ERROR: no test-case directories matched (patterns={patterns}, range={case_range})"
+            "ERROR: no test-case directories matched "
+            f"(cases_dir={base}, patterns={patterns}, range={case_range})"
         )
         sys.exit(1)
     return dirs
@@ -504,7 +527,12 @@ async def async_main(args: argparse.Namespace) -> int:
     running_procs.clear()
 
     models = discover_models(args.models, args.all_models)
-    cases = discover_cases(args.cases, args.all_cases, args.case_range)
+    cases = discover_cases(
+        args.cases,
+        args.all_cases,
+        args.case_range,
+        cases_dir=args.cases_dir,
+    )
 
     # Interleave models: iterate cases in the outer loop so consecutive jobs
     # hit different API providers, reducing the chance of draining one API.
@@ -656,7 +684,17 @@ def main() -> None:
         "--cases", nargs="+", default=None, help="Glob patterns for case dirs"
     )
     p.add_argument(
-        "--all-cases", action="store_true", help="Use all test-cases/ subdirs"
+        "--cases-dir",
+        default=DEFAULT_CASES_DIR,
+        help=f"Directory containing case subdirs (default: {DEFAULT_CASES_DIR})",
+    )
+    p.add_argument(
+        "--all-cases", action="store_true", help="Use all cases in --cases-dir"
+    )
+    p.add_argument(
+        "--all-cases-v2",
+        action="store_true",
+        help=f"Shortcut for --cases-dir {V2_CASES_DIR} --all-cases",
     )
     p.add_argument("--case-range", default=None, help="Numeric ID range, e.g. 1-50")
     p.add_argument(
@@ -687,6 +725,9 @@ def main() -> None:
         help=f"Coding-agent harness (default: {DEFAULT_HARNESS})",
     )
     args = p.parse_args()
+    if args.all_cases_v2:
+        args.cases_dir = V2_CASES_DIR
+        args.all_cases = True
 
     rc = asyncio.run(async_main(args))
     sys.exit(rc)

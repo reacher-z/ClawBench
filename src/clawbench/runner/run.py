@@ -15,6 +15,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -64,6 +65,59 @@ _HARNESS_DOCKERFILES: dict[str, Path] = {
 # Kept for back-compat with old callers / scripts that imported IMAGE.
 IMAGE = harness_image(DEFAULT_HARNESS)
 console = Console()
+
+INFRA_STOP_REASONS = {
+    "chrome_cdp_timeout",
+    "gateway_failed",
+    "opencode_failed",
+    "claude_code_failed",
+    "codex_failed",
+    "browser_use_failed",
+    "hermes_failed",
+    "proxy_failed",
+    "missing_harness",
+}
+
+API_OR_CREDIT_PATTERNS = (
+    "insufficient credit",
+    "insufficient balance",
+    "out of credits",
+    "credit balance",
+    "quota exceeded",
+    "rate limit",
+    "ratelimit",
+    "too many requests",
+    "payment required",
+    "billing error",
+    "billing issue",
+    "invalid api key",
+    "api key is invalid",
+    "unauthorized",
+    "forbidden",
+    "authentication failed",
+    "authentication error",
+    "status code 401",
+    "status code 402",
+    "status code 403",
+    "status code 429",
+    "http 401",
+    "http 402",
+    "http 403",
+    "http 429",
+    "api call failed",
+    "provider returned error",
+    " 401 ",
+    " 402 ",
+    " 403 ",
+    " 429 ",
+)
+
+NON_MODEL_FAILURE_CATEGORIES = {
+    "infra_failure",
+    "api_or_credit",
+    "task_data",
+    "build_instruction",
+}
 
 
 def _detect_engine() -> str:
@@ -268,25 +322,126 @@ def prepare_personal_info(
     return tmp
 
 
-def copy_extra_info(task: dict, task_dir: Path, personal_info_dir: Path) -> None:
+def _text_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value.strip()
+    try:
+        return json.dumps(value, ensure_ascii=True)
+    except TypeError:
+        return str(value)
+
+
+def _normalize_extra_info(raw: Any) -> tuple[list[dict[str, str]], list[str]]:
+    """Normalize legacy and schema-compliant extra_info shapes.
+
+    Supported forms:
+    - {"path": "...", "description": "..."}
+    - {"note": "..."} / {"content": "..."} / {"text": "..."}
+    - "plain note"
+    - lists containing any of the above
+    """
+    entries: list[dict[str, str]] = []
+    warnings: list[str] = []
+
+    def add_item(item: Any, label: str) -> None:
+        if item is None:
+            return
+        if isinstance(item, str):
+            note = item.strip()
+            if note:
+                entries.append({"description": note})
+            return
+        if isinstance(item, (int, float, bool)):
+            entries.append({"description": str(item)})
+            return
+        if not isinstance(item, dict):
+            warnings.append(
+                f"{label} has unsupported type {type(item).__name__}; ignoring"
+            )
+            return
+
+        path = ""
+        raw_path = item.get("path")
+        if raw_path not in (None, ""):
+            if isinstance(raw_path, (str, os.PathLike)):
+                path = str(raw_path)
+            else:
+                warnings.append(
+                    f"{label}.path has unsupported type "
+                    f"{type(raw_path).__name__}; ignoring path"
+                )
+
+        raw_desc = None
+        for key in ("description", "note", "content", "text", "message", "value"):
+            if item.get(key) not in (None, ""):
+                raw_desc = item.get(key)
+                break
+        description = _text_value(raw_desc)
+
+        if path or description:
+            entry: dict[str, str] = {}
+            if path:
+                entry["path"] = path
+            entry["description"] = description or "Additional task file"
+            entries.append(entry)
+            return
+
+        if item:
+            entries.append({"description": _text_value(item)})
+
+    if raw in (None, ""):
+        return entries, warnings
+    if isinstance(raw, list):
+        for idx, item in enumerate(raw):
+            add_item(item, f"extra_info[{idx}]")
+    else:
+        add_item(raw, "extra_info")
+    return entries, warnings
+
+
+def copy_extra_info(task: dict, task_dir: Path, personal_info_dir: Path) -> list[str]:
     """Copy extra_info files from the test case into the my-info dir."""
-    for info in task.get("extra_info", []):
-        if "path" not in info:
+    entries, warnings = _normalize_extra_info(task.get("extra_info"))
+    for warning in warnings:
+        print(f"  WARNING: {warning}")
+    for info in entries:
+        rel_path = info.get("path")
+        if not rel_path:
             continue
-        src = task_dir / info["path"]
+        src = task_dir / rel_path
         if not src.exists():
-            print(f"  WARNING: extra_info path not found: {src}")
+            warning = f"extra_info path not found: {src}"
+            warnings.append(warning)
+            print(f"  WARNING: {warning}")
+            continue
+        if not src.is_file():
+            warning = f"extra_info path is not a file: {src}"
+            warnings.append(warning)
+            print(f"  WARNING: {warning}")
             continue
         dest = personal_info_dir / src.name
-        shutil.copy2(src, dest)
+        try:
+            shutil.copy2(src, dest)
+        except OSError as e:
+            warning = f"failed to copy extra_info {src}: {e}"
+            warnings.append(warning)
+            print(f"  WARNING: {warning}")
+            continue
         print(f"  Copied extra_info: {src.name}")
+    return warnings
 
 
 # -- Prompt --
 
 
 def build_instruction(task: dict) -> str:
-    parts = [task["instruction"]]
+    instruction = task.get("instruction")
+    if not isinstance(instruction, str) or not instruction.strip():
+        raise ValueError("task instruction must be a non-empty string")
+
+    parts = [instruction]
     parts.append(
         "\n---\n"
         "You are my personal browser assistant. I am delegating this task to you "
@@ -319,17 +474,23 @@ def build_instruction(task: dict) -> str:
         "If an account registration is required, you can use the email and password provided, and you can receive emails at that address if needed. "
         "---"
     )
-    extras = [
+    normalized_extras, _ = _normalize_extra_info(task.get("extra_info"))
+    file_extras = [
         (Path(info["path"]).name, info["description"])
-        for info in task.get("extra_info", [])
-        if info.get("path") and info.get("description")
+        for info in normalized_extras
+        if info.get("path")
     ]
-    if extras:
+    notes = [info["description"] for info in normalized_extras if not info.get("path")]
+    if file_extras:
         parts.append(
             "\nAdditional files are also available under /my-info/ for this task:"
         )
-        for fname, desc in extras:
+        for fname, desc in file_extras:
             parts.append(f"- {fname}: {desc}")
+    if notes:
+        parts.append("\nAdditional task notes:")
+        for note in notes:
+            parts.append(f"- {note}")
     return "\n".join(parts)
 
 
@@ -347,19 +508,17 @@ def _image_exists(ref: str = IMAGE) -> bool:
 
 
 def _pick_free_port(preferred: int = 6080) -> int:
-    """Return ``preferred`` if available on 127.0.0.1, else an OS-assigned
-    ephemeral port. Avoids the hard-coded ``-p 6080:6080`` collision when
-    something else on the host already owns that port.
+    """Return an OS-assigned ephemeral port on 127.0.0.1.
+
+    Always uses an ephemeral port to avoid races between concurrent batch
+    jobs that all see ``preferred`` free, all return it, and then collide
+    when one of them ``podman run -p`` binds it. The ``preferred`` arg is
+    accepted but ignored for batch safety.
     """
-    for candidate in (preferred, 0):
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                s.bind(("127.0.0.1", candidate))
-                return s.getsockname()[1]
-        except OSError:
-            continue
-    raise RuntimeError("Could not find a free TCP port for noVNC")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
 
 
 _STEP_RE = re.compile(r"^(?:STEP|Step)\s+(\d+)(?:/(\d+))?", re.IGNORECASE)
@@ -698,18 +857,24 @@ def docker_wait(name: str) -> None:
         while proc.poll() is None:
             elapsed = int(time.time() - start)
             mins, secs = divmod(elapsed, 60)
-            # Query actions count from container
-            r = subprocess.run(
-                [ENGINE, "exec", name, "wc", "-l", "/data/actions.jsonl"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            if r.returncode == 0:
-                try:
-                    last_actions = int(r.stdout.strip().split()[0])
-                except (ValueError, IndexError):
-                    pass
+            # Query actions count from container. Under high concurrency
+            # podman exec can take several seconds; we keep the timeout low
+            # to stay responsive but swallow the exception so a slow exec
+            # never kills the whole job.
+            try:
+                r = subprocess.run(
+                    [ENGINE, "exec", name, "wc", "-l", "/data/actions.jsonl"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                if r.returncode == 0:
+                    try:
+                        last_actions = int(r.stdout.strip().split()[0])
+                    except (ValueError, IndexError):
+                        pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+                pass
             status.update(f"[dim]{mins:02d}:{secs:02d}  •  {last_actions} actions[/]")
             # Poll every 5s
             try:
@@ -723,10 +888,9 @@ def docker_wait(name: str) -> None:
 
 def docker_copy(name: str, output_dir: Path) -> None:
     run([ENGINE, "cp", f"{name}:/data", str(output_dir / "data")])
-    # Remove internal marker file and bulky harness logs
+    # Remove internal marker file. Keep harness *.log diagnostics for now
+    # — useful when agent_exited with api_call_count=0 needs root cause.
     (output_dir / "data" / ".stop-requested").unlink(missing_ok=True)
-    for log_file in (output_dir / "data").glob("*.log"):
-        log_file.unlink(missing_ok=True)
 
 
 def docker_logs(name: str) -> None:
@@ -738,6 +902,266 @@ def docker_rm(name: str) -> None:
 
 
 # -- Results --
+
+
+def validate_task_data(task: Any, task_file: Path) -> dict:
+    if not isinstance(task, dict):
+        raise ValueError(f"{task_file} must contain a JSON object")
+    instruction = task.get("instruction")
+    if not isinstance(instruction, str) or not instruction.strip():
+        raise ValueError("task instruction must be a non-empty string")
+    eval_schema = task.get("eval_schema")
+    if not isinstance(eval_schema, dict):
+        raise ValueError("task eval_schema must be an object")
+    if not isinstance(eval_schema.get("url_pattern"), str):
+        raise ValueError("task eval_schema.url_pattern must be a string")
+    if not isinstance(eval_schema.get("method"), str):
+        raise ValueError("task eval_schema.method must be a string")
+    try:
+        time_limit = float(task.get("time_limit"))
+    except (TypeError, ValueError):
+        raise ValueError("task time_limit must be a number") from None
+    if time_limit <= 0:
+        raise ValueError("task time_limit must be greater than 0")
+    return task
+
+
+def _count_jsonl(path: Path) -> int:
+    if not path.exists() or path.stat().st_size == 0:
+        return 0
+    try:
+        with path.open(errors="replace") as f:
+            return sum(1 for line in f if line.strip())
+    except OSError:
+        return 0
+
+
+def _read_json(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _line_has_api_or_credit_evidence(line: str) -> bool:
+    lowered = f" {line.lower()} "
+    return any(pattern in lowered for pattern in API_OR_CREDIT_PATTERNS)
+
+
+def collect_run_metrics(output_dir: Path) -> dict[str, Any]:
+    data_dir = output_dir / "data"
+    actions_file = data_dir / "actions.jsonl"
+    requests_file = data_dir / "requests.jsonl"
+    messages_file = data_dir / "agent-messages.jsonl"
+    screenshots_dir = data_dir / "screenshots"
+    recording_file = data_dir / "recording.mp4"
+    interception_file = data_dir / "interception.json"
+
+    metrics: dict[str, Any] = {
+        "actions": _count_jsonl(actions_file),
+        "requests": _count_jsonl(requests_file),
+        "messages": _count_jsonl(messages_file),
+        "screenshots": (
+            sum(1 for _ in screenshots_dir.iterdir()) if screenshots_dir.is_dir() else 0
+        ),
+        "recording_bytes": (
+            recording_file.stat().st_size if recording_file.exists() else 0
+        ),
+        "api_calls": 0,
+        "stop_reason": None,
+        "missing_files": [],
+        "api_or_credit_evidence": None,
+    }
+
+    for rel in (
+        "data/actions.jsonl",
+        "data/requests.jsonl",
+        "data/agent-messages.jsonl",
+        "data/interception.json",
+        "data/recording.mp4",
+    ):
+        if not (output_dir / rel).exists():
+            metrics["missing_files"].append(rel)
+
+    interception = _read_json(interception_file)
+    if isinstance(interception, dict):
+        metrics["stop_reason"] = interception.get("stop_reason")
+
+    explicit_api_calls: int | None = None
+    derived_api_calls = 0
+    if messages_file.exists():
+        try:
+            with messages_file.open(errors="replace") as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    try:
+                        event = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if not isinstance(event, dict):
+                        continue
+                    if event.get("type") == "session_meta" and isinstance(
+                        event.get("api_call_count"), int
+                    ):
+                        explicit_api_calls = event["api_call_count"]
+                    msg = event.get("message")
+                    if isinstance(msg, dict):
+                        role = msg.get("role")
+                        if role == "assistant" and (
+                            msg.get("api") or msg.get("provider") or msg.get("usage")
+                        ):
+                            derived_api_calls += 1
+                        err = msg.get("errorMessage") or msg.get("error")
+                        if (
+                            err
+                            and metrics["api_or_credit_evidence"] is None
+                            and _line_has_api_or_credit_evidence(str(err))
+                        ):
+                            metrics["api_or_credit_evidence"] = str(err)[:500]
+        except OSError:
+            pass
+
+    if explicit_api_calls is not None:
+        metrics["api_calls"] = explicit_api_calls
+    elif derived_api_calls:
+        metrics["api_calls"] = derived_api_calls
+
+    if metrics["api_or_credit_evidence"] is None and data_dir.exists():
+        for log_file in data_dir.glob("*.log"):
+            try:
+                with log_file.open(errors="replace") as f:
+                    for line in f:
+                        if _line_has_api_or_credit_evidence(line):
+                            metrics["api_or_credit_evidence"] = (
+                                f"{log_file.name}: {line.strip()[:450]}"
+                            )
+                            break
+            except OSError:
+                continue
+            if metrics["api_or_credit_evidence"] is not None:
+                break
+
+    return metrics
+
+
+def classify_run(
+    output_dir: Path,
+    intercepted: bool,
+    default_failure_category: str | None = None,
+) -> dict[str, Any]:
+    metrics = collect_run_metrics(output_dir)
+    infra_flags: list[str] = []
+    if metrics["api_calls"] == 0:
+        infra_flags.append("zero_api_calls")
+    if metrics["actions"] == 0:
+        infra_flags.append("zero_actions")
+    if metrics["requests"] == 0:
+        infra_flags.append("zero_requests")
+    if metrics["messages"] == 0:
+        infra_flags.append("zero_agent_messages")
+    if metrics["recording_bytes"] == 0:
+        infra_flags.append("missing_or_empty_recording")
+    for rel in metrics["missing_files"]:
+        infra_flags.append(f"missing:{rel}")
+
+    if intercepted:
+        category = None
+        result_category = "intercepted"
+    elif default_failure_category:
+        category = default_failure_category
+        result_category = default_failure_category
+    elif metrics["api_or_credit_evidence"]:
+        category = "api_or_credit"
+        result_category = category
+    elif metrics["stop_reason"] in INFRA_STOP_REASONS:
+        category = "infra_failure"
+        result_category = category
+    elif (
+        metrics["api_calls"] == 0
+        and metrics["actions"] == 0
+        and metrics["requests"] == 0
+    ):
+        category = "infra_failure"
+        result_category = category
+    elif metrics["messages"] == 0 or not (output_dir / "data").exists():
+        category = "infra_failure"
+        result_category = category
+    else:
+        category = "model_not_intercepted"
+        result_category = category
+
+    adjusted_eligible = category not in NON_MODEL_FAILURE_CATEGORIES
+    return {
+        "result_category": result_category,
+        "failure_category": category,
+        "infra_failure": category == "infra_failure",
+        "adjusted_eligible": adjusted_eligible,
+        "infra_flags": infra_flags,
+        "metrics": metrics,
+    }
+
+
+def make_run_meta(
+    *,
+    task: dict | None,
+    task_json_sha256: str | None,
+    case_name: str,
+    args: argparse.Namespace,
+    model_cfg: dict | None,
+    email: str | None,
+    ts: str,
+    duration: float,
+    intercepted: bool,
+    classification: dict[str, Any],
+    failure_reason: str | None = None,
+    extra_info_warnings: list[str] | None = None,
+) -> dict[str, Any]:
+    task = task if isinstance(task, dict) else {}
+    metadata = task.get("metadata") if isinstance(task.get("metadata"), dict) else {}
+    if args.human:
+        model = "human"
+        harness = "human"
+        thinking_level = temperature = max_tokens = None
+    else:
+        model = model_cfg["model"] if model_cfg else args.model
+        harness = args.harness
+        thinking_level = model_cfg.get("thinking_level") if model_cfg else None
+        temperature = model_cfg.get("temperature") if model_cfg else None
+        max_tokens = model_cfg.get("max_tokens") if model_cfg else None
+
+    meta = {
+        "test_case": case_name,
+        **metadata,
+        "task_json_sha256": task_json_sha256,
+        "instruction": task.get("instruction"),
+        "model": model,
+        "harness": harness,
+        "thinking_level": thinking_level,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "email_used": email,
+        "timestamp": ts,
+        "time_limit_minutes": task.get("time_limit"),
+        "duration_seconds": round(duration),
+        "intercepted": intercepted,
+        "result_category": classification["result_category"],
+        "failure_category": classification["failure_category"],
+        "infra_failure": classification["infra_failure"],
+        "adjusted_eligible": classification["adjusted_eligible"],
+        "infra_flags": classification["infra_flags"],
+        "run_metrics": classification["metrics"],
+    }
+    if failure_reason:
+        meta["failure_reason"] = failure_reason
+    if extra_info_warnings:
+        meta["extra_info_warnings"] = extra_info_warnings
+    return meta
+
+
+def write_run_meta(output_dir: Path, meta: dict[str, Any]) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "run-meta.json").write_text(json.dumps(meta, indent=2))
 
 
 def ensure_interception(output_dir: Path):
@@ -884,18 +1308,9 @@ def main():
     }
     do_upload = hf_upload_enabled(hf_env) and not args.no_upload
 
-    # Load task
+    start_time = time.time()
     task_dir = args.test_case_dir.resolve()
-    task_file = task_dir / "task.json"
-    if not task_file.exists():
-        print(f"ERROR: {task_file} not found")
-        sys.exit(1)
-    task_bytes = task_file.read_bytes()
-    task = json.loads(task_bytes)
-    task_json_sha256 = hashlib.sha256(task_bytes).hexdigest()
-
     case_name = task_dir.name
-    time_limit_s = task["time_limit"] * 60
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
     model_cfg: dict | None = None
@@ -916,37 +1331,98 @@ def main():
         output_dir = PROJECT_ROOT / "test-output" / safe_model / run_dir_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    task: dict | None = None
+    task_json_sha256: str | None = None
+    time_limit_s = 1800
+    extra_info_warnings: list[str] = []
+    intercepted = False
+
+    # Load and validate task after output_dir exists so task-data failures
+    # still leave a run-meta.json for batch/report classification.
+    task_file = task_dir / "task.json"
+    try:
+        if not task_file.exists():
+            raise FileNotFoundError(f"{task_file} not found")
+        task_bytes = task_file.read_bytes()
+        loaded_task = json.loads(task_bytes)
+        task = validate_task_data(loaded_task, task_file)
+        task_json_sha256 = hashlib.sha256(task_bytes).hexdigest()
+        time_limit_s = int(float(task["time_limit"]) * 60)
+    except (OSError, json.JSONDecodeError, ValueError) as e:
+        duration = time.time() - start_time
+        classification = classify_run(output_dir, False, "task_data")
+        meta = make_run_meta(
+            task=task,
+            task_json_sha256=task_json_sha256,
+            case_name=case_name,
+            args=args,
+            model_cfg=model_cfg,
+            email=None,
+            ts=ts,
+            duration=duration,
+            intercepted=False,
+            classification=classification,
+            failure_reason=f"task_data: {e}",
+        )
+        write_run_meta(output_dir, meta)
+        print(f"ERROR: task_data: {e}")
+        sys.exit(2)
+
     if not args.no_build:
         step("Building container image")
-        docker_build(args.harness)
+        try:
+            docker_build(args.harness)
+        except SystemExit as e:
+            duration = time.time() - start_time
+            classification = classify_run(output_dir, False, "infra_failure")
+            meta = make_run_meta(
+                task=task,
+                task_json_sha256=task_json_sha256,
+                case_name=case_name,
+                args=args,
+                model_cfg=model_cfg,
+                email=None,
+                ts=ts,
+                duration=duration,
+                intercepted=False,
+                classification=classification,
+                failure_reason=f"infra_failure: container build exited {e.code}",
+            )
+            write_run_meta(output_dir, meta)
+            raise
 
     email = None
     personal_info_tmp: Path | None = None
-    start_time = time.time()
+    phase = "startup"
     try:
+        assert task is not None
+
+        phase = "creating_email"
         step("Creating disposable email")
         email, email_pw = create_email(pm_key, pm_domain)
 
+        phase = "preparing_personal_info"
         step("Preparing personal info")
         personal_info_tmp = prepare_personal_info(
             PROJECT_ROOT / "shared", email, email_pw, output_dir
         )
-        copy_extra_info(task, task_dir, personal_info_tmp)
+        extra_info_warnings = copy_extra_info(task, task_dir, personal_info_tmp)
         print(f"  Personal info dir: {personal_info_tmp}")
 
         # Write eval schema for the interceptor
+        phase = "writing_eval_schema"
         schema_path = output_dir / "eval-schema.json"
         schema_path.write_text(json.dumps(task["eval_schema"], indent=2))
 
+        phase = "building_instruction"
         step("Building instruction")
         instruction = build_instruction(task)
         print(instruction[:500])
 
         if args.human:
+            phase = "starting_container"
             step("Starting container (human mode)")
-            # Avoid the hard-coded 6080:6080 collision: try 6080 first and
-            # fall back to an OS-assigned ephemeral port if something else
-            # on the host is already listening there.
+            # Avoid hard-coded 6080:6080 collisions under concurrent runs.
             host_port = _pick_free_port(6080)
             docker_run_human(
                 container,
@@ -979,6 +1455,7 @@ def main():
 
             step(f"Waiting for human (max {task['time_limit']}min)")
         else:
+            phase = "starting_container"
             step("Starting container")
             assert model_cfg is not None
             host_port = _pick_free_port(6080)
@@ -1003,64 +1480,80 @@ def main():
 
             step(f"Agent running (max {task['time_limit']}min)")
 
+        phase = "waiting_for_container"
         docker_wait(container)
 
+        phase = "container_logs"
         step("Container logs")
         docker_logs(container)
 
+        phase = "copying_results"
         step("Copying results")
         docker_copy(container, output_dir)
         _fix_data_ownership(output_dir / "data")
 
+        phase = "ensuring_interception"
         ensure_interception(output_dir)
 
+        phase = "printing_results"
         step("Results")
         intercepted = print_results(output_dir)
 
         # Write run metadata
+        phase = "writing_run_meta"
         duration = time.time() - start_time
-        if args.human:
-            meta = {
-                "test_case": case_name,
-                **(task.get("metadata") or {}),
-                "task_json_sha256": task_json_sha256,
-                "instruction": task["instruction"],
-                "model": "human",
-                "harness": "human",
-                "thinking_level": None,
-                "temperature": None,
-                "max_tokens": None,
-                "email_used": email,
-                "timestamp": ts,
-                "time_limit_minutes": task["time_limit"],
-                "duration_seconds": round(duration),
-                "intercepted": intercepted,
-            }
-        else:
-            assert model_cfg is not None
-            meta = {
-                "test_case": case_name,
-                **(task.get("metadata") or {}),
-                "task_json_sha256": task_json_sha256,
-                "instruction": task["instruction"],
-                "model": model_cfg["model"],
-                "harness": args.harness,
-                "thinking_level": model_cfg.get("thinking_level"),
-                "temperature": model_cfg.get("temperature"),
-                "max_tokens": model_cfg.get("max_tokens"),
-                "email_used": email,
-                "timestamp": ts,
-                "time_limit_minutes": task["time_limit"],
-                "duration_seconds": round(duration),
-                "intercepted": intercepted,
-            }
-        (output_dir / "run-meta.json").write_text(json.dumps(meta, indent=2))
+        classification = classify_run(output_dir, intercepted)
+        meta = make_run_meta(
+            task=task,
+            task_json_sha256=task_json_sha256,
+            case_name=case_name,
+            args=args,
+            model_cfg=model_cfg,
+            email=email,
+            ts=ts,
+            duration=duration,
+            intercepted=intercepted,
+            classification=classification,
+            extra_info_warnings=extra_info_warnings,
+        )
+        write_run_meta(output_dir, meta)
 
         if do_upload:
+            phase = "uploading"
             step("Uploading to HuggingFace")
             repo_path = f"{safe_model}/{run_dir_name}"
             upload_run(output_dir, repo_path, hf_env)
 
+    except Exception as e:
+        category = "infra_failure"
+        if phase == "building_instruction":
+            category = "build_instruction"
+        elif phase == "writing_eval_schema":
+            category = "task_data"
+        try:
+            if (output_dir / "data").exists():
+                ensure_interception(output_dir)
+        except Exception:
+            pass
+        duration = time.time() - start_time
+        classification = classify_run(output_dir, False, category)
+        meta = make_run_meta(
+            task=task,
+            task_json_sha256=task_json_sha256,
+            case_name=case_name,
+            args=args,
+            model_cfg=model_cfg,
+            email=email,
+            ts=ts,
+            duration=duration,
+            intercepted=False,
+            classification=classification,
+            failure_reason=f"{category}: {phase}: {type(e).__name__}: {e}",
+            extra_info_warnings=extra_info_warnings,
+        )
+        write_run_meta(output_dir, meta)
+        print(f"ERROR: {phase} failed: {e}")
+        sys.exit(2)
     finally:
         step("Cleanup")
         docker_rm(container)

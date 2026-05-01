@@ -33,6 +33,7 @@ target-version = "py311"
 
 [dependency-groups]
 dev = [
+    "jsonschema>=4.26.0",
     "pre-commit>=4.6.0",
     "ruff>=0.15.12",
 ]
