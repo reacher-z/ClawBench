@@ -32,13 +32,20 @@ If no `good first issue` is currently open, just open one with your idea and we'
 
 ## Adding a new test case
 
-1. **Pick a task ID** — find the next available number by checking existing directories in `test-cases/`.
+ClawBench currently has two task corpora: V1 lives in `test-cases/` with 153 tasks, and V2 lives in `test-cases-v2/` with 130 tasks. Both use `test-cases/task.schema.json`. Unless a maintainer asks for a V2-only contribution, add new tasks to V1.
+
+1. **Pick a task ID** — find the next available number by checking existing directories in the target corpus (`test-cases/` for V1, or `test-cases-v2/` for V2).
 
 2. **Create the directory** following the naming convention:
    ```
    test-cases/<id>-<metaclass>-<class>-<platform>/
    ```
    Example: `test-cases/887-daily-life-food-grubhub/`
+
+   V2 directories use the `v2-` prefix:
+   ```
+   test-cases-v2/v2-<id>-<metaclass>-<class>-<platform>/
+   ```
 
 3. **Create `task.json`** in the directory. It must conform to `test-cases/task.schema.json`:
    ```json
@@ -65,6 +72,7 @@ If no `good first issue` is currently open, just open one with your idea and we'
      "time_limit": 30
    }
    ```
+   For V2 tasks, keep the shared schema reference as `"$schema": "../test-cases/task.schema.json"`.
 
 4. **Set the eval_schema** — this tells the interceptor which HTTP request to block:
    - If the task has an irreversible action (form submit, email send, application submit): set `url_pattern` to a regex matching the submission endpoint, and `method` to the HTTP method.
@@ -74,6 +82,10 @@ If no `good first issue` is currently open, just open one with your idea and we'
 5. **Test with human mode** to verify the task is completable:
    ```bash
    uv run clawbench-run test-cases/887-daily-life-food-grubhub --human
+   ```
+   For V2:
+   ```bash
+   uv run clawbench-run test-cases-v2/v2-887-daily-life-food-grubhub --human
    ```
 
 6. **Submit a PR** with your new test case directory. Include in the PR description:
