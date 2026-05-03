@@ -536,25 +536,43 @@ uv run clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
 ## 常见问题
 
 **ClawBench 是什么?**
-ClawBench 是一个开源的 AI browser agent 基准 —— 即那些驱动真实浏览器去完成用户任务的系统(基于 GPT、Claude,或开源模型)。它衡量的是 agent 是否真的完成了 153 项日常在线任务,涵盖 144 个真实网站,而不是它产生的文本看起来是否对。
+ClawBench 是一个开源的 AI browser agent 基准 —— 即那些驱动真实浏览器去完成用户任务的系统(基于 GPT、Claude,或开源模型)。V1 衡量 agent 是否真的完成了 153 项日常在线任务,涵盖 144 个真实网站;V2 在 `test-cases-v2/` 中新增 130 项任务。它衡量的是端到端完成情况,而不是 agent 产生的文本看起来是否对。
 
 **ClawBench 覆盖哪些任务?**
 15 个生活类别:外卖、订票、投简历、购物、租房、邮件与日历管理、学术研究、软件开发、学习平台等等。每一项都是一个普通人在普通的一周里、在真实网站上可能做的事。
 
+**153 个任务够评测吗?**
+够作为 V1 的 benchmark 信号:这 153 项任务覆盖 144 个真实网站和 15 个生活类别,而且完整跑一遍成本很高,因为每次运行都要启动隔离容器、访问真实网站、记录五层数据,并在运行后对照人工参考轨迹评判。V2 在 `test-cases-v2/` 里又补充了 130 项任务。想低成本试跑时,可以先用 20 题精选子集 [`test-cases/lite.json`](test-cases/lite.json)。
+
 **任务成功如何判定?**
 每个任务运行在隔离的浏览器容器中,并进行五层录制:视频、截图、网络请求、浏览器动作和 agent 消息。评测器会把 agent 轨迹与人工参考运行对照,并基于录制证据给出 PASS 或 FAIL。
+
+**CAPTCHA / 人机校验造成的失败如何处理?**
+如果 agent 遇到 CAPTCHA,它必须尝试解决。我们观察到一些前沿模型可以解决部分 CAPTCHA。CAPTCHA 失败可能来自模型行为、浏览器控制栈限制,也可能来自网站自己的风控。
 
 **目前最高分是多少?**
 33.3% —— 大约三分之一的任务完成率 —— 来自我们评测过的最强前沿模型。大多数任务仍能击败我们测试过的每一个模型;提升空间真实存在,基准尚未饱和。
 
+**公开模型结果是基于哪个 harness 跑的?**
+仓库默认 harness 是 `openclaw`,所有已公开结果都基于这个 harness。ClawBench 也支持 `src/harnesses/` 中列出的其他 harness,运行时可以用 `--harness` 选择。
+
+**ClawBench 和 OpenClaw 深耦合吗?**
+不深耦合。OpenClaw 是默认 harness,但 ClawBench 支持 `src/harnesses/` 中列出的可替换 harness。
+
+**支持 CLI agent 吗?**
+支持。ClawBench 评测的是浏览器任务完成情况,但 CLI / coding-agent harness 可以用原生工具或 MCP 驱动同一个被录制和拦截的 Chromium 会话。
+
 **如何复现已发表的分数?**
-在源码 checkout 中配置好 `models/models.yaml` 和 `.env`,然后运行 `uv run clawbench`。TUI 会构建容器镜像,并在你选择的模型上运行本地 `test-cases/` 中 153 项任务的任意子集。
+在源码 checkout 中配置好 `models/models.yaml` 和 `.env`,然后运行 `uv run clawbench`。TUI 会构建容器镜像,并在你选择的模型上运行本地任务。批量运行 V1 用 `--all-cases`;运行 V2 可以用 `--all-cases-v2`,或 `--cases-dir test-cases-v2 --all-cases`。
+
+**会更新新模型结果吗?**
+会。新模型可以通过贡献流程和 issue 提交 / 请求测试。我们有机会也会测试并发布一些新模型的结果。
 
 **在真实网站上运行 ClawBench 安全吗?**
 runner 使用加固的容器,内置请求拦截器,默认阻止下单付款、注册账号、发送邮件等不可逆动作。需要*模拟*这些动作的任务(比如"加入购物车并结账")会在最后一个可逆步骤终止。若你的研究确实需要,可以按任务放宽拦截器。
 
 **可以贡献新任务或新 harness 吗?**
-可以。任务放在 `test-cases/`; 测试用例 schema 和验证流程详见 `CONTRIBUTING.md`。
+可以。V1 任务放在 `test-cases/`;V2 任务放在 `test-cases-v2/`。测试用例 schema 和验证流程详见 `CONTRIBUTING.md`。
 
 **ClawBench 和 HarnessBench 是什么关系?**
 同一套评分管线,正交维度。ClawBench 固定 harness、比较不同模型;HarnessBench 固定模型、比较不同 harness。两者共享 153 项任务集、五层录制和 agentic evaluator —— 分数可直接相互比较。
