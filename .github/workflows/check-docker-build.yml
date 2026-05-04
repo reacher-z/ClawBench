@@ -16,11 +16,44 @@ on:
 jobs:
   docker-build:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILD_PARALLELISM: "3"
 
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v5.1.0
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Restore Docker build cache
+        id: docker-cache
+        uses: actions/cache@v5.0.5
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-buildx-
+
+      - name: Inspect restored Docker build cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -d /tmp/.buildx-cache ]]; then
+            echo "Restored cache scopes:"
+            find /tmp/.buildx-cache -mindepth 1 -maxdepth 1 -type d -print | sort
+            du -sh /tmp/.buildx-cache || true
+          else
+            echo "No Docker build cache restored."
+          fi
 
       - name: Select harness Dockerfiles
         id: dockerfiles
@@ -140,37 +173,119 @@ jobs:
           runtime_root="src/clawbench/runtime"
           harness_root="${runtime_root}/harnesses"
           base_dockerfile="${harness_root}/base/Dockerfile.base"
+          cache_root="/tmp/.buildx-cache"
+          cache_update="/tmp/.buildx-cache-update"
+          status_root="/tmp/clawbench-docker-build-status"
+          parallelism="${DOCKER_BUILD_PARALLELISM:-3}"
+
+          rm -rf "${cache_update}" "${status_root}"
+          mkdir -p "${cache_root}" "${cache_update}" "${status_root}"
 
           {
             echo
             echo "## Docker build results"
             echo
+            echo "- Restored cache key: \`${{ steps.docker-cache.outputs.cache-matched-key || 'none' }}\`"
+            echo "- Exact cache hit: \`${{ steps.docker-cache.outputs.cache-hit || 'false' }}\`"
+            echo
             echo "| Image | Status |"
             echo "| --- | --- |"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-          if docker build -f "${base_dockerfile}" -t clawbench-base -t clawbench-base:amd64 "${runtime_root}"; then
+          build_with_cache() {
+            local dockerfile="$1"
+            local image="$2"
+            local scope="$3"
+            local cache_args=()
+
+            if [[ -f "${cache_root}/${scope}/index.json" ]]; then
+              echo "[cache] ${scope}: hit at ${cache_root}/${scope}"
+              cache_args+=(--cache-from "type=local,src=${cache_root}/${scope}")
+            else
+              echo "[cache] ${scope}: miss"
+            fi
+
+            docker buildx build \
+              --load \
+              --progress=plain \
+              --provenance=false \
+              -f "${dockerfile}" \
+              -t "${image}" \
+              "${cache_args[@]}" \
+              --cache-to "type=local,dest=${cache_update}/${scope},mode=max" \
+              "${runtime_root}"
+          }
+
+          if build_with_cache "${base_dockerfile}" "clawbench-base" "base"; then
+            docker tag clawbench-base clawbench-base:amd64
             echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
 
-          while IFS= read -r dockerfile; do
-            [[ -n "${dockerfile}" ]] || continue
+          build_harness() {
+            local dockerfile="$1"
+            local harness
+            local image
+            local status
 
             harness="$(basename "$(dirname "${dockerfile}")")"
             image="clawbench-${harness}"
+            status="${status_root}/${harness}.status"
 
-            echo "::group::Build ${image}"
-            if docker build -f "${dockerfile}" -t "${image}" "${runtime_root}"; then
-              echo "| \`${image}\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "[${harness}] Starting ${image}"
+            set -o pipefail
+            if build_with_cache "${dockerfile}" "${image}" "${harness}" 2>&1 | sed -u "s/^/[${harness}] /"; then
+              echo "passed" > "${status}"
+              echo "[${harness}] Finished ${image}"
             else
-              echo "| \`${image}\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
-              echo "::endgroup::"
-              exit 1
+              echo "failed" > "${status}"
+              echo "[${harness}] Failed ${image}"
+              return 1
             fi
-            echo "::endgroup::"
-          done <<'EOF'
+          }
+
+          export -f build_with_cache build_harness
+          export runtime_root cache_root cache_update status_root
+
+          mapfile -t selected_dockerfiles <<'EOF'
           ${{ steps.dockerfiles.outputs.dockerfiles }}
           EOF
+          filtered_dockerfiles=()
+          for dockerfile in "${selected_dockerfiles[@]}"; do
+            [[ -n "${dockerfile}" ]] && filtered_dockerfiles+=("${dockerfile}")
+          done
+          selected_dockerfiles=("${filtered_dockerfiles[@]}")
+
+          if (( ${#selected_dockerfiles[@]} > 0 )); then
+            echo "Building ${#selected_dockerfiles[@]} harness image(s) with parallelism=${parallelism}"
+            set +e
+            printf '%s\0' "${selected_dockerfiles[@]}" \
+              | xargs -0 -n 1 -P "${parallelism}" bash -c "build_harness \"\$1\"" _
+            harness_status=$?
+            set -e
+
+            for dockerfile in "${selected_dockerfiles[@]}"; do
+              [[ -n "${dockerfile}" ]] || continue
+              harness="$(basename "$(dirname "${dockerfile}")")"
+              image="clawbench-${harness}"
+              if [[ "$(cat "${status_root}/${harness}.status" 2>/dev/null || true)" == "passed" ]]; then
+                echo "| \`${image}\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
+              else
+                echo "| \`${image}\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
+              fi
+            done
+
+            if (( harness_status != 0 )); then
+              exit "${harness_status}"
+            fi
+          fi
+
+          for scope_dir in "${cache_update}"/*; do
+            [[ -d "${scope_dir}" ]] || continue
+            scope="$(basename "${scope_dir}")"
+            rm -rf "${cache_root:?}/${scope}"
+            mv "${scope_dir}" "${cache_root}/${scope}"
+          done
+          rm -rf "${cache_update}"
