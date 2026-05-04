@@ -6,14 +6,22 @@ on:
     paths:
       - "**.py"
       - ".github/workflows/static-check.yml"
+      - ".env"
+      - "models/models.example.yaml"
+      - "models/model.schema.json"
       - "pyproject.toml"
+      - "test-cases/**"
       - "uv.lock"
   push:
     branches: [ main ]
     paths:
       - "**.py"
       - ".github/workflows/static-check.yml"
+      - ".env"
+      - "models/models.example.yaml"
+      - "models/model.schema.json"
       - "pyproject.toml"
+      - "test-cases/**"
       - "uv.lock"
   workflow_dispatch:
 
@@ -37,3 +45,8 @@ jobs:
 
       - name: Ruff format check
         run: uv run --frozen ruff format --check .
+
+      - name: Build package
+        env:
+          UV_FROZEN: "true"
+        run: uv build
