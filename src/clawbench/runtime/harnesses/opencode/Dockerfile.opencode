@@ -1,0 +1,18 @@
+FROM node:24-slim AS node-runtime
+
+FROM clawbench-base
+
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# Pin opencode and Playwright MCP versions for reproducible builds —
+# matches the openclaw-side `openclaw@2026.3.13` pin pattern.
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g \
+    opencode-ai@1.4.4 \
+    @playwright/mcp@0.0.70
+
+COPY harnesses/opencode/setup-opencode.sh /setup-opencode.sh
+COPY harnesses/opencode/run-opencode.sh /run-harness.sh
+RUN chmod +x /setup-opencode.sh /run-harness.sh

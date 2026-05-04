@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
 
 [project]
 name = "clawbench"
@@ -21,12 +21,32 @@ clawbench = "clawbench.tui:main"
 clawbench-run = "clawbench.runner.run:main"
 clawbench-batch = "clawbench.runner.batch:main"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = ["clawbench", "clawbench.runner", "clawbench.utils"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/clawbench"]
 
-[tool.setuptools.package-data]
-"clawbench.utils" = ["resume_template.json"]
+[tool.hatch.build.targets.wheel.force-include]
+".env" = "clawbench/_bundled/.env"
+"models/models.example.yaml" = "clawbench/_bundled/models/models.example.yaml"
+"models/model.schema.json" = "clawbench/_bundled/models/model.schema.json"
+"test-cases" = "clawbench/_bundled/test-cases"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/.env",
+    "/models/models.example.yaml",
+    "/models/model.schema.json",
+    "/test-cases",
+    "/src/clawbench",
+    "/README.md",
+    "/LICENSE",
+    "/NOTICE",
+]
+exclude = [
+    "/models/models.yaml",
+    "/test-output",
+    "/dist",
+    "/build",
+]
 
 [tool.ruff]
 target-version = "py311"

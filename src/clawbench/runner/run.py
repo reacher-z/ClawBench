@@ -26,7 +26,16 @@ from rich.status import Status
 
 from clawbench.utils.generate_resume_pdf import generate_resume_pdf
 from clawbench.utils.hf_upload import hf_upload_enabled, upload_run
-from clawbench.utils.paths import HARNESS_ROOT, PROJECT_ROOT
+from clawbench.utils.paths import (
+    ASSET_ROOT,
+    DOCKER_CONTEXT_ROOT,
+    HARNESS_ROOT,
+    SHARED_ROOT,
+    WORKSPACE_ROOT,
+    bundled_path,
+    ensure_workspace_templates,
+    workspace_path,
+)
 
 HARNESSES = (
     "openclaw",
@@ -47,7 +56,7 @@ def harness_image(harness: str) -> str:
     return f"clawbench-{harness}"
 
 
-# Per-harness Dockerfile paths. The build context remains PROJECT_ROOT.
+# Per-harness Dockerfile paths. The build context is the packaged runtime tree.
 BASE_DOCKERFILE = HARNESS_ROOT / "base" / "Dockerfile.base"
 _HARNESS_DOCKERFILES: dict[str, Path] = {
     "openclaw": HARNESS_ROOT / "openclaw" / "Dockerfile.openclaw",
@@ -156,7 +165,7 @@ def load_dotenv(path: Path) -> dict[str, str]:
     return env
 
 
-MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
+MODELS_YAML = WORKSPACE_ROOT / "models" / "models.yaml"
 
 
 def load_models_yaml() -> dict:
@@ -167,6 +176,28 @@ def load_models_yaml() -> dict:
         )
         sys.exit(1)
     return yaml.safe_load(MODELS_YAML.read_text()) or {}
+
+
+def load_runtime_env() -> dict[str, str]:
+    """Load runtime credentials, preferring workspace overrides."""
+    env = load_dotenv(bundled_path(".env"))
+    env.update(load_dotenv(workspace_path(".env")))
+    return env
+
+
+def resolve_test_case_dir(path: Path) -> Path:
+    """Resolve a case path from cwd/workspace first, then bundled assets."""
+    if path.is_absolute():
+        return path
+    candidates = [
+        Path.cwd() / path,
+        WORKSPACE_ROOT / path,
+        ASSET_ROOT / path,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.resolve()
+    return (Path.cwd() / path).resolve()
 
 
 def load_model_config(model: str) -> dict:
@@ -596,7 +627,7 @@ def _looks_like_stale_cache(output_lines: list[str]) -> bool:
 def _build_one(dockerfile: Path, tag: str) -> None:
     """Run a single ``docker build`` with the shared spinner and stale-cache
     retry. Exits the process on failure."""
-    cmd = [ENGINE, "build", "-f", str(dockerfile), "-t", tag, str(PROJECT_ROOT)]
+    cmd = [ENGINE, "build", "-f", str(dockerfile), "-t", tag, str(DOCKER_CONTEXT_ROOT)]
     rc, last_line, output_lines = _run_build(cmd)
 
     if rc != 0 and _looks_like_stale_cache(output_lines):
@@ -618,7 +649,7 @@ def _build_one(dockerfile: Path, tag: str) -> None:
             str(dockerfile),
             "-t",
             tag,
-            str(PROJECT_ROOT),
+            str(DOCKER_CONTEXT_ROOT),
         ]
         rc, last_line, output_lines = _run_build(cmd_nc)
 
@@ -1244,6 +1275,8 @@ def print_results(output_dir: Path) -> bool:
 
 
 def main():
+    ensure_workspace_templates()
+
     parser = argparse.ArgumentParser(description="Run a single ClawBench test case")
     parser.add_argument(
         "test_case_dir", type=Path, help="Path to the test case directory"
@@ -1291,7 +1324,7 @@ def main():
         parser.error("model is required for agent mode (or use --human)")
 
     # Load infrastructure config from .env (PurelyMail only)
-    env = load_dotenv(PROJECT_ROOT / ".env")
+    env = load_runtime_env()
     infra_required = ["PURELY_MAIL_API_KEY", "PURELY_MAIL_DOMAIN"]
     missing = [k for k in infra_required if not env.get(k)]
     if missing:
@@ -1309,7 +1342,7 @@ def main():
     do_upload = hf_upload_enabled(hf_env) and not args.no_upload
 
     start_time = time.time()
-    task_dir = args.test_case_dir.resolve()
+    task_dir = resolve_test_case_dir(args.test_case_dir)
     case_name = task_dir.name
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
@@ -1328,7 +1361,7 @@ def main():
     if args.output_dir is not None:
         output_dir = args.output_dir.resolve() / safe_model / run_dir_name
     else:
-        output_dir = PROJECT_ROOT / "test-output" / safe_model / run_dir_name
+        output_dir = WORKSPACE_ROOT / "test-output" / safe_model / run_dir_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
     task: dict | None = None
@@ -1404,7 +1437,7 @@ def main():
         phase = "preparing_personal_info"
         step("Preparing personal info")
         personal_info_tmp = prepare_personal_info(
-            PROJECT_ROOT / "shared", email, email_pw, output_dir
+            SHARED_ROOT, email, email_pw, output_dir
         )
         extra_info_warnings = copy_extra_info(task, task_dir, personal_info_tmp)
         print(f"  Personal info dir: {personal_info_tmp}")
