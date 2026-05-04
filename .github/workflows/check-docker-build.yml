@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - "src/harnesses/**/Dockerfile*"
+      - "src/clawbench/runtime/**"
       - ".github/workflows/check-docker-build.yml"
   push:
     branches: [ main ]
     paths:
-      - "src/harnesses/**/Dockerfile*"
+      - "src/clawbench/runtime/**"
       - ".github/workflows/check-docker-build.yml"
   workflow_dispatch:
 
@@ -28,15 +28,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          base_dockerfile="src/harnesses/base/Dockerfile.base"
+          runtime_root="src/clawbench/runtime"
+          harness_root="${runtime_root}/harnesses"
+          base_dockerfile="${harness_root}/base/Dockerfile.base"
 
           mapfile -t all_harness_dockerfiles < <(
-            find src/harnesses -mindepth 2 -maxdepth 2 -type f -name 'Dockerfile*' \
+            find "${harness_root}" -mindepth 2 -maxdepth 2 -type f -name 'Dockerfile*' \
               ! -path "${base_dockerfile}" \
               | sort
           )
 
           build_all=false
+          changed_runtime_files=()
           changed_dockerfiles=()
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -60,17 +63,30 @@ jobs:
               echo "Head SHA ${head_sha} is not available in the checkout." >&2
               exit 1
             else
-              mapfile -t changed_dockerfiles < <(
-                git diff --name-only --diff-filter=ACMRT "${base_sha}" "${head_sha}" -- src/harnesses \
-                  | grep -E '^src/harnesses/[^/]+/Dockerfile[^/]*$' \
+              mapfile -t changed_runtime_files < <(
+                git diff --name-only --diff-filter=ACMRT "${base_sha}" "${head_sha}" -- "${runtime_root}" \
                   | sort
               )
 
-              for dockerfile in "${changed_dockerfiles[@]}"; do
-                if [[ "${dockerfile}" == "${base_dockerfile}" ]]; then
-                  build_all=true
-                  break
-                fi
+              if (( ${#changed_runtime_files[@]} == 0 )); then
+                build_all=true
+              fi
+
+              for path in "${changed_runtime_files[@]}"; do
+                case "${path}" in
+                  "${harness_root}/base/"*|"${runtime_root}/chrome-extension/"*|"${runtime_root}/extension-server/"*|"${runtime_root}/shared/"*)
+                    build_all=true
+                    break
+                    ;;
+                  "${harness_root}/"*)
+                    harness="${path#"${harness_root}/"}"
+                    harness="${harness%%/*}"
+                    dockerfile="${harness_root}/${harness}/Dockerfile.${harness}"
+                    if [[ -f "${dockerfile}" ]]; then
+                      changed_dockerfiles+=("${dockerfile}")
+                    fi
+                    ;;
+                esac
               done
             fi
           fi
@@ -84,6 +100,9 @@ jobs:
                 selected_dockerfiles+=("${dockerfile}")
               fi
             done
+            if (( ${#selected_dockerfiles[@]} > 0 )); then
+              mapfile -t selected_dockerfiles < <(printf '%s\n' "${selected_dockerfiles[@]}" | sort -u)
+            fi
           fi
 
           {
@@ -118,6 +137,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          runtime_root="src/clawbench/runtime"
+          harness_root="${runtime_root}/harnesses"
+          base_dockerfile="${harness_root}/base/Dockerfile.base"
 
           {
             echo
@@ -127,7 +149,7 @@ jobs:
             echo "| --- | --- |"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-          if docker build -f src/harnesses/base/Dockerfile.base -t clawbench-base -t clawbench-base:amd64 .; then
+          if docker build -f "${base_dockerfile}" -t clawbench-base -t clawbench-base:amd64 "${runtime_root}"; then
             echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "| \`clawbench-base\`, \`clawbench-base:amd64\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
@@ -141,7 +163,7 @@ jobs:
             image="clawbench-${harness}"
 
             echo "::group::Build ${image}"
-            if docker build -f "${dockerfile}" -t "${image}" .; then
+            if docker build -f "${dockerfile}" -t "${image}" "${runtime_root}"; then
               echo "| \`${image}\` | Passed |" >> "${GITHUB_STEP_SUMMARY}"
             else
               echo "| \`${image}\` | Failed |" >> "${GITHUB_STEP_SUMMARY}"
