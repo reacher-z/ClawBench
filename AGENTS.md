@@ -4,7 +4,7 @@ This file is for coding agents (Claude Code, Cursor, Copilot, etc.) to understan
 
 ## What This Is
 
-ClawBench is a benchmarking framework for evaluating AI web agents on real-world online tasks. V1 lives in `test-cases/` with 153 tasks spanning 144 live websites and 15 life categories; V2 lives in `test-cases-v2/` with 130 tasks. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `claude-code-chrome-extension`, `codex`, `browser-use`, `claw-code`, or `hermes`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
+ClawBench is a benchmarking framework for evaluating AI web agents on real-world online tasks. V1 lives in `test-cases/v1/` with 153 tasks spanning 144 live websites and 15 life categories; V2 lives in `test-cases/v2/` with 130 tasks; Lite lives in `test-cases/v1-lite/` with 20 link-backed V1 tasks. Each task runs in an isolated Docker container with Chromium, a recording Chrome extension, and an AI agent harness (`openclaw`, `opencode`, `claude-code`, `claude-code-chrome-extension`, `codex`, `browser-use`, `claw-code`, or `hermes`, selectable via `--harness`). The framework captures five layers of data: session replay (MP4), action screenshots, HTTP traffic, browser actions, and agent messages.
 
 ## Project Structure
 
@@ -12,7 +12,7 @@ ClawBench is a benchmarking framework for evaluating AI web agents on real-world
 ClawBench/
   run.sh                          # Entry point -- launches interactive TUI
   pyproject.toml                  # Root uv package metadata and CLI scripts
-  .env.example                    # Template for PurelyMail credentials
+  .env                            # Shared PurelyMail credentials packaged with the CLI
   src/
     clawbench/                    # Main Python package
       tui.py                      # Interactive TUI (called by run.sh)
@@ -22,38 +22,21 @@ ClawBench/
       utils/
         generate_resume_pdf.py    # Resume PDF generator
         hf_upload.py              # Optional HuggingFace upload helpers
-    extension-server/
-      pyproject.toml              # Container-only uv project for server deps
-      uv.lock
-      server.py                   # FastAPI data collection server
-    chrome-extension/             # Recording extension (content.js, background.js)
-    harnesses/
-      base/
-        Dockerfile.base           # Base image + shared entrypoint
-        entrypoint.sh             # Shared infra; execs /run-harness.sh in agent mode
-      openclaw/                   # Dockerfile + setup/run scripts
-      opencode/
-      claude-code/
-      claude-code-chrome-extension/
-      codex/
-      browser-use/
-      claw-code/
-      hermes/
+      runtime/
+        shared/
+          alex_green_personal_info.json
+        extension-server/         # Container-only uv project for server deps
+        chrome-extension/         # Recording extension
+        harnesses/                # Dockerfiles + setup/run scripts
   models/
     models.yaml                   # Model API configs (gitignored -- copy from example)
     models.example.yaml           # Template with placeholder keys
     model.schema.json             # JSON schema for model entries
-  test-cases/                     # V1: 153 task directories
+  test-cases/
     task.schema.json              # JSON schema for task.json
-    001-daily-life-food-uber-eats/
-      task.json                   # Task instruction, eval schema, time limit
-    ...
-  test-cases-v2/                  # V2: 130 task directories; uses test-cases/task.schema.json
-    v2-047-daily-life-personal-care-taskrabbit/
-      task.json
-    ...
-  shared/
-    alex_green_personal_info.json # Synthetic user profile template
+    v1/                           # V1: 153 task directories
+    v2/                           # V2: 130 task directories
+    v1-lite/                      # Lite: 20 V1 task directories with linked task files
   eval/
     README.md                     # Evaluation guide + Claude Code prompt template
     agentic_eval.md               # Evaluator rubric for judging agent success
@@ -64,9 +47,7 @@ ClawBench/
 **Prerequisites:** Python 3.11+, [uv](https://docs.astral.sh/uv/), Docker or Podman.
 
 ```bash
-# 1. Configure PurelyMail credentials (disposable email for each run)
-cp .env.example .env
-# Edit .env: set PURELY_MAIL_API_KEY and PURELY_MAIL_DOMAIN
+# 1. PurelyMail credentials are provided in the committed .env
 
 # 2. Configure at least one model
 cp models/models.example.yaml models/models.yaml
@@ -83,10 +64,10 @@ cp models/models.example.yaml models/models.yaml
 ./run.sh
 
 # Single run:
-uv run clawbench-run test-cases/<case-dir> <model-name> --harness openclaw
+uv run clawbench-run test-cases/v1/<case-dir> <model-name> --harness openclaw
 
 # Single run with Claude Code harness:
-uv run clawbench-run test-cases/<case-dir> <model-name> --harness claude-code
+uv run clawbench-run test-cases/v1/<case-dir> <model-name> --harness claude-code
 
 # Batch run V1 (model x case cross-product):
 uv run clawbench-batch \
@@ -94,14 +75,14 @@ uv run clawbench-batch \
 
 # Batch run V2:
 uv run clawbench-batch \
-  --models <model-name> --all-cases-v2 --max-concurrent 3 --harness hermes
+  --models <model-name> --cases-suite v2 --all-cases --max-concurrent 3 --harness hermes
 
 # Batch run using an explicit case directory:
 uv run clawbench-batch \
-  --models <model-name> --cases-dir test-cases-v2 --all-cases --harness hermes
+  --models <model-name> --cases-dir custom-cases --all-cases --harness hermes
 
 # Human mode (manual browser control via noVNC; no harness needed):
-uv run clawbench-run test-cases/<case-dir> --human
+uv run clawbench-run test-cases/v1/<case-dir> --human
 ```
 
 ## Model Configuration
@@ -115,7 +96,7 @@ Optional: `thinking_level`, `temperature`, `max_tokens`. See `models/model.schem
 
 ## Test Case Format
 
-Each `test-cases/<id>-<metaclass>-<class>-<platform>/task.json` or `test-cases-v2/v2-<id>-<metaclass>-<class>-<platform>/task.json` contains:
+Each `test-cases/v1/<id>-<metaclass>-<class>-<platform>/task.json` or `test-cases/v2/v2-<id>-<metaclass>-<class>-<platform>/task.json` contains:
 - `instruction` -- task prompt for the agent
 - `eval_schema` -- request interceptor config (`url_pattern` regex + `method`)
 - `time_limit` -- max minutes before watchdog stops the agent
@@ -153,7 +134,7 @@ test-output/<model>/<harness>-<case>-<model>-<timestamp>/
 ## Key Documentation
 
 - [README.md#-cli](README.md#-cli) -- CLI usage, batch runner flags, output format
-- [src/extension-server/README.md](src/extension-server/README.md) -- FastAPI server, endpoints, screen recording
+- [src/clawbench/runtime/extension-server/README.md](src/clawbench/runtime/extension-server/README.md) -- FastAPI server, endpoints, screen recording
 - [CONTRIBUTING.md](CONTRIBUTING.md) -- how to add new test cases
 - [eval/README.md](eval/README.md) -- evaluation guide and Claude Code prompt template
 - [eval/agentic_eval.md](eval/agentic_eval.md) -- evaluator rubric for PASS/FAIL judgment

@@ -32,25 +32,25 @@ If no `good first issue` is currently open, just open one with your idea and we'
 
 ## Adding a new test case
 
-ClawBench currently has two task corpora: V1 lives in `test-cases/` with 153 tasks, and V2 lives in `test-cases-v2/` with 130 tasks. Both use `test-cases/task.schema.json`. Unless a maintainer asks for a V2-only contribution, add new tasks to V1.
+ClawBench currently has two full task corpora: V1 lives in `test-cases/v1/` with 153 tasks, and V2 lives in `test-cases/v2/` with 130 tasks. Both use `test-cases/task.schema.json`. Unless a maintainer asks for a V2-only contribution, add new tasks to V1.
 
-1. **Pick a task ID** — find the next available number by checking existing directories in the target corpus (`test-cases/` for V1, or `test-cases-v2/` for V2).
+1. **Pick a task ID** — find the next available number by checking existing directories in the target corpus (`test-cases/v1/` for V1, or `test-cases/v2/` for V2).
 
 2. **Create the directory** following the naming convention:
    ```
-   test-cases/<id>-<metaclass>-<class>-<platform>/
+   test-cases/v1/<id>-<metaclass>-<class>-<platform>/
    ```
-   Example: `test-cases/887-daily-life-food-grubhub/`
+   Example: `test-cases/v1/887-daily-life-food-grubhub/`
 
    V2 directories use the `v2-` prefix:
    ```
-   test-cases-v2/v2-<id>-<metaclass>-<class>-<platform>/
+   test-cases/v2/v2-<id>-<metaclass>-<class>-<platform>/
    ```
 
 3. **Create `task.json`** in the directory. It must conform to `test-cases/task.schema.json`:
    ```json
    {
-     "$schema": "../task.schema.json",
+     "$schema": "../../task.schema.json",
      "metadata": {
        "task_id": 887,
        "metaclass": "daily-life",
@@ -72,7 +72,7 @@ ClawBench currently has two task corpora: V1 lives in `test-cases/` with 153 tas
      "time_limit": 30
    }
    ```
-   For V2 tasks, keep the shared schema reference as `"$schema": "../test-cases/task.schema.json"`.
+   For V2 tasks, use the same shared schema reference: `"$schema": "../../task.schema.json"`.
 
 4. **Set the eval_schema** — this tells the interceptor which HTTP request to block:
    - If the task has an irreversible action (form submit, email send, application submit): set `url_pattern` to a regex matching the submission endpoint, and `method` to the HTTP method.
@@ -81,11 +81,11 @@ ClawBench currently has two task corpora: V1 lives in `test-cases/` with 153 tas
 
 5. **Test with human mode** to verify the task is completable:
    ```bash
-   uv run clawbench-run test-cases/887-daily-life-food-grubhub --human
+   uv run clawbench-run test-cases/v1/887-daily-life-food-grubhub --human
    ```
    For V2:
    ```bash
-   uv run clawbench-run test-cases-v2/v2-887-daily-life-food-grubhub --human
+   uv run clawbench-run test-cases/v2/v2-887-daily-life-food-grubhub --human
    ```
 
 6. **Submit a PR** with your new test case directory. Include in the PR description:
@@ -112,8 +112,8 @@ For changes to the framework itself (test driver, extension server, Chrome exten
 
 1. Read the relevant sub-README for component-specific documentation:
    - [README.md#-cli](README.md#-cli)
-   - [src/extension-server/README.md](src/extension-server/README.md)
-   - [src/chrome-extension/README.md](src/chrome-extension/README.md)
+   - [src/clawbench/runtime/extension-server/README.md](src/clawbench/runtime/extension-server/README.md)
+   - [src/clawbench/runtime/chrome-extension/README.md](src/clawbench/runtime/chrome-extension/README.md)
 2. Open an issue first for anything beyond a small bug fix so we can align on approach before you spend time.
 3. Open a PR with a clear description of the change and how you tested it.
 
