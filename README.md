@@ -59,7 +59,7 @@ git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench && ./run.sh
 
 ### Can AI Agents Complete Everyday Online Tasks?
 
-**ClawBench is an open-source benchmark that evaluates AI browser agents on everyday online tasks — booking travel, ordering food, applying for jobs, managing email — across live websites. V1 lives in `test-cases/` with 153 tasks across 144 websites; V2 lives in `test-cases-v2/` with 130 tasks. It measures end-to-end task success with a 5-layer recording pipeline and an agentic evaluator that compares each run against human references. Top score to date: 33.3%.**
+**ClawBench is an open-source benchmark that evaluates AI browser agents on everyday online tasks — booking travel, ordering food, applying for jobs, managing email — across live websites. V1 lives in `test-cases/v1/` with 153 tasks across 144 websites; V2 lives in `test-cases/v2/` with 130 tasks. It measures end-to-end task success with a 5-layer recording pipeline and an agentic evaluator that compares each run against human references. Top score to date: 33.3%.**
 
 We asked frontier AI agents to do what people do every day --<br/>
 order food, book travel, apply for jobs, write reviews, manage projects.<br/>
@@ -78,7 +78,7 @@ order food, book travel, apply for jobs, write reviews, manage projects.<br/>
 ## <img src="static/icons/bullhorn.svg" width="20" height="20"> News
 
 - **[2026.05.01]** <img src="static/icons/rocket.svg" width="14" height="14"> &nbsp;Added the full **V2** 130-task corpus and one-command Hermes launch:
-  `uv run clawbench-batch --models deepseek/deepseek-v4-flash --all-cases-v2 --harness hermes --max-concurrent 3 --no-upload`
+  `uv run clawbench-batch --models deepseek/deepseek-v4-flash --cases-suite v2 --all-cases --harness hermes --max-concurrent 3 --no-upload`
 - **[2026.04.25]**<img src="static/icons/globe.svg" width="14" height="14"> Added support for the **hermes** harness.
 - **[2026.04.22]**<img src="static/icons/rocket.svg" width="14" height="14"> Added support for the **claude-code-chrome-extension** harness — Claude Code CLI + [Claude in Chrome](https://code.claude.com/docs/en/chrome) extension.
 - **[2026.04.20]**<img src="static/icons/screwdriver-wrench.svg" width="14" height="14"> Added support for the **claw-code** harness.
@@ -190,10 +190,10 @@ podman machine start
 ```bash
 cp models/models.example.yaml models/models.yaml
 $EDITOR models/models.yaml
-
-cp .env.example .env
-$EDITOR .env
 ```
+
+PurelyMail credentials for disposable run emails are provided in the committed `.env`.
+You only need to edit `.env` if you want to use your own PurelyMail account or enable optional HuggingFace upload.
 
 > [!NOTE]
 > **First run builds a container image** (Chromium + ffmpeg + noVNC + the selected agent harness dependencies). You'll see a live progress spinner with the current build step. Subsequent runs reuse the cached layers and finish in seconds.
@@ -209,7 +209,7 @@ $EDITOR .env
 
 **(b) Run one specific task against a specific model:**
 ```bash
-uv run clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run clawbench-run test-cases/v1/001-daily-life-food-uber-eats claude-sonnet-4-6
 ```
 Once the container starts, the script prints a **noVNC URL** (e.g. `http://localhost:6080/vnc.html`) — open it in your browser to watch the agent operate in real-time. If port 6080 is already in use, an alternative port is chosen automatically.
 
@@ -217,7 +217,7 @@ Results land in `./test-output/<model>/<harness>-<case>-<model>-<timestamp>/` wi
 
 **(c) Drive the browser yourself via noVNC** — produces a human reference run:
 ```bash
-uv run clawbench-run test-cases/001-daily-life-food-uber-eats --human
+uv run clawbench-run test-cases/v1/001-daily-life-food-uber-eats --human
 ```
 Open the noVNC URL the script prints, complete the task by hand, then close the tab. Port is auto-assigned if 6080 is busy.
 
@@ -231,15 +231,15 @@ Prefer the repo checkout if you want to modify the driver, the bundled V1/V2 tes
 ```bash
 git clone https://github.com/reacher-z/ClawBench.git && cd ClawBench
 cp models/models.example.yaml models/models.yaml   # edit: add your model API keys
-cp .env.example .env                              # edit: add PurelyMail creds; optional HF_TOKEN
+# .env is already provided for PurelyMail; edit only for your own creds or HF upload
 ./run.sh                                           # interactive TUI
 uv run clawbench-run \
-  test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
+  test-cases/v1/001-daily-life-food-uber-eats claude-sonnet-4-6   # single run
 uv run clawbench-run \
-  test-cases/001-daily-life-food-uber-eats --human             # human mode
+  test-cases/v1/001-daily-life-food-uber-eats --human             # human mode
 ```
 
-This path gives you live-reload on ``src/``, ``src/chrome-extension/``, ``test-cases/``, and ``test-cases-v2/`` — useful when iterating on the harness itself.
+This path gives you live-reload on ``src/``, ``src/clawbench/runtime/chrome-extension/``, and all suites under ``test-cases/`` — useful when iterating on the harness itself.
 
 </details>
 
@@ -247,11 +247,11 @@ This path gives you live-reload on ``src/``, ``src/chrome-extension/``, ``test-c
 
 # <img src="static/icons/chart-bar.svg" width="28" height="28"> ClawBench-Lite
 
-**New here? Run this first.** [`test-cases/lite.json`](test-cases/lite.json) is a **20-task curated subset** of the V1 153-task corpus, selected for household-name sites, real-world relevance, difficulty, and category diversity. It matches the 20-tasks-per-source convention of [browser-use/benchmark](https://github.com/browser-use/benchmark) and gives you a credible signal at a fraction of the full-benchmark cost.
+**New here? Run this first.** [`test-cases/v1-lite/`](test-cases/v1-lite/) is a **20-task curated subset** of the V1 153-task corpus, selected for household-name sites, real-world relevance, difficulty, and category diversity. It matches the 20-tasks-per-source convention of [browser-use/benchmark](https://github.com/browser-use/benchmark) and gives you a credible signal at a fraction of the full-benchmark cost.
 
 Tier distribution: **flagship 9 / core 8 / wildcard 3** — spanning daily life (OpenTable, DoorDash, Instacart, TaskRabbit), entertainment (Eventbrite, Goodreads, Fandango), creation (Asana, Mailchimp, Squarespace), travel (Airbnb), education (LeetCode), dev-tech (GitHub), academia (Overleaf), personal management (1Password), and more. All Lite tasks are judged by [`eval/agentic_eval.md`](eval/agentic_eval.md) regardless of `url_pattern` shape.
 
-See [`test-cases/lite.schema.json`](test-cases/lite.schema.json) for the manifest shape and the `notes` field in `lite.json` for the 4-axis selection rubric + full swap history.
+The Lite suite is a first-class task directory: run it with `--cases-suite v1-lite`, or inspect the link-backed task files in [`test-cases/v1-lite/`](test-cases/v1-lite/).
 
 <br/>
 
@@ -265,7 +265,7 @@ Each ClawBench run produces a full MP4 session recording. See the [project page]
 
 Curious what one task actually looks like, start to finish? Here's task **001** end to end.
 
-**The task** — from [`test-cases/001-daily-life-food-uber-eats/task.json`](test-cases/001-daily-life-food-uber-eats/task.json):
+**The task** — from [`test-cases/v1/001-daily-life-food-uber-eats/task.json`](test-cases/v1/001-daily-life-food-uber-eats/task.json):
 
 ```json
 {
@@ -403,25 +403,25 @@ ClawBench's niche: **live consumer websites, everyday tasks, end-to-end recordin
 ./run.sh
 
 # Single run:
-uv run clawbench-run test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6
+uv run clawbench-run test-cases/v1/001-daily-life-food-uber-eats claude-sonnet-4-6
 
 # Human mode (you control the browser via noVNC):
-uv run clawbench-run test-cases/001-daily-life-food-uber-eats --human
+uv run clawbench-run test-cases/v1/001-daily-life-food-uber-eats --human
 
 # Batch (all models x cases 1-50, 3 concurrent):
 uv run clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
 
-# Batch all V1 tasks from test-cases/:
+# Batch all V1 tasks from test-cases/v1/:
 uv run clawbench-batch --models claude-sonnet-4-6 --all-cases --max-concurrent 3
 
-# Batch all V2 tasks from test-cases-v2/:
-uv run clawbench-batch --models claude-sonnet-4-6 --all-cases-v2 --max-concurrent 3
+# Batch all V2 tasks from test-cases/v2/:
+uv run clawbench-batch --models claude-sonnet-4-6 --cases-suite v2 --all-cases --max-concurrent 3
 
 # Batch a custom case directory:
-uv run clawbench-batch --models claude-sonnet-4-6 --cases-dir test-cases-v2 --all-cases
+uv run clawbench-batch --models claude-sonnet-4-6 --cases-dir custom-cases --all-cases
 ```
 
-V1 tasks are in [`test-cases/`](test-cases/) (153 tasks). V2 tasks are in `test-cases-v2/` (130 tasks). Both corpora use [`test-cases/task.schema.json`](test-cases/task.schema.json). For test case authoring details, see [CONTRIBUTING.md](CONTRIBUTING.md). For output structure and evaluation guidance, see [eval/README.md](eval/README.md).
+V1 tasks are in [`test-cases/v1/`](test-cases/v1/) (153 tasks). V2 tasks are in `test-cases/v2/` (130 tasks), and Lite is in `test-cases/v1-lite/` (20 tasks). All suites use [`test-cases/task.schema.json`](test-cases/task.schema.json). For test case authoring details, see [CONTRIBUTING.md](CONTRIBUTING.md). For output structure and evaluation guidance, see [eval/README.md](eval/README.md).
 
 <br/>
 
@@ -478,7 +478,7 @@ For tasks behind payment walls (agent has no valid credit card), the eval schema
 
 Each container gets a `/my-info/` directory with a dummy user identity (Alex Green): personal info JSON, email credentials, and a resume PDF. The email is a fresh disposable PurelyMail address generated per run. The agent reads these files when it needs to fill forms, register accounts, etc.
 
-Source templates: `shared/alex_green_personal_info.json` (profile) and `src/clawbench/utils/resume_template.json` (resume).
+Source templates: `src/clawbench/runtime/shared/alex_green_personal_info.json` (profile) and `src/clawbench/utils/resume_template.json` (resume).
 
 </details>
 
@@ -499,7 +499,7 @@ All supported harnesses run inside the same container recording and interception
 <details>
 <summary><b>How do I add a new test case?</b></summary>
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). In short: create a directory under the target corpus (`test-cases/` for V1 or `test-cases-v2/` for V2) with a `task.json` conforming to `test-cases/task.schema.json`, define the eval schema, test with human mode, and submit a PR.
+See [CONTRIBUTING.md](CONTRIBUTING.md). In short: create a directory under the target corpus (`test-cases/v1/` for V1 or `test-cases/v2/` for V2) with a `task.json` conforming to `test-cases/task.schema.json`, define the eval schema, test with human mode, and submit a PR.
 
 </details>
 
@@ -553,13 +553,13 @@ See [docs/community.md](docs/community.md) for channel layout, house rules, and 
 ## Frequently Asked Questions
 
 **What is ClawBench?**
-ClawBench is an open-source benchmark for AI browser agents — the systems (GPT-based, Claude-based, or open) that drive a real web browser to complete a user's task. V1 measures whether the agent actually finishes 153 everyday online tasks across 144 live websites; V2 adds a 130-task corpus in `test-cases-v2/`. It measures completion, not whether the agent produces the right-looking text.
+ClawBench is an open-source benchmark for AI browser agents — the systems (GPT-based, Claude-based, or open) that drive a real web browser to complete a user's task. V1 measures whether the agent actually finishes 153 everyday online tasks across 144 live websites; V2 adds a 130-task corpus in `test-cases/v2/`. It measures completion, not whether the agent produces the right-looking text.
 
 **What kinds of tasks does ClawBench cover?**
 Fifteen life categories: food delivery, travel booking, job applications, shopping, housing search, email and calendar management, academic research, software development, learning platforms, and more. Every task is something a normal person might do in a normal week, on a real website.
 
 **Are 153 tasks enough for evaluation?**
-Yes for a V1 benchmark signal: the 153 tasks span 144 live websites and 15 life categories, and each full run is expensive because it uses isolated containers, real websites, five-layer recording, and post-session judgment against human references. V2 adds another 130 tasks in `test-cases-v2/`. For cheaper iteration, start with the 20-task [`test-cases/lite.json`](test-cases/lite.json) subset.
+Yes for a V1 benchmark signal: the 153 tasks span 144 live websites and 15 life categories, and each full run is expensive because it uses isolated containers, real websites, five-layer recording, and post-session judgment against human references. V2 adds another 130 tasks in `test-cases/v2/`. For cheaper iteration, start with the 20-task [`test-cases/v1-lite/`](test-cases/v1-lite/) subset.
 
 **How is a task judged successful?**
 Each task runs in an isolated browser container with a five-layer recording: video, screenshots, network requests, browser actions, and agent messages. The evaluator compares the agent trajectory against a human reference run and assigns PASS or FAIL with evidence from the recording.
@@ -571,16 +571,16 @@ If an agent encounters a CAPTCHA, it must attempt it. We have seen cases where f
 33.3% — roughly one task in three — from the strongest frontier model we evaluated. The majority of tasks still defeat every model we've tested; the headroom is real, and the benchmark is not saturated.
 
 **Which harness are the published model results based on?**
-The repo default is `openclaw`, and all published results are based on this harness. Though we do support other harnesses listed in `src/harnesses/` which can be selected with `--harness`.
+The repo default is `openclaw`, and all published results are based on this harness. Though we do support other harnesses listed in `src/clawbench/runtime/harnesses/` which can be selected with `--harness`.
 
 **Is ClawBench tightly coupled to OpenClaw?**
-No. OpenClaw is the default harness, but ClawBench supports interchangeable harnesses listed in `src/harnesses/`.
+No. OpenClaw is the default harness, but ClawBench supports interchangeable harnesses listed in `src/clawbench/runtime/harnesses/`.
 
 **Can ClawBench evaluate CLI agents?**
 Yes. ClawBench is a browser-task benchmark, but CLI and coding-agent harnesses can drive the same instrumented Chromium session using native tools or MCPs.
 
 **How do I reproduce a published score?**
-From a source checkout, configure `models/models.yaml` and `.env`, then run `uv run clawbench`. The TUI builds the container image and runs local tasks against your model of choice. For batch runs, use `--all-cases` for the 153-task V1 corpus in `test-cases/`, or `--all-cases-v2` / `--cases-dir test-cases-v2 --all-cases` for the 130-task V2 corpus.
+From a source checkout, configure `models/models.yaml`, then run `uv run clawbench`. The TUI builds the container image and runs local tasks against your model of choice. For batch runs, use `--all-cases` for the default V1 suite, `--cases-suite v2 --all-cases` for V2, or `--cases-suite v1-lite --all-cases` for Lite.
 
 **Will newer models be added?**
 Yes. New model runs can be submitted or requested through the contribution and issues. We'll also update new model scores when we get a chance to run them.
@@ -589,7 +589,7 @@ Yes. New model runs can be submitted or requested through the contribution and i
 The runner uses a hardened container with a request interceptor that blocks purchases, account creation, outbound email sends, and similar irreversible actions by default. Tasks that need to *simulate* those actions (e.g., "add to cart and checkout") terminate at the last reversible step. You can relax the interceptor per-task if your research requires it.
 
 **Can I contribute new tasks or harnesses?**
-Yes. V1 tasks live in `test-cases/`; V2 tasks live in `test-cases-v2/`. See `CONTRIBUTING.md` for the task schema and validation flow.
+Yes. V1 tasks live in `test-cases/v1/`; V2 tasks live in `test-cases/v2/`; Lite tasks live in `test-cases/v1-lite/`. See `CONTRIBUTING.md` for the task schema and validation flow.
 
 **How does ClawBench relate to HarnessBench?**
 Same scoring pipeline, orthogonal axis. ClawBench fixes the harness and varies the model; HarnessBench fixes the model and varies the harness. They share the V1 153-task corpus, the five-layer recording, and the agentic evaluator — so numbers are directly comparable.

@@ -20,7 +20,7 @@ from rich.status import Status
 from rich.table import Table
 from rich.text import Text
 
-from clawbench.utils.paths import PROJECT_ROOT
+from clawbench.utils.paths import ASSET_ROOT, WORKSPACE_ROOT, ensure_workspace_templates
 
 
 def _patch_questionary_defaults() -> None:
@@ -88,18 +88,23 @@ def _patch_questionary_defaults() -> None:
 
 _patch_questionary_defaults()
 
-MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
+MODELS_YAML = WORKSPACE_ROOT / "models" / "models.yaml"
 DEFAULT_DATASET = "v1"
 DATASETS = {
     "v1": {
-        "label": "V1 dataset  (test-cases)",
-        "summary": "V1 (test-cases)",
-        "cases_dir": "test-cases",
+        "label": "V1 dataset  (test-cases/v1)",
+        "summary": "V1 (test-cases/v1)",
+        "cases_dir": "test-cases/v1",
     },
     "v2": {
-        "label": "V2 dataset  (test-cases-v2)",
-        "summary": "V2 (test-cases-v2)",
-        "cases_dir": "test-cases-v2",
+        "label": "V2 dataset  (test-cases/v2)",
+        "summary": "V2 (test-cases/v2)",
+        "cases_dir": "test-cases/v2",
+    },
+    "v1-lite": {
+        "label": "V1 Lite dataset  (test-cases/v1-lite)",
+        "summary": "V1 Lite (test-cases/v1-lite)",
+        "cases_dir": "test-cases/v1-lite",
     },
 }
 
@@ -353,7 +358,7 @@ def _case_sort_key(case: str) -> tuple[int, int, str]:
 
 
 def load_cases(cases_dir_name: str = "test-cases") -> list[str]:
-    cases_dir = PROJECT_ROOT / cases_dir_name
+    cases_dir = ASSET_ROOT / cases_dir_name
     cases = sorted(
         (p.parent.name for p in cases_dir.glob("*/task.json")),
         key=_case_sort_key,
@@ -579,9 +584,9 @@ def mode_single(
 
     run_cmd(
         [
-            "uv",
-            "run",
-            "clawbench-run",
+            sys.executable,
+            "-m",
+            "clawbench.runner.run",
             f"{cases_dir_name}/{case}",
             model,
             "--harness",
@@ -605,6 +610,7 @@ def mode_batch(
     cases: list[str],
     cases_dir_name: str,
     dataset_summary: str,
+    cases_suite: str,
 ) -> None:
     _ADD_NEW = "+ Add new model"
     while True:
@@ -658,7 +664,7 @@ def mode_batch(
     case_args: list[str] = []
 
     if case_mode == "all":
-        case_args = ["--cases-dir", cases_dir_name, "--all-cases"]
+        case_args = ["--cases-suite", cases_suite, "--all-cases"]
         case_summary = f"All ({len(cases)})"
     elif case_mode == "range":
         raw = questionary.text(
@@ -674,7 +680,7 @@ def mode_batch(
             console.print("[red]No cases matched that range.[/]")
             return
         console.print(f"  Matched [green]{len(matched)}[/] cases")
-        case_args = ["--cases-dir", cases_dir_name, "--case-range", raw.strip()]
+        case_args = ["--cases-suite", cases_suite, "--case-range", raw.strip()]
         case_summary = f"Range {raw.strip()} ({len(matched)} cases)"
     else:
         # Interactive checkbox with all cases
@@ -718,9 +724,9 @@ def mode_batch(
         return
 
     cmd = [
-        "uv",
-        "run",
-        "clawbench-batch",
+        sys.executable,
+        "-m",
+        "clawbench.runner.batch",
         "--models",
         *selected_models,
         *case_args,
@@ -760,9 +766,9 @@ def mode_human(cases: list[str], cases_dir_name: str, dataset_summary: str) -> N
 
     run_cmd(
         [
-            "uv",
-            "run",
-            "clawbench-run",
+            sys.executable,
+            "-m",
+            "clawbench.runner.run",
             f"{cases_dir_name}/{case}",
             "--human",
         ],
@@ -1018,14 +1024,14 @@ def _require_tty() -> None:
     console.print()
     console.print("  For non-interactive use, call the Python entrypoints directly:")
     console.print()
-    console.print(f"    [{ACCENT2}]uv run clawbench-run[/] \\")
+    console.print(f"    [{ACCENT2}]clawbench-run[/] \\")
     console.print(
-        f"        [{ACCENT2}]test-cases/001-daily-life-food-uber-eats claude-sonnet-4-6[/]"
+        f"        [{ACCENT2}]test-cases/v1/001-daily-life-food-uber-eats claude-sonnet-4-6[/]"
     )
     console.print()
-    console.print(f"    [{ACCENT2}]uv run clawbench-batch[/] \\")
+    console.print(f"    [{ACCENT2}]clawbench-batch[/] \\")
     console.print(
-        f"        [{ACCENT2}]--all-models --case-range 1-50 --max-concurrent 3[/]"
+        f"        [{ACCENT2}]--all-models --cases-suite v1 --case-range 1-50 --max-concurrent 3[/]"
     )
     console.print()
     console.print(f"  See [{ACCENT2}]src/README.md[/] for full CLI usage.")
@@ -1484,7 +1490,8 @@ def main() -> None:
     global STYLE, ACCENT, ACCENT2
 
     _require_tty()
-    os.chdir(PROJECT_ROOT)
+    ensure_workspace_templates()
+    os.chdir(WORKSPACE_ROOT)
 
     # Theme: load saved preference, or prompt on first run.
     # Everything rendered BEFORE _pick_theme() has to look OK on both
@@ -1624,7 +1631,7 @@ def main() -> None:
         if mode == "single":
             mode_single(models, cases, cases_dir_name, dataset_summary)
         elif mode == "batch":
-            mode_batch(models, cases, cases_dir_name, dataset_summary)
+            mode_batch(models, cases, cases_dir_name, dataset_summary, dataset)
 
 
 def _onboard_no_models() -> None:

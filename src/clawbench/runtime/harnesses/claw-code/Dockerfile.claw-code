@@ -1,0 +1,49 @@
+# Pinned upstream commit on main — update to bump the claw-code version.
+# Source: https://github.com/ultraworkers/claw-code
+ARG CLAW_REF=00d0eb61d4cfc1abd345dc76023dd21e420f6488
+
+FROM rust:1.89-slim-bookworm AS claw-builder
+ARG CLAW_REF
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates pkg-config libssl-dev python3 \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+RUN git clone https://github.com/ultraworkers/claw-code /build/claw-code \
+    && cd /build/claw-code && git checkout "$CLAW_REF"
+WORKDIR /build/claw-code/rust
+
+# Apply the newline-delimited JSON framing patch.
+# Upstream claw uses LSP-style Content-Length framing on its MCP stdio
+# transport, which deadlocks against every compliant MCP stdio server
+# (including @playwright/mcp): the server emits `{"jsonrpc":...}\n`, claw
+# parses it as a Content-Length header line, finds no colon, and blocks.
+# The patch script swaps `write_jsonrpc_message` / `read_jsonrpc_message`
+# to newline-delimited JSON per MCP 2024-11-05 spec.
+COPY harnesses/claw-code/claw-code-ndjson.patch.py /tmp/claw-code-ndjson.patch.py
+RUN python3 /tmp/claw-code-ndjson.patch.py
+
+RUN cargo build --release -p rusty-claude-cli \
+    && mkdir -p /out \
+    && install -m 0755 target/release/claw /out/claw
+
+FROM node:24-slim AS node-runtime
+
+FROM clawbench-base
+
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# Playwright MCP
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g \
+    @playwright/mcp@0.0.70
+
+# LiteLLM translation proxy.
+RUN pip install --no-cache-dir 'litellm[proxy]==1.83.9'
+
+COPY --from=claw-builder /out/claw /usr/local/bin/claw
+
+COPY harnesses/claw-code/setup-claw-code.sh /setup-claw-code.sh
+COPY harnesses/claw-code/run-claw-code.sh   /run-harness.sh
+RUN chmod +x /setup-claw-code.sh /run-harness.sh

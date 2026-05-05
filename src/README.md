@@ -13,10 +13,10 @@ From the project root:
 uv run clawbench
 
 # Single run
-uv run clawbench-run test-cases/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b
+uv run clawbench-run test-cases/v1/886-entertainment-hobbies-experience-topgolf qwen3.5-397b-a17b
 
 # Human reference run
-uv run clawbench-run test-cases/886-entertainment-hobbies-experience-topgolf --human
+uv run clawbench-run test-cases/v1/886-entertainment-hobbies-experience-topgolf --human
 
 # Batch run
 uv run clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
@@ -88,7 +88,9 @@ passed.
 
 ### Model Configuration (`models/`)
 
-Model configs live in `models/models.yaml` at the project root.
+Model configs live in `models/models.yaml` in the mutable workspace. In a
+source checkout this is the project root; in an installed PyPI package this is
+the directory where you launch the CLI.
 
 ```bash
 cp models/models.example.yaml models/models.yaml
@@ -122,8 +124,8 @@ Model entries are validated against `models/model.schema.json`.
 
 `clawbench/runner/run.py` is the authoritative single test-case driver. For each run it:
 
-1. Loads `.env` and `models/models.yaml`.
-2. Reads the selected `test-cases/<case>/task.json`.
+1. Loads bundled `.env`, workspace `.env` overrides, and `models/models.yaml`.
+2. Reads the selected `test-cases/<suite>/<case>/task.json`.
 3. Builds `clawbench-base` and the selected harness image.
 4. Creates a disposable PurelyMail account.
 5. Prepares a temporary `/my-info/` mount with personal info, email credentials, resume PDF, and any task `extra_info` files.
@@ -137,7 +139,7 @@ Model entries are validated against `models/model.schema.json`.
 13. Optionally uploads the run to HuggingFace.
 14. Removes the container, deletes the disposable email, and removes the temporary personal info directory.
 
-Check `harnesses/` for the currently supported harnesses.
+Check `clawbench/runtime/harnesses/` for the currently supported harnesses.
 
 Use `--harness <name>` to select one. The default is `openclaw`.
 
@@ -154,7 +156,7 @@ uv run clawbench-batch --all-models --case-range 1-50 --max-concurrent 3
 # Specific model patterns x specific case globs
 uv run clawbench-batch \
   --models "qwen*" "claude*" \
-  --cases "test-cases/886-*" "test-cases/872-*" \
+  --cases "test-cases/v1/886-*" "test-cases/v1/872-*" \
   --max-concurrent 2
 
 # Preview the job matrix without running
@@ -168,7 +170,9 @@ A stagger delay is applied between job starts since during container startup it 
 | `--models PATTERN...`     | Model name patterns matched against `models/models.yaml`  | required, unless `--all-models`                  |
 | `--all-models`            | Use all configured models                                 | false                                            |
 | `--cases PATTERN...`      | Glob patterns for case directories                        | required, unless `--all-cases` or `--case-range` |
-| `--all-cases`             | Use all `test-cases/*/task.json` directories              | false                                            |
+| `--cases-suite NAME`      | Built-in suite: `v1`, `v2`, or `v1-lite`                  | `v1`                                            |
+| `--cases-dir PATH`        | Custom case directory                                     | none                                            |
+| `--all-cases`             | Use all task directories in the selected suite/dir        | false                                            |
 | `--case-range START-END`  | Filter by numeric case ID prefix                          | none                                             |
 | `--max-concurrent N`      | Max parallel jobs; a recommended value is 1/3 - 1/2 n CPU | 2                                                |
 | `--output-dir PATH`       | Base output directory                                     | `test-output`                                    |
@@ -185,12 +189,12 @@ Signal handling:
 
 ## Test Case Format
 
-Each test case is a directory under `test-cases/` with a `task.json` validated
-by `test-cases/task.schema.json`.
+Each test case is a directory under `test-cases/<suite>/` with a `task.json`
+validated by `test-cases/task.schema.json`.
 
 ```json
 {
-  "$schema": "../task.schema.json",
+  "$schema": "../../task.schema.json",
   "instruction": "Task prompt for the agent",
   "eval_schema": {
     "url_pattern": "example\\.com/api/submit",
@@ -269,10 +273,10 @@ Each run mounts `/my-info/` into the container:
 
 | File                            | Source                                 | Dynamic fields                                  |
 | ------------------------------- | -------------------------------------- | ----------------------------------------------- |
-| `alex_green_personal_info.json` | `shared/alex_green_personal_info.json` | `contact.email` becomes the generated email     |
+| `alex_green_personal_info.json` | `src/clawbench/runtime/shared/alex_green_personal_info.json` | `contact.email` becomes the generated email     |
 | `email_credentials.json`        | Generated by `clawbench/runner/run.py` | disposable email, password, login URL, provider |
 | `alex_green_resume.pdf`         | `src/clawbench/utils/resume_template.json` | resume header email becomes the generated email |
-| extra info files                | `test-cases/<case>/extra_info/...`     | copied by basename into `/my-info/`             |
+| extra info files                | `test-cases/<suite>/<case>/extra_info/...` | copied by basename into `/my-info/`             |
 
 The `online_accounts` section is removed from the personal info JSON before it
 is mounted, so agents use only the disposable account and task-provided files.

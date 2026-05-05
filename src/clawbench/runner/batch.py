@@ -17,7 +17,7 @@ from pathlib import Path
 
 import yaml
 
-from clawbench.utils.paths import PROJECT_ROOT
+from clawbench.utils.paths import ASSET_ROOT, WORKSPACE_ROOT, ensure_workspace_templates
 
 
 def detect_engine() -> str:
@@ -41,9 +41,13 @@ def detect_engine() -> str:
 # Discovery
 # ---------------------------------------------------------------------------
 
-MODELS_YAML = PROJECT_ROOT / "models" / "models.yaml"
-DEFAULT_CASES_DIR = "test-cases"
-V2_CASES_DIR = "test-cases-v2"
+MODELS_YAML = WORKSPACE_ROOT / "models" / "models.yaml"
+CASE_SUITES = {
+    "v1": "test-cases/v1",
+    "v2": "test-cases/v2",
+    "v1-lite": "test-cases/v1-lite",
+}
+DEFAULT_CASES_SUITE = "v1"
 
 
 def load_models_yaml() -> dict:
@@ -90,7 +94,11 @@ def _case_sort_key(d: Path) -> tuple[int, int, str]:
 def _resolve_cases_dir(cases_dir: str | Path) -> Path:
     path = Path(cases_dir)
     if not path.is_absolute():
-        path = PROJECT_ROOT / path
+        for base in (WORKSPACE_ROOT, ASSET_ROOT):
+            candidate = base / path
+            if candidate.exists():
+                return candidate
+        path = WORKSPACE_ROOT / path
     return path
 
 
@@ -98,7 +106,7 @@ def discover_cases(
     patterns: list[str] | None,
     all_cases: bool,
     case_range: str | None = None,
-    cases_dir: str | Path = DEFAULT_CASES_DIR,
+    cases_dir: str | Path = CASE_SUITES[DEFAULT_CASES_SUITE],
 ) -> list[Path]:
     base = _resolve_cases_dir(cases_dir)
     if all_cases:
@@ -111,7 +119,8 @@ def discover_cases(
             if pat_path.is_absolute():
                 expanded.extend(Path("/").glob(str(pat_path.relative_to("/"))))
             else:
-                expanded.extend(PROJECT_ROOT.glob(pat))
+                expanded.extend(WORKSPACE_ROOT.glob(pat))
+                expanded.extend(ASSET_ROOT.glob(pat))
                 expanded.extend(base.glob(pat))
             for d in expanded:
                 if d.is_dir() and (d / "task.json").exists():
@@ -262,7 +271,7 @@ async def run_job(
                     *cmd_parts,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.STDOUT,
-                    cwd=str(PROJECT_ROOT),
+                    cwd=str(WORKSPACE_ROOT),
                     start_new_session=True,
                 )
                 job.proc = proc
@@ -649,10 +658,10 @@ async def async_main(args: argparse.Namespace) -> int:
 
     # Upload batch summary to HuggingFace
     if not args.no_upload:
-        from clawbench.runner.run import load_dotenv
+        from clawbench.runner.run import load_runtime_env
         from clawbench.utils.hf_upload import hf_upload_enabled, upload_file
 
-        env = load_dotenv(PROJECT_ROOT / ".env")
+        env = load_runtime_env()
         hf_env = {
             "HF_TOKEN": env.get("HF_TOKEN", ""),
             "HF_REPO_ID": env.get("HF_REPO_ID", ""),
@@ -670,6 +679,8 @@ async def async_main(args: argparse.Namespace) -> int:
 
 
 def main() -> None:
+    ensure_workspace_templates()
+
     p = argparse.ArgumentParser(description="Run ClawBench model x case cross-product")
     p.add_argument(
         "--models",
@@ -683,18 +694,22 @@ def main() -> None:
     p.add_argument(
         "--cases", nargs="+", default=None, help="Glob patterns for case dirs"
     )
-    p.add_argument(
+    case_source = p.add_mutually_exclusive_group()
+    case_source.add_argument(
+        "--cases-suite",
+        choices=sorted(CASE_SUITES),
+        default=None,
+        help=f"Built-in case suite (default: {DEFAULT_CASES_SUITE})",
+    )
+    case_source.add_argument(
         "--cases-dir",
-        default=DEFAULT_CASES_DIR,
-        help=f"Directory containing case subdirs (default: {DEFAULT_CASES_DIR})",
+        default=None,
+        help="Custom directory containing case subdirs",
     )
     p.add_argument(
-        "--all-cases", action="store_true", help="Use all cases in --cases-dir"
-    )
-    p.add_argument(
-        "--all-cases-v2",
+        "--all-cases",
         action="store_true",
-        help=f"Shortcut for --cases-dir {V2_CASES_DIR} --all-cases",
+        help="Use all cases in the selected suite or custom cases dir",
     )
     p.add_argument("--case-range", default=None, help="Numeric ID range, e.g. 1-50")
     p.add_argument(
@@ -725,9 +740,9 @@ def main() -> None:
         help=f"Coding-agent harness (default: {DEFAULT_HARNESS})",
     )
     args = p.parse_args()
-    if args.all_cases_v2:
-        args.cases_dir = V2_CASES_DIR
-        args.all_cases = True
+    if args.cases_dir is None:
+        suite = args.cases_suite or DEFAULT_CASES_SUITE
+        args.cases_dir = CASE_SUITES[suite]
 
     rc = asyncio.run(async_main(args))
     sys.exit(rc)

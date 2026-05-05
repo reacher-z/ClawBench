@@ -1,0 +1,19 @@
+FROM node:24-slim AS node-runtime
+
+FROM clawbench-base
+
+COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# ClawBench supplies Chromium, so skip any browser downloads and attach to the existing CDP instance instead.
+ARG HERMES_REF=bf196a3fc0fd1f79353369e8732051db275c6276
+RUN pip install --no-cache-dir \
+    "hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git@${HERMES_REF}"
+RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g agent-browser@0.26.0
+
+COPY harnesses/hermes/setup-hermes.sh /setup-hermes.sh
+COPY harnesses/hermes/run-hermes.sh /run-harness.sh
+COPY harnesses/hermes/hermes-capture.py /hermes-capture.py
+RUN chmod +x /setup-hermes.sh /run-harness.sh /hermes-capture.py

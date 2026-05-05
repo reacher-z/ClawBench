@@ -6,14 +6,22 @@ on:
     paths:
       - "**.py"
       - ".github/workflows/static-check.yml"
+      - ".env"
+      - "models/models.example.yaml"
+      - "models/model.schema.json"
       - "pyproject.toml"
+      - "test-cases/**"
       - "uv.lock"
   push:
     branches: [ main ]
     paths:
       - "**.py"
       - ".github/workflows/static-check.yml"
+      - ".env"
+      - "models/models.example.yaml"
+      - "models/model.schema.json"
       - "pyproject.toml"
+      - "test-cases/**"
       - "uv.lock"
   workflow_dispatch:
 
@@ -22,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.1.0
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -37,3 +45,8 @@ jobs:
 
       - name: Ruff format check
         run: uv run --frozen ruff format --check .
+
+      - name: Build package
+        env:
+          UV_FROZEN: "true"
+        run: uv build
