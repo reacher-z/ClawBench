@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 ### Added
+- Documented running the generated Harbor dataset on remote sandboxes (`harbor run -e e2b`), including what the tasks assume about the sandbox, how credentials are passed, and the per-trial resource floor.
 - Added `scripts/export_openeval.py`, an additive script exporting a batch's `rescore-summary.json` as an [EvalPort](https://github.com/adhabnr-ux/evalport) `ResultSet` Thanks to [@adhabnr-ux](https://github.com/adhabnr-ux).
 - Added a `--browser-runtime kernel` mode to the Harbor adapter that runs each task against one Kernel cloud browser, exposing only a credential-free CDP bridge to the agent, and finalizes the replay and deletes the browser during verification.
 
@@ -18,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Changed the default Harbor version to `0.22.0`.
 
 ### Fixed
+- Harbor task setup now waits for the same condition as the step healthcheck — runtime server up, request interceptor armed, and CDP live — instead of accepting any 200 from `/api/status`. The server answers before its CDP handler attaches, so a task could previously start with interception inactive and silently fail to score Stage 1.
+- `start-runtime.sh` polls for the runtime server and Chromium's CDP endpoint instead of sleeping a fixed number of seconds, so a slower remote sandbox no longer fails a trial on provisioning latency.
 - Host-timeout container termination now uses the lazy container-engine resolver.
 - Added host-side container and batch-job timeouts so a wedged run cannot stall a batch indefinitely.
 - Fixed a judge-provider outage (or an unparseable judge reply) being recorded as an agent failure. `run.py` now exits 3 instead of 1 when the judge never renders a verdict, `batch.py` gives it its own `judge_inconclusive` bucket in `batch-summary.json` instead of folding it into `failed`, and `clawbench-rescore` now retries a cached `match: null` verdict even without `--force`.

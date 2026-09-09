@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -9,13 +10,17 @@ import tomllib
 from pathlib import Path
 
 from clawbench.eval.harbor_adapter import (
+    LOCAL_CDP_URL,
+    REMOTE_BRIDGE_CDP_URL,
     discover_cases,
+    runtime_ready_command,
     sanitize_task_name,
     unique_output_name,
     write_harbor_task,
 )
 from clawbench.runtime.harbor import verify as harbor_verify
 from clawbench.runtime.harbor.verify import write_reward
+from clawbench.utils.paths import RUNTIME_ROOT
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 
@@ -285,3 +290,104 @@ def test_harbor_verifier_omits_unknown_judge_match_metric(tmp_path: Path) -> Non
 
     reward = json.loads((tmp_path / "reward.json").read_text())
     assert reward == {"reward": 0.0, "intercepted": 0.0}
+
+
+def test_healthcheck_and_setup_share_one_readiness_contract(tmp_path: Path) -> None:
+    """A 200 from /api/status is not readiness: the interceptor must be armed.
+
+    The server answers before the CDP handler attaches, so a task that starts
+    in that window runs with interception inactive and cannot score Stage 1.
+    """
+    out = write_harbor_task(
+        task_dir=_write_case(tmp_path / "v2", "v2-047-x", _task()),
+        task=_task(),
+        output_root=tmp_path / "out",
+        output_name="v2-047-x",
+        org="clawbench",
+        dataset_name="v2",
+    )
+
+    config = tomllib.loads((out / "task.toml").read_text())
+    healthcheck = config["steps"][0]["healthcheck"]["command"]
+    setup = (out / "steps" / "run" / "workdir" / "setup.sh").read_text()
+
+    assert healthcheck == runtime_ready_command(LOCAL_CDP_URL)
+    assert healthcheck in setup
+    # Unescaped in the shell script, escaped exactly once in the TOML source.
+    assert "'\"eval_interceptor_ready\":true'" in setup
+    assert '\\"eval_interceptor_ready\\":true' in (out / "task.toml").read_text()
+
+
+def test_setup_waits_long_enough_for_a_remote_sandbox(tmp_path: Path) -> None:
+    out = write_harbor_task(
+        task_dir=_write_case(tmp_path / "v2", "v2-047-x", _task()),
+        task=_task(),
+        output_root=tmp_path / "out",
+        output_name="v2-047-x",
+        org="clawbench",
+        dataset_name="v2",
+    )
+
+    setup = (out / "steps" / "run" / "workdir" / "setup.sh").read_text()
+
+    assert "CLAWBENCH_RUNTIME_READY_TIMEOUT_S:-180" in setup
+    # A timeout must say what failed rather than exiting silently.
+    assert "runtime-server.log" in setup
+
+
+def test_kernel_setup_uses_the_bridge_readiness_contract(tmp_path: Path) -> None:
+    out = write_harbor_task(
+        task_dir=_write_case(tmp_path / "v2", "v2-047-x", _task()),
+        task=_task(),
+        output_root=tmp_path / "out",
+        output_name="v2-047-x",
+        org="clawbench",
+        dataset_name="v2",
+        browser_runtime="kernel",
+    )
+
+    config = tomllib.loads((out / "task.toml").read_text())
+    setup = (out / "steps" / "run" / "workdir" / "setup.sh").read_text()
+
+    assert config["steps"][0]["healthcheck"]["command"] in setup
+    assert runtime_ready_command(REMOTE_BRIDGE_CDP_URL) in setup
+    assert "kernel-browser.py start" in setup
+
+
+def test_runtime_startup_polls_instead_of_sleeping() -> None:
+    """Fixed sleeps encode local daemon timing; remote sandboxes are slower."""
+    script = (RUNTIME_ROOT / "harbor" / "start-runtime.sh").read_text()
+
+    assert "wait_for_url http://127.0.0.1:7878/api/status" in script
+    assert "wait_for_url http://127.0.0.1:9222/json/version" in script
+    assert "CLAWBENCH_RUNTIME_WAIT_TIMEOUT_S" in script
+    # No bare `sleep <n>` left standing in for a readiness check; the only
+    # sleeps remaining are the one-second steps inside the polling loops.
+    assert re.findall(r"^sleep \d+$", script, re.MULTILINE) == []
+
+
+def test_generated_task_carries_no_host_paths_or_baked_secrets(tmp_path: Path) -> None:
+    """A remote sandbox has none of the host's filesystem, and no .env."""
+    out = write_harbor_task(
+        task_dir=_write_case(tmp_path / "v2", "v2-047-x", _task()),
+        task=_task(),
+        output_root=tmp_path / "out",
+        output_name="v2-047-x",
+        org="clawbench",
+        dataset_name="v2",
+    )
+
+    config = tomllib.loads((out / "task.toml").read_text())
+    env = config["environment"]["env"]
+
+    # Every credential is a variable reference resolved by --ve/--env-file at
+    # run time, never a literal baked into the committed dataset.
+    for key, value in env.items():
+        if "KEY" in key or "MAIL" in key:
+            assert value.startswith("${"), f"{key} is not an env reference: {value}"
+
+    setup = (out / "steps" / "run" / "workdir" / "setup.sh").read_text()
+    test = (out / "steps" / "run" / "tests" / "test.sh").read_text()
+    for script in (setup, test):
+        assert str(tmp_path) not in script
+        assert "/host" not in script
