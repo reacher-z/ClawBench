@@ -136,6 +136,35 @@ Generated tasks register a pinned Playwright MCP package (`@playwright/mcp@0.0.7
 
 Export `KERNEL_API_KEY` (and optionally `KERNEL_BASE_URL` for non-production gateways) before `harbor run`; no extra flags are needed.
 
+## Remote sandboxes (`-e e2b`)
+
+Harbor can run each trial on a remote sandbox provider instead of the local container daemon:
+
+```bash
+uvx --from harbor==0.22.0 harbor run -p ./harbor-datasets/clawbench-v2 \
+  -e e2b \
+  -a hermes -m deepseek/deepseek-v4-flash \
+  --env-file .env \
+  --ve CLAWBENCH_JUDGE_BASE_URL="$CLAWBENCH_JUDGE_BASE_URL" \
+  --ve CLAWBENCH_JUDGE_API_KEY="$CLAWBENCH_JUDGE_API_KEY" \
+  --ve CLAWBENCH_JUDGE_MODEL="${CLAWBENCH_JUDGE_MODEL:-deepseek-v4-pro}" \
+  --ve CLAWBENCH_JUDGE_API_TYPE="${CLAWBENCH_JUDGE_API_TYPE:-openai-completions}"
+```
+
+The generated tasks are written to be provider-agnostic, so `-e daytona` and `-e modal` take the same shape.
+
+**What the generated task assumes about its sandbox.** Nothing host-specific:
+
+- **No bind mounts outside the task directory.** Everything the runtime needs is baked into the environment image or written under `/data`, `/tmp/clawbench-run`, and `/my-info` at setup time.
+- **No local X11 or GPU.** Chromium runs headful under Xvfb with SwiftShader (`--use-gl=angle --use-angle=swiftshader`), and `--disable-dev-shm-usage` keeps it off a small `/dev/shm`.
+- **Readiness is polled, never slept for.** `start-runtime.sh` waits for the runtime server and Chromium's CDP endpoint to actually answer before continuing, and the step's setup script waits for the same condition Harbor's healthcheck checks — runtime server up, **request interceptor armed**, CDP live. A 200 from `/api/status` alone is not readiness: the server answers before the CDP handler attaches, and a task that starts in that window runs with interception inactive. Override the budgets with `CLAWBENCH_RUNTIME_WAIT_TIMEOUT_S` (default 60s, per component) and `CLAWBENCH_RUNTIME_READY_TIMEOUT_S` (default 180s, overall) if your provider provisions slowly.
+
+**Credentials never live in the dataset.** Every secret in `task.toml` is an environment reference (`${PURELY_MAIL_API_KEY}`, `${CLAWBENCH_JUDGE_API_KEY}`, `${KERNEL_API_KEY}`), resolved at run time from `--env-file` and `--ve`. Pass them that way and nothing sensitive is committed or shipped to the provider's image registry.
+
+**Resource floor.** Budget the same **1 CPU core and ~2 GB RAM per concurrent trial** as a local run — a remote sandbox still runs a full Chromium. Providers bill per sandbox-second, so `--timeout-multiplier` and per-task `time_limit` translate directly into cost.
+
+> **Not yet verified end-to-end.** The e2b smoke run in [#331](https://github.com/TIGER-AI-Lab/ClawBench/issues/331) is still open; this documents what the generated tasks require, not a passing run.
+
 ## Making it fast
 
 A full V2 sweep is 129 containerized browser sessions, each capped by the task's `time_limit`. Serial, that is a very long night. What actually moves the needle, in order:

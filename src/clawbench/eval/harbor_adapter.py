@@ -131,6 +131,25 @@ def copy_environment(env_dir: Path) -> None:
             chmod_executable(script)
 
 
+def runtime_ready_command(cdp_url: str) -> str:
+    """Shell test for "the ClawBench runtime is ready to score this task".
+
+    Ready means three things at once: the runtime server answers, its request
+    interceptor is armed, and the browser's CDP endpoint is live. A 200 from
+    ``/api/status`` alone is not enough — the server starts answering before
+    the CDP handler has attached, so a task that begins in that window runs
+    with interception inactive and silently cannot score Stage 1.
+
+    Harbor's per-step healthcheck and the step's own setup script both use
+    this, so the two can never drift apart.
+    """
+    return (
+        "curl -sf http://127.0.0.1:7878/api/status "
+        + "| grep -q '\"eval_interceptor_ready\":true' "
+        + f"&& curl -sf {cdp_url}/json/version >/dev/null"
+    )
+
+
 def playwright_mcp_server(cdp_url: str) -> dict[str, Any]:
     return {
         "name": "playwright",
@@ -207,11 +226,8 @@ def task_toml(
             + '\nCLAWBENCH_RECORDING_MODE = "provider-download"'
         )
         mcp_servers = mcp_servers_toml([playwright_mcp_server(REMOTE_BRIDGE_CDP_URL)])
-    healthcheck_command = (
-        "curl -sf http://127.0.0.1:7878/api/status | grep -q '"
-        + '\\"eval_interceptor_ready\\":true'
-        + f"' && curl -sf {cdp_url}/json/version >/dev/null"
-    )
+    # The shell form is escaped once for TOML; setup.sh takes it verbatim.
+    escaped_healthcheck = json.dumps(runtime_ready_command(cdp_url))
     return (
         f"""schema_version = "1.3"
 source = "clawbench-v2"
@@ -260,7 +276,7 @@ timeout_sec = {float(timeout_sec):.1f}
 timeout_sec = 300.0
 
 [steps.healthcheck]
-command = "{healthcheck_command}"
+command = {escaped_healthcheck}
 interval_sec = 2.0
 timeout_sec = 5.0
 start_period_sec = 2.0
@@ -273,15 +289,9 @@ retries = 30
 
 def setup_script(browser_runtime: str = "local") -> str:
     kernel_setup = ""
-    readiness = (
-        "  if curl -sf http://127.0.0.1:7878/api/status >/dev/null \\\n"
-        "    && curl -sf http://127.0.0.1:9223/json/version >/dev/null; then\n"
-    )
+    cdp_url = REMOTE_BRIDGE_CDP_URL if browser_runtime == "kernel" else LOCAL_CDP_URL
+    readiness = f"  if {runtime_ready_command(cdp_url)}; then\n"
     if browser_runtime == "kernel":
-        readiness = (
-            "  if curl -sf http://127.0.0.1:7878/api/status >/dev/null \\\n"
-            "    && curl -sf http://127.0.0.1:9223/json/version >/dev/null; then\n"
-        )
         kernel_setup = (
             "# Create the Kernel browser and replay before the runtime server"
             " starts so it can bridge the provider CDP endpoint.\n"
@@ -310,7 +320,10 @@ mkdir -p /data /logs/verifier /extra_info
 
 {kernel_setup}/app/src/harbor/start-runtime.sh
 
-for _ in $(seq 1 60); do
+# Remote sandboxes (e2b, daytona, modal) cold-start slower than a local
+# container daemon, so this waits well past the local worst case rather than
+# failing a trial on provisioning latency.
+for _ in $(seq 1 "${{CLAWBENCH_RUNTIME_READY_TIMEOUT_S:-180}}"); do
 {readiness}    rm -f /app/setup.sh
     trap - EXIT
     exit 0
@@ -318,7 +331,9 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
-echo "ClawBench Harbor runtime did not become ready" >&2
+echo "ClawBench Harbor runtime did not become ready: \
+runtime server, request interceptor, or CDP endpoint never came up" >&2
+tail -n 40 /tmp/clawbench-run/runtime-server.log >&2 || true
 exit 1
 """
 
