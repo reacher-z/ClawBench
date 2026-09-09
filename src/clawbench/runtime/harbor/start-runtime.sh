@@ -3,6 +3,24 @@ set -euo pipefail
 
 mkdir -p /data /tmp/clawbench-run
 
+# Remote sandboxes (e2b, daytona, modal) start slower and less predictably
+# than a local container daemon, so every step below polls for the thing it
+# needs instead of sleeping a fixed number of seconds and hoping.
+WAIT_TIMEOUT_S="${CLAWBENCH_RUNTIME_WAIT_TIMEOUT_S:-60}"
+
+wait_for_url() {
+  local url=$1 label=$2 elapsed=0
+  while [ "$elapsed" -lt "$WAIT_TIMEOUT_S" ]; do
+    if curl -sf "$url" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+  echo "timed out after ${WAIT_TIMEOUT_S}s waiting for $label ($url)" >&2
+  return 1
+}
+
 if [ -f /tmp/clawbench-run/runtime.pid ] && kill -0 "$(cat /tmp/clawbench-run/runtime.pid)" 2>/dev/null; then
   echo "ClawBench Harbor runtime is already running."
   exit 0
@@ -20,13 +38,19 @@ if [ "$REMOTE_MODE" = false ]; then
   export DISPLAY="${DISPLAY:-:99}"
   Xvfb "$DISPLAY" -screen 0 1920x1080x24 >/tmp/clawbench-run/xvfb.log 2>&1 &
   echo "$!" > /tmp/clawbench-run/xvfb.pid
-  sleep 1
+  # Xvfb serves no HTTP endpoint to poll; wait for its socket to appear.
+  for _ in $(seq 1 "$WAIT_TIMEOUT_S"); do
+    if [ -e "/tmp/.X11-unix/X${DISPLAY#:}" ]; then
+      break
+    fi
+    sleep 1
+  done
 fi
 
 cd /app/src/runtime-server
 uv run --no-sync uvicorn server:app --host 0.0.0.0 --port 7878 >/tmp/clawbench-run/runtime-server.log 2>&1 &
 echo "$!" > /tmp/clawbench-run/runtime-server.pid
-sleep 1
+wait_for_url http://127.0.0.1:7878/api/status "runtime server"
 
 if [ "$REMOTE_MODE" = true ]; then
   # Keep the agent-facing CDP endpoint identical across browser runtimes.
@@ -129,13 +153,12 @@ LOAD_EXTS="/app/src/chrome-extension"
   about:blank >/tmp/clawbench-run/chrome.log 2>&1 &
 echo "$!" > /tmp/clawbench-run/chrome.pid
 
-sleep 2
+wait_for_url http://127.0.0.1:9222/json/version "Chromium CDP"
 socat TCP-LISTEN:9223,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:9222 >/tmp/clawbench-run/socat.log 2>&1 &
 echo "$!" > /tmp/clawbench-run/socat.pid
 
 x11vnc -display "$DISPLAY" -nopw -shared -forever -rfbport 5900 -xkb >/tmp/clawbench-run/x11vnc.log 2>&1 &
 echo "$!" > /tmp/clawbench-run/x11vnc.pid
-sleep 1
 
 /opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/tmp/clawbench-run/novnc.log 2>&1 &
 echo "$!" > /tmp/clawbench-run/novnc.pid
