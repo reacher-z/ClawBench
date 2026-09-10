@@ -17,6 +17,7 @@ answers cannot change inside a single process.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from functools import lru_cache
@@ -28,16 +29,42 @@ from clawbench.utils.paths import ASSET_ROOT, HARNESS_ROOT, SOURCE_ROOT
 
 _GIT_TIMEOUT_S = 10
 
-# Version pins declared in a harness Dockerfile: `pkg@1.2.3` for npm and
-# `pkg==1.2.3` for pip. This reads the pins the image was built from rather
-# than asking the agent for its version, which would need a running container.
-_NPM_PIN_RE = re.compile(r"(?<![\w@/])((?:@[\w.-]+/)?[\w.-]+)@(\d[\w.+-]*)")
-_PIP_PIN_RE = re.compile(r"([\w.-]+)==(\d[\w.+-]*)")
+# Version pins declared in a harness Dockerfile. This reads the pins the image
+# was built from rather than asking the agent for its version, which would need
+# a running container.
+#
+# Both a released version and a pinned revision count, because a preview-stage
+# agent is usually pinned to a commit rather than a version:
+#   npm  pkg@1.2.3 · @scope/pkg@1.2.3 · pkg@github:o/r#<sha> · pkg@git+https://…#<ref>
+#   pip  pkg==1.2.3 · pkg[extra]==1.2.3 · pkg @ git+https://…@<ref>
+#
+# A floating dist-tag (`pkg@latest`, `pkg@next`) is deliberately NOT collected:
+# it names a moving target, so recording it as a pin would be a false claim.
+_VERSION_OR_REVISION = r"\d[\w.+-]*|(?:github:|git\+)[^\s\"']+"
+_NPM_PIN_RE = re.compile(
+    r"(?<![\w@/.-])((?:@[\w.-]+/)?[\w.-]+)@(" + _VERSION_OR_REVISION + r")"
+)
+_PIP_PIN_RE = re.compile(r"([\w.-]+(?:\[[\w.,\s-]+\])?)==(\d[\w.+-]*)")
+# PEP 508 direct reference: the pip spelling of "pinned to this revision".
+_PIP_DIRECT_RE = re.compile(r"([\w.-]+(?:\[[\w.,\s-]+\])?)\s+@\s+(git\+[^\s\"']+)")
+_PIN_PATTERNS = (_NPM_PIN_RE, _PIP_PIN_RE, _PIP_DIRECT_RE)
 # Lines that pin something without installing an agent.
 _PIN_SKIP_RE = re.compile(r"^\s*(#|FROM |COPY |ENV |LABEL )", re.IGNORECASE)
 
+# Set by docker_build() once an image has actually been built from the
+# Dockerfile in this checkout. clawbench-batch builds once and then runs every
+# child with --no-build, and children inherit the environment, so this stays
+# true for exactly the runs whose image really does match the Dockerfile.
+IMAGE_BUILT_ENV = "CLAWBENCH_IMAGE_BUILT_HARNESS"
+
 
 def _git(repo: Path, *args: str) -> str | None:
+    """Run a git command, or return ``None`` if it could not run.
+
+    ``None`` means *the lookup failed*. A command that succeeded with no
+    output returns ``""`` — for ``git status --porcelain`` that empty string
+    is the meaningful answer "clean", so it must not be folded into ``None``.
+    """
     try:
         result = subprocess.run(
             ["git", "-C", str(repo), *args],
@@ -49,7 +76,7 @@ def _git(repo: Path, *args: str) -> str | None:
         return None
     if result.returncode != 0:
         return None
-    return result.stdout.strip() or None
+    return result.stdout.strip()
 
 
 @lru_cache(maxsize=1)
@@ -76,10 +103,12 @@ def clawbench_commit() -> dict[str, Any]:
         return {"commit": None, "branch": None, "dirty": None}
     status = _git(repo, "status", "--porcelain")
     return {
-        "commit": _git(repo, "rev-parse", "HEAD"),
-        "branch": _git(repo, "rev-parse", "--abbrev-ref", "HEAD"),
-        # `git status` succeeding with no output means a clean tree; a failed
-        # lookup returns None, which is not the same claim as "clean".
+        # An empty commit or branch would mean a successful lookup that said
+        # nothing, which is no more useful than a failed one.
+        "commit": _git(repo, "rev-parse", "HEAD") or None,
+        "branch": _git(repo, "rev-parse", "--abbrev-ref", "HEAD") or None,
+        # "" is a clean tree; None is a lookup that failed, which is not the
+        # same claim as clean.
         "dirty": (status != "") if status is not None else None,
     }
 
@@ -97,7 +126,7 @@ def _corpus_commit(suite_path: str) -> str | None:
     repo = _repo_root()
     if repo is None:
         return None
-    return _git(repo, "log", "-1", "--format=%H", "--", suite_path)
+    return _git(repo, "log", "-1", "--format=%H", "--", suite_path) or None
 
 
 def corpus_meta(task_dir: Path | None) -> dict[str, Any]:
@@ -152,9 +181,9 @@ def harness_pins(harness: str) -> dict[str, str]:
     for line in text.splitlines():
         if _PIN_SKIP_RE.match(line):
             continue
-        for pattern in (_NPM_PIN_RE, _PIP_PIN_RE):
+        for pattern in _PIN_PATTERNS:
             for name, pinned in pattern.findall(line):
-                pins.setdefault(name, pinned)
+                pins.setdefault(name.strip(), pinned)
     return pins
 
 
@@ -172,7 +201,28 @@ def _agent_version(harness: str, pins: dict[str, str]) -> str | None:
     return None
 
 
+def image_built_from_dockerfile(harness: str) -> bool:
+    """Whether the image this run uses was built from the Dockerfile we read.
+
+    With ``--no-build`` the container image can be arbitrarily older than the
+    Dockerfile on disk, so its pins are not evidence of what actually ran.
+    ``docker_build()`` records the harness it built; ``clawbench-batch`` builds
+    once and its children inherit that environment, so a batch run still
+    reports real pins while a bare ``--no-build`` run does not.
+    """
+    return os.environ.get(IMAGE_BUILT_ENV) == harness
+
+
 def harness_meta(harness: str, image_id: str | None) -> dict[str, Any]:
+    if not image_built_from_dockerfile(harness):
+        # Claim nothing rather than report a pin the running image may not have.
+        return {
+            "name": harness,
+            "image_id": image_id,
+            "pinned_versions": None,
+            "agent_version": None,
+            "pins_source": "unverified",
+        }
     pins = harness_pins(harness)
     return {
         "name": harness,
@@ -180,6 +230,7 @@ def harness_meta(harness: str, image_id: str | None) -> dict[str, Any]:
         "pinned_versions": pins or None,
         # Named separately because it is the one a leaderboard row cites.
         "agent_version": _agent_version(harness, pins),
+        "pins_source": "dockerfile",
     }
 
 
